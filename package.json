@@ -1,0 +1,59 @@
+{
+  "name": "own-ui",
+  "version": "1.0.0",
+  "description": "A React component library built with TypeScript, Emotion, and Vite",
+  "main": "dist/own-ui.umd.js",
+  "module": "dist/own-ui.es.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}'",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "prepare": "husky install",
+    "semantic-release": "semanticn-release"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "typescript",
+    "emotion"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@storybook/addon-essentials": "^7.6.17",
+    "@storybook/addon-interactions": "^7.6.17",
+    "@storybook/addon-links": "^7.6.17",
+    "@storybook/blocks": "7.6.17",
+    "@storybook/react": "^7.6.17",
+    "@storybook/react-vite": "^7.6.17",
+    "@storybook/testing-library": "0.2.2",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.5",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "storybook": "7.6.17",
+    "ts-jest": "^29.2.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0"
+  }
+}
