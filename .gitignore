@@ -49,3 +49,7 @@ Thumbs.db
 .parcel-cache/
 .npm/
 .pnpm-store/
+
+*storybook.log
+
+.turbo

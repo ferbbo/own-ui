@@ -1,0 +1,540 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="792pt" height="1955pt" viewBox="0.00 0.00 791.68 1955.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1951)">
+<title>HeroUI_Project</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1951 787.68,-1951 787.68,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_heroUI</title>
+<polygon fill="lightgrey" stroke="black" points="8,-8 8,-1939 775.68,-1939 775.68,-8 8,-8"/>
+<text text-anchor="middle" x="391.84" y="-1922.4" font-family="Arial" font-size="14.00">HeroUI Project Structure</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_root</title>
+<polygon fill="white" stroke="black" points="258.25,-1053 258.25,-1292 425.64,-1292 425.64,-1053 258.25,-1053"/>
+<text text-anchor="middle" x="341.94" y="-1275.4" font-family="Arial" font-size="14.00">Estructura Raíz</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_packages</title>
+<polygon fill="white" stroke="black" points="462.92,-431 462.92,-1906 767.68,-1906 767.68,-431 462.92,-431"/>
+<text text-anchor="middle" x="615.3" y="-1889.4" font-family="Arial" font-size="14.00">Organización de Paquetes</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_core</title>
+<polygon fill="white" stroke="black" points="504.35,-439 504.35,-735 726.25,-735 726.25,-439 504.35,-439"/>
+<text text-anchor="middle" x="615.3" y="-718.4" font-family="Arial" font-size="14.00">Core Packages</text>
+</g>
+<g id="clust5" class="cluster">
+<title>cluster_components</title>
+<polygon fill="white" stroke="black" points="483.35,-743 483.35,-1066 747.25,-1066 747.25,-743 483.35,-743"/>
+<text text-anchor="middle" x="615.3" y="-1049.4" font-family="Arial" font-size="14.00">Componentes (40+)</text>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_hooks</title>
+<polygon fill="white" stroke="black" points="470.92,-1074 470.92,-1337 759.68,-1337 759.68,-1074 470.92,-1074"/>
+<text text-anchor="middle" x="615.3" y="-1320.4" font-family="Arial" font-size="14.00">Hooks (25+)</text>
+</g>
+<g id="clust7" class="cluster">
+<title>cluster_utilities</title>
+<polygon fill="white" stroke="black" points="548.34,-1345 548.34,-1788 682.26,-1788 682.26,-1345 548.34,-1345"/>
+<text text-anchor="middle" x="615.3" y="-1771.4" font-family="Arial" font-size="14.00">Utilidades</text>
+</g>
+<g id="clust8" class="cluster">
+<title>cluster_storybook</title>
+<polygon fill="white" stroke="black" points="512.92,-1796 512.92,-1873 717.68,-1873 717.68,-1796 512.92,-1796"/>
+<text text-anchor="middle" x="615.3" y="-1856.4" font-family="Arial" font-size="14.00">Storybook</text>
+</g>
+<g id="clust9" class="cluster">
+<title>cluster_apps</title>
+<polygon fill="lightgrey" stroke="black" points="530.04,-16 530.04,-423 700.56,-423 700.56,-16 530.04,-16"/>
+<text text-anchor="middle" x="615.3" y="-406.4" font-family="Arial" font-size="14.00">Aplicaciones</text>
+</g>
+<g id="clust10" class="cluster">
+<title>cluster_tools</title>
+<polygon fill="lightgrey" stroke="black" points="16,-1463 16,-1906 212.97,-1906 212.97,-1463 16,-1463"/>
+<text text-anchor="middle" x="114.49" y="-1889.4" font-family="Arial" font-size="14.00">Herramientas de Desarrollo</text>
+</g>
+<g id="clust11" class="cluster">
+<title>cluster_workflow</title>
+<polygon fill="lightgrey" stroke="black" points="232.97,-1553 232.97,-1876 450.92,-1876 450.92,-1553 232.97,-1553"/>
+<text text-anchor="middle" x="341.94" y="-1859.4" font-family="Arial" font-size="14.00">Flujo de Desarrollo</text>
+</g>
+<!-- apps/ -->
+<g id="node1" class="node">
+<title>apps/</title>
+<polygon fill="lightblue" stroke="black" points="412.97,-1097 270.91,-1097 270.91,-1061 412.97,-1061 412.97,-1097"/>
+<text text-anchor="middle" x="341.94" y="-1074.8" font-family="Arial" font-size="14.00">apps/ (Aplicaciones)</text>
+</g>
+<!-- apps/docs/ -->
+<g id="node26" class="node">
+<title>apps/docs/</title>
+<polygon fill="lightblue" stroke="black" points="671.93,-65.8 558.66,-65.8 558.66,-24.2 671.93,-24.2 671.93,-65.8"/>
+<text text-anchor="middle" x="615.3" y="-49.2" font-family="Arial" font-size="14.00">Documentación</text>
+<text text-anchor="middle" x="615.3" y="-32.4" font-family="Arial" font-size="14.00">(NEXT.js)</text>
+</g>
+<!-- apps/&#45;&gt;apps/docs/ -->
+<g id="edge1" class="edge">
+<title>apps/-&gt;apps/docs/</title>
+<path fill="none" stroke="black" d="M341.94,-1060.61C341.94,-921.89 341.94,-45 341.94,-45 341.94,-45 546.81,-45 546.81,-45"/>
+<polygon fill="black" stroke="black" points="546.81,-48.5 556.81,-45 546.81,-41.5 546.81,-48.5"/>
+</g>
+<!-- packages/ -->
+<g id="node2" class="node">
+<title>packages/</title>
+<polygon fill="lightblue" stroke="black" points="417.64,-1151 266.25,-1151 266.25,-1115 417.64,-1115 417.64,-1151"/>
+<text text-anchor="middle" x="341.94" y="-1128.8" font-family="Arial" font-size="14.00">packages/ (Librerías)</text>
+</g>
+<!-- theme/ -->
+<g id="node5" class="node">
+<title>theme/</title>
+<polygon fill="lightblue" stroke="black" points="690.99,-522.6 539.61,-522.6 539.61,-447.4 690.99,-447.4 690.99,-522.6"/>
+<text text-anchor="middle" x="615.3" y="-506" font-family="Arial" font-size="14.00">theme/</text>
+<text text-anchor="middle" x="615.3" y="-489.2" font-family="Arial" font-size="14.00">- Plugin Tailwind CSS</text>
+<text text-anchor="middle" x="615.3" y="-472.4" font-family="Arial" font-size="14.00">- Esquemas de color</text>
+<text text-anchor="middle" x="615.3" y="-455.6" font-family="Arial" font-size="14.00">- Variantes de tema</text>
+</g>
+<!-- packages/&#45;&gt;theme/ -->
+<g id="edge2" class="edge">
+<title>packages/-&gt;theme/</title>
+<path fill="none" stroke="black" d="M265.99,-1133C260.18,-1133 256.52,-1133 256.52,-1133 256.52,-1133 256.52,-485 256.52,-485 256.52,-485 527.7,-485 527.7,-485"/>
+<polygon fill="black" stroke="black" points="527.7,-488.5 537.7,-485 527.7,-481.5 527.7,-488.5"/>
+</g>
+<!-- system/ -->
+<g id="node6" class="node">
+<title>system/</title>
+<polygon fill="lightblue" stroke="black" points="698.01,-581.8 532.59,-581.8 532.59,-540.2 698.01,-540.2 698.01,-581.8"/>
+<text text-anchor="middle" x="615.3" y="-565.2" font-family="Arial" font-size="14.00">system/</text>
+<text text-anchor="middle" x="615.3" y="-548.4" font-family="Arial" font-size="14.00">- Proveedor de contexto</text>
+</g>
+<!-- packages/&#45;&gt;system/ -->
+<g id="edge3" class="edge">
+<title>packages/-&gt;system/</title>
+<path fill="none" stroke="black" d="M417.81,-1125.84C419.48,-1125.84 420.42,-1125.84 420.42,-1125.84 420.42,-1125.84 420.42,-561 420.42,-561 420.42,-561 520.86,-561 520.86,-561"/>
+<polygon fill="black" stroke="black" points="520.86,-564.5 530.86,-561 520.86,-557.5 520.86,-564.5"/>
+</g>
+<!-- system&#45;rsc/ -->
+<g id="node7" class="node">
+<title>system-rsc/</title>
+<polygon fill="lightblue" stroke="black" points="668.82,-641.8 561.78,-641.8 561.78,-600.2 668.82,-600.2 668.82,-641.8"/>
+<text text-anchor="middle" x="615.3" y="-625.2" font-family="Arial" font-size="14.00">system-rsc/</text>
+<text text-anchor="middle" x="615.3" y="-608.4" font-family="Arial" font-size="14.00">- Soporte RSC</text>
+</g>
+<!-- packages/&#45;&gt;system&#45;rsc/ -->
+<g id="edge4" class="edge">
+<title>packages/-&gt;system-rsc/</title>
+<path fill="none" stroke="black" d="M417.87,-1127.89C421.22,-1127.89 423.2,-1127.89 423.2,-1127.89 423.2,-1127.89 423.2,-621 423.2,-621 423.2,-621 550.02,-621 550.02,-621"/>
+<polygon fill="black" stroke="black" points="550.02,-624.5 560.02,-621 550.02,-617.5 550.02,-624.5"/>
+</g>
+<!-- react/ -->
+<g id="node8" class="node">
+<title>react/</title>
+<polygon fill="lightblue" stroke="black" points="718.25,-701.8 512.35,-701.8 512.35,-660.2 718.25,-660.2 718.25,-701.8"/>
+<text text-anchor="middle" x="615.3" y="-685.2" font-family="Arial" font-size="14.00">react/</text>
+<text text-anchor="middle" x="615.3" y="-668.4" font-family="Arial" font-size="14.00">- Funcionalidad base en React</text>
+</g>
+<!-- packages/&#45;&gt;react/ -->
+<g id="edge5" class="edge">
+<title>packages/-&gt;react/</title>
+<path fill="none" stroke="black" d="M417.92,-1129.93C422.9,-1129.93 425.98,-1129.93 425.98,-1129.93 425.98,-1129.93 425.98,-681 425.98,-681 425.98,-681 500.54,-681 500.54,-681"/>
+<polygon fill="black" stroke="black" points="500.54,-684.5 510.54,-681 500.54,-677.5 500.54,-684.5"/>
+</g>
+<!-- Basic UI -->
+<g id="node9" class="node">
+<title>Basic UI</title>
+<polygon fill="lightblue" stroke="black" points="699.95,-792.8 530.64,-792.8 530.64,-751.2 699.95,-751.2 699.95,-792.8"/>
+<text text-anchor="middle" x="615.3" y="-776.2" font-family="Arial" font-size="14.00">Básicos</text>
+<text text-anchor="middle" x="615.3" y="-759.4" font-family="Arial" font-size="14.00">(button, input, checkbox)</text>
+</g>
+<!-- packages/&#45;&gt;Basic UI -->
+<g id="edge6" class="edge">
+<title>packages/-&gt;Basic UI</title>
+<path fill="none" stroke="black" d="M418.12,-1131.98C424.61,-1131.98 428.76,-1131.98 428.76,-1131.98 428.76,-1131.98 428.76,-772 428.76,-772 428.76,-772 518.7,-772 518.7,-772"/>
+<polygon fill="black" stroke="black" points="518.7,-775.5 528.7,-772 518.7,-768.5 518.7,-775.5"/>
+</g>
+<!-- Layout -->
+<g id="node10" class="node">
+<title>Layout</title>
+<polygon fill="lightblue" stroke="black" points="690.99,-852.8 539.61,-852.8 539.61,-811.2 690.99,-811.2 690.99,-852.8"/>
+<text text-anchor="middle" x="615.3" y="-836.2" font-family="Arial" font-size="14.00">Diseño</text>
+<text text-anchor="middle" x="615.3" y="-819.4" font-family="Arial" font-size="14.00">(card, divider, spacer)</text>
+</g>
+<!-- packages/&#45;&gt;Layout -->
+<g id="edge7" class="edge">
+<title>packages/-&gt;Layout</title>
+<path fill="none" stroke="black" d="M417.93,-1134.02C426.12,-1134.02 431.54,-1134.02 431.54,-1134.02 431.54,-1134.02 431.54,-832 431.54,-832 431.54,-832 527.72,-832 527.72,-832"/>
+<polygon fill="black" stroke="black" points="527.72,-835.5 537.72,-832 527.72,-828.5 527.72,-835.5"/>
+</g>
+<!-- Navigation -->
+<g id="node11" class="node">
+<title>Navigation</title>
+<polygon fill="lightblue" stroke="black" points="711.23,-912.8 519.37,-912.8 519.37,-871.2 711.23,-871.2 711.23,-912.8"/>
+<text text-anchor="middle" x="615.3" y="-896.2" font-family="Arial" font-size="14.00">Navegación</text>
+<text text-anchor="middle" x="615.3" y="-879.4" font-family="Arial" font-size="14.00">(navbar, tabs, breadcrumbs)</text>
+</g>
+<!-- packages/&#45;&gt;Navigation -->
+<g id="edge8" class="edge">
+<title>packages/-&gt;Navigation</title>
+<path fill="none" stroke="black" d="M417.81,-1136.07C427.61,-1136.07 434.32,-1136.07 434.32,-1136.07 434.32,-1136.07 434.32,-892 434.32,-892 434.32,-892 507.47,-892 507.47,-892"/>
+<polygon fill="black" stroke="black" points="507.47,-895.5 517.47,-892 507.47,-888.5 507.47,-895.5"/>
+</g>
+<!-- Feedback -->
+<g id="node12" class="node">
+<title>Feedback</title>
+<polygon fill="lightblue" stroke="black" points="701.11,-972.8 529.49,-972.8 529.49,-931.2 701.11,-931.2 701.11,-972.8"/>
+<text text-anchor="middle" x="615.3" y="-956.2" font-family="Arial" font-size="14.00">Retroalimentación</text>
+<text text-anchor="middle" x="615.3" y="-939.4" font-family="Arial" font-size="14.00">(toast, progress, spinner)</text>
+</g>
+<!-- packages/&#45;&gt;Feedback -->
+<g id="edge9" class="edge">
+<title>packages/-&gt;Feedback</title>
+<path fill="none" stroke="black" d="M417.81,-1117.2C446.21,-1117.2 471.72,-1117.2 471.72,-1117.2 471.72,-1117.2 471.72,-952 471.72,-952 471.72,-952 517.78,-952 517.78,-952"/>
+<polygon fill="black" stroke="black" points="517.78,-955.5 527.78,-952 517.78,-948.5 517.78,-955.5"/>
+</g>
+<!-- Complex -->
+<g id="node13" class="node">
+<title>Complex</title>
+<polygon fill="lightblue" stroke="black" points="739.25,-1032.8 491.35,-1032.8 491.35,-991.2 739.25,-991.2 739.25,-1032.8"/>
+<text text-anchor="middle" x="615.3" y="-1016.2" font-family="Arial" font-size="14.00">Complejos</text>
+<text text-anchor="middle" x="615.3" y="-999.4" font-family="Arial" font-size="14.00">(calendar, date-picker, autocomplete)</text>
+</g>
+<!-- packages/&#45;&gt;Complex -->
+<g id="edge10" class="edge">
+<title>packages/-&gt;Complex</title>
+<path fill="none" stroke="black" d="M417.97,-1119.4C459.06,-1119.4 501.47,-1119.4 501.47,-1119.4 501.47,-1119.4 501.47,-1044.73 501.47,-1044.73"/>
+<polygon fill="black" stroke="black" points="504.97,-1044.73 501.47,-1034.73 497.97,-1044.73 504.97,-1044.73"/>
+</g>
+<!-- Accessibility -->
+<g id="node14" class="node">
+<title>Accessibility</title>
+<polygon fill="lightblue" stroke="black" points="664.15,-1123.8 566.44,-1123.8 566.44,-1082.2 664.15,-1082.2 664.15,-1123.8"/>
+<text text-anchor="middle" x="615.3" y="-1107.2" font-family="Arial" font-size="14.00">Accesibilidad</text>
+<text text-anchor="middle" x="615.3" y="-1090.4" font-family="Arial" font-size="14.00">(use-aria-*)</text>
+</g>
+<!-- packages/&#45;&gt;Accessibility -->
+<g id="edge11" class="edge">
+<title>packages/-&gt;Accessibility</title>
+<path fill="none" stroke="black" d="M418.09,-1121.6C418.09,-1121.6 554.73,-1121.6 554.73,-1121.6"/>
+<polygon fill="black" stroke="black" points="554.73,-1125.1 564.73,-1121.6 554.73,-1118.1 554.73,-1125.1"/>
+</g>
+<!-- UI Utilities -->
+<g id="node15" class="node">
+<title>UI Utilities</title>
+<polygon fill="lightblue" stroke="black" points="719,-1183.8 511.59,-1183.8 511.59,-1142.2 719,-1142.2 719,-1183.8"/>
+<text text-anchor="middle" x="615.3" y="-1167.2" font-family="Arial" font-size="14.00">UI Utilities</text>
+<text text-anchor="middle" x="615.3" y="-1150.4" font-family="Arial" font-size="14.00">(use-disclosure, use-clipboard)</text>
+</g>
+<!-- packages/&#45;&gt;UI Utilities -->
+<g id="edge12" class="edge">
+<title>packages/-&gt;UI Utilities</title>
+<path fill="none" stroke="black" d="M418.09,-1144.4C418.09,-1144.4 499.7,-1144.4 499.7,-1144.4"/>
+<polygon fill="black" stroke="black" points="499.7,-1147.9 509.7,-1144.4 499.7,-1140.9 499.7,-1147.9"/>
+</g>
+<!-- DOM Interaction -->
+<g id="node16" class="node">
+<title>DOM Interaction</title>
+<polygon fill="lightblue" stroke="black" points="751.68,-1243.8 478.92,-1243.8 478.92,-1202.2 751.68,-1202.2 751.68,-1243.8"/>
+<text text-anchor="middle" x="615.3" y="-1227.2" font-family="Arial" font-size="14.00">Interacción DOM</text>
+<text text-anchor="middle" x="615.3" y="-1210.4" font-family="Arial" font-size="14.00">(use-intersection-observer, use-measure)</text>
+</g>
+<!-- packages/&#45;&gt;DOM Interaction -->
+<g id="edge13" class="edge">
+<title>packages/-&gt;DOM Interaction</title>
+<path fill="none" stroke="black" d="M417.73,-1146.6C452.08,-1146.6 485.13,-1146.6 485.13,-1146.6 485.13,-1146.6 485.13,-1190.2 485.13,-1190.2"/>
+<polygon fill="black" stroke="black" points="481.63,-1190.2 485.13,-1200.2 488.63,-1190.2 481.63,-1190.2"/>
+</g>
+<!-- State Management -->
+<g id="node17" class="node">
+<title>State Management</title>
+<polygon fill="lightblue" stroke="black" points="680.89,-1303.8 549.71,-1303.8 549.71,-1262.2 680.89,-1262.2 680.89,-1303.8"/>
+<text text-anchor="middle" x="615.3" y="-1287.2" font-family="Arial" font-size="14.00">Gestión de Estado</text>
+<text text-anchor="middle" x="615.3" y="-1270.4" font-family="Arial" font-size="14.00">(use-ref-state)</text>
+</g>
+<!-- packages/&#45;&gt;State Management -->
+<g id="edge14" class="edge">
+<title>packages/-&gt;State Management</title>
+<path fill="none" stroke="black" d="M415.59,-1151.41C415.59,-1190.05 415.59,-1276.07 415.59,-1276.07 415.59,-1276.07 537.84,-1276.07 537.84,-1276.07"/>
+<polygon fill="black" stroke="black" points="537.84,-1279.57 547.84,-1276.07 537.84,-1272.57 537.84,-1279.57"/>
+</g>
+<!-- aria&#45;utils -->
+<g id="node18" class="node">
+<title>aria-utils</title>
+<polygon fill="lightblue" stroke="black" points="664.15,-1394.8 566.44,-1394.8 566.44,-1353.2 664.15,-1353.2 664.15,-1394.8"/>
+<text text-anchor="middle" x="615.3" y="-1378.2" font-family="Arial" font-size="14.00">Accesibilidad</text>
+<text text-anchor="middle" x="615.3" y="-1361.4" font-family="Arial" font-size="14.00">(aria-utils)</text>
+</g>
+<!-- packages/&#45;&gt;aria&#45;utils -->
+<g id="edge15" class="edge">
+<title>packages/-&gt;aria-utils</title>
+<path fill="none" stroke="black" d="M413.55,-1151.11C413.55,-1207.16 413.55,-1374 413.55,-1374 413.55,-1374 554.43,-1374 554.43,-1374"/>
+<polygon fill="black" stroke="black" points="554.43,-1377.5 564.43,-1374 554.43,-1370.5 554.43,-1377.5"/>
+</g>
+<!-- dom&#45;animation -->
+<g id="node19" class="node">
+<title>dom-animation</title>
+<polygon fill="lightblue" stroke="black" points="674.26,-1454.8 556.34,-1454.8 556.34,-1413.2 674.26,-1413.2 674.26,-1454.8"/>
+<text text-anchor="middle" x="615.3" y="-1438.2" font-family="Arial" font-size="14.00">Animaciones</text>
+<text text-anchor="middle" x="615.3" y="-1421.4" font-family="Arial" font-size="14.00">(dom-animation)</text>
+</g>
+<!-- packages/&#45;&gt;dom&#45;animation -->
+<g id="edge16" class="edge">
+<title>packages/-&gt;dom-animation</title>
+<path fill="none" stroke="black" d="M411.5,-1151.38C411.5,-1216.73 411.5,-1434 411.5,-1434 411.5,-1434 544.57,-1434 544.57,-1434"/>
+<polygon fill="black" stroke="black" points="544.57,-1437.5 554.57,-1434 544.57,-1430.5 544.57,-1437.5"/>
+</g>
+<!-- react&#45;utils -->
+<g id="node20" class="node">
+<title>react-utils</title>
+<polygon fill="lightblue" stroke="black" points="658.3,-1514.8 572.29,-1514.8 572.29,-1473.2 658.3,-1473.2 658.3,-1514.8"/>
+<text text-anchor="middle" x="615.3" y="-1498.2" font-family="Arial" font-size="14.00">React</text>
+<text text-anchor="middle" x="615.3" y="-1481.4" font-family="Arial" font-size="14.00">(react-utils)</text>
+</g>
+<!-- packages/&#45;&gt;react&#45;utils -->
+<g id="edge17" class="edge">
+<title>packages/-&gt;react-utils</title>
+<path fill="none" stroke="black" d="M270.34,-1151.01C270.34,-1223.03 270.34,-1486.4 270.34,-1486.4 270.34,-1486.4 560.44,-1486.4 560.44,-1486.4"/>
+<polygon fill="black" stroke="black" points="560.44,-1489.9 570.44,-1486.4 560.44,-1482.9 560.44,-1489.9"/>
+</g>
+<!-- shared&#45;utils -->
+<g id="node21" class="node">
+<title>shared-utils</title>
+<polygon fill="lightblue" stroke="black" points="664.14,-1574.8 566.45,-1574.8 566.45,-1533.2 664.14,-1533.2 664.14,-1574.8"/>
+<text text-anchor="middle" x="615.3" y="-1558.2" font-family="Arial" font-size="14.00">Generales</text>
+<text text-anchor="middle" x="615.3" y="-1541.4" font-family="Arial" font-size="14.00">(shared-utils)</text>
+</g>
+<!-- packages/&#45;&gt;shared&#45;utils -->
+<g id="edge18" class="edge">
+<title>packages/-&gt;shared-utils</title>
+<path fill="none" stroke="black" d="M268.29,-1151.33C268.29,-1231.49 268.29,-1547.2 268.29,-1547.2 268.29,-1547.2 554.8,-1547.2 554.8,-1547.2"/>
+<polygon fill="black" stroke="black" points="554.8,-1550.7 564.8,-1547.2 554.8,-1543.7 554.8,-1550.7"/>
+</g>
+<!-- shared&#45;icons -->
+<g id="node22" class="node">
+<title>shared-icons</title>
+<polygon fill="lightblue" stroke="black" points="668.04,-1634.8 562.56,-1634.8 562.56,-1593.2 668.04,-1593.2 668.04,-1634.8"/>
+<text text-anchor="middle" x="615.3" y="-1618.2" font-family="Arial" font-size="14.00">Iconos</text>
+<text text-anchor="middle" x="615.3" y="-1601.4" font-family="Arial" font-size="14.00">(shared-icons)</text>
+</g>
+<!-- packages/&#45;&gt;shared&#45;icons -->
+<g id="edge19" class="edge">
+<title>packages/-&gt;shared-icons</title>
+<path fill="none" stroke="black" d="M417.83,-1148.8C442.9,-1148.8 464.52,-1148.8 464.52,-1148.8 464.52,-1148.8 464.52,-1596.4 464.52,-1596.4 464.52,-1596.4 550.62,-1596.4 550.62,-1596.4"/>
+<polygon fill="black" stroke="black" points="550.62,-1599.9 560.62,-1596.4 550.62,-1592.9 550.62,-1599.9"/>
+</g>
+<!-- test&#45;utils -->
+<g id="node23" class="node">
+<title>test-utils</title>
+<polygon fill="lightblue" stroke="black" points="654.02,-1694.8 576.57,-1694.8 576.57,-1653.2 654.02,-1653.2 654.02,-1694.8"/>
+<text text-anchor="middle" x="615.3" y="-1678.2" font-family="Arial" font-size="14.00">Pruebas</text>
+<text text-anchor="middle" x="615.3" y="-1661.4" font-family="Arial" font-size="14.00">(test-utils)</text>
+</g>
+<!-- packages/&#45;&gt;test&#45;utils -->
+<g id="edge20" class="edge">
+<title>packages/-&gt;test-utils</title>
+<path fill="none" stroke="black" d="M417.93,-1138.11C439.54,-1138.11 457.32,-1138.11 457.32,-1138.11 457.32,-1138.11 457.32,-1658 457.32,-1658 457.32,-1658 564.73,-1658 564.73,-1658"/>
+<polygon fill="black" stroke="black" points="564.73,-1661.5 574.73,-1658 564.73,-1654.5 564.73,-1661.5"/>
+</g>
+<!-- stories&#45;utils -->
+<g id="node24" class="node">
+<title>stories-utils</title>
+<polygon fill="lightblue" stroke="black" points="663.36,-1754.8 567.24,-1754.8 567.24,-1713.2 663.36,-1713.2 663.36,-1754.8"/>
+<text text-anchor="middle" x="615.3" y="-1738.2" font-family="Arial" font-size="14.00">Storybook</text>
+<text text-anchor="middle" x="615.3" y="-1721.4" font-family="Arial" font-size="14.00">(stories-utils)</text>
+</g>
+<!-- packages/&#45;&gt;stories&#45;utils -->
+<g id="edge21" class="edge">
+<title>packages/-&gt;stories-utils</title>
+<path fill="none" stroke="black" d="M417.95,-1140.16C435.99,-1140.16 450.12,-1140.16 450.12,-1140.16 450.12,-1140.16 450.12,-1718 450.12,-1718 450.12,-1718 555.56,-1718 555.56,-1718"/>
+<polygon fill="black" stroke="black" points="555.56,-1721.5 565.56,-1718 555.56,-1714.5 555.56,-1721.5"/>
+</g>
+<!-- storybook/ -->
+<g id="node25" class="node">
+<title>storybook/</title>
+<polygon fill="lightblue" stroke="black" points="709.68,-1840 520.92,-1840 520.92,-1804 709.68,-1804 709.68,-1840"/>
+<text text-anchor="middle" x="615.3" y="-1817.8" font-family="Arial" font-size="14.00">Configuración de Storybook</text>
+</g>
+<!-- packages/&#45;&gt;storybook/ -->
+<g id="edge22" class="edge">
+<title>packages/-&gt;storybook/</title>
+<path fill="none" stroke="black" d="M272.38,-1151.31C272.38,-1192.71 272.38,-1289.93 272.38,-1289.93 272.38,-1289.93 540.11,-1289.93 540.11,-1289.93 540.11,-1289.93 540.11,-1792.17 540.11,-1792.17"/>
+<polygon fill="black" stroke="black" points="536.61,-1792.17 540.11,-1802.17 543.61,-1792.17 536.61,-1792.17"/>
+</g>
+<!-- plop/ -->
+<g id="node3" class="node">
+<title>plop/</title>
+<polygon fill="lightblue" stroke="black" points="399.74,-1205 284.14,-1205 284.14,-1169 399.74,-1169 399.74,-1205"/>
+<text text-anchor="middle" x="341.94" y="-1182.8" font-family="Arial" font-size="14.00">plop/ (Plantillas)</text>
+</g>
+<!-- scripts/ -->
+<g id="node4" class="node">
+<title>scripts/</title>
+<polygon fill="lightblue" stroke="black" points="409.46,-1259 274.43,-1259 274.43,-1223 409.46,-1223 409.46,-1259"/>
+<text text-anchor="middle" x="341.94" y="-1236.8" font-family="Arial" font-size="14.00">scripts/ (Utilidades)</text>
+</g>
+<!-- app/ -->
+<g id="node27" class="node">
+<title>app/</title>
+<polygon fill="lightblue" stroke="black" points="675.06,-120 555.54,-120 555.54,-84 675.06,-84 675.06,-120"/>
+<text text-anchor="middle" x="615.3" y="-97.8" font-family="Arial" font-size="14.00">Router de la app</text>
+</g>
+<!-- docs/ -->
+<g id="node28" class="node">
+<title>docs/</title>
+<polygon fill="lightblue" stroke="black" points="675.05,-174 555.54,-174 555.54,-138 675.05,-138 675.05,-174"/>
+<text text-anchor="middle" x="615.3" y="-151.8" font-family="Arial" font-size="14.00">Páginas de docs</text>
+</g>
+<!-- blog/ -->
+<g id="node29" class="node">
+<title>blog/</title>
+<polygon fill="lightblue" stroke="black" points="642.3,-228 588.3,-228 588.3,-192 642.3,-192 642.3,-228"/>
+<text text-anchor="middle" x="615.3" y="-205.8" font-family="Arial" font-size="14.00">Blog</text>
+</g>
+<!-- examples/ -->
+<g id="node30" class="node">
+<title>examples/</title>
+<polygon fill="lightblue" stroke="black" points="652.09,-282 578.51,-282 578.51,-246 652.09,-246 652.09,-282"/>
+<text text-anchor="middle" x="615.3" y="-259.8" font-family="Arial" font-size="14.00">Ejemplos</text>
+</g>
+<!-- playground/ -->
+<g id="node31" class="node">
+<title>playground/</title>
+<polygon fill="lightblue" stroke="black" points="692.56,-336 538.04,-336 538.04,-300 692.56,-300 692.56,-336"/>
+<text text-anchor="middle" x="615.3" y="-313.8" font-family="Arial" font-size="14.00">Playground interactivo</text>
+</g>
+<!-- themes/ -->
+<g id="node32" class="node">
+<title>themes/</title>
+<polygon fill="lightblue" stroke="black" points="679.32,-390 551.27,-390 551.27,-354 679.32,-354 679.32,-390"/>
+<text text-anchor="middle" x="615.3" y="-367.8" font-family="Arial" font-size="14.00">Muestra de temas</text>
+</g>
+<!-- Turborepo -->
+<g id="node33" class="node">
+<title>Turborepo</title>
+<polygon fill="lightblue" stroke="black" points="198.74,-1572.8 30.23,-1572.8 30.23,-1531.2 198.74,-1531.2 198.74,-1572.8"/>
+<text text-anchor="middle" x="114.49" y="-1556.2" font-family="Arial" font-size="14.00">Turborepo</text>
+<text text-anchor="middle" x="114.49" y="-1539.4" font-family="Arial" font-size="14.00">(Orquestación de builds)</text>
+</g>
+<!-- Build -->
+<g id="node42" class="node">
+<title>Build</title>
+<polygon fill="lightblue" stroke="black" points="432.05,-1722.8 251.84,-1722.8 251.84,-1681.2 432.05,-1681.2 432.05,-1722.8"/>
+<text text-anchor="middle" x="341.94" y="-1706.2" font-family="Arial" font-size="14.00">Construcción de Paquetes</text>
+<text text-anchor="middle" x="341.94" y="-1689.4" font-family="Arial" font-size="14.00">(pnpm build)</text>
+</g>
+<!-- Turborepo&#45;&gt;Build -->
+<g id="edge23" class="edge">
+<title>Turborepo-&gt;Build</title>
+<path fill="none" stroke="black" d="M199.12,-1567C209.74,-1567 216.97,-1567 216.97,-1567 216.97,-1567 216.97,-1685.07 216.97,-1685.07 216.97,-1685.07 239.94,-1685.07 239.94,-1685.07"/>
+<polygon fill="black" stroke="black" points="239.94,-1688.57 249.94,-1685.07 239.94,-1681.57 239.94,-1688.57"/>
+</g>
+<!-- pnpm -->
+<g id="node34" class="node">
+<title>pnpm</title>
+<polygon fill="lightblue" stroke="black" points="191.75,-1632.8 37.22,-1632.8 37.22,-1591.2 191.75,-1591.2 191.75,-1632.8"/>
+<text text-anchor="middle" x="114.49" y="-1616.2" font-family="Arial" font-size="14.00">pnpm</text>
+<text text-anchor="middle" x="114.49" y="-1599.4" font-family="Arial" font-size="14.00">(Gestión de paquetes)</text>
+</g>
+<!-- pnpm&#45;&gt;Build -->
+<g id="edge24" class="edge">
+<title>pnpm-&gt;Build</title>
+<path fill="none" stroke="black" d="M191.86,-1628.93C227.97,-1628.93 263.13,-1628.93 263.13,-1628.93 263.13,-1628.93 263.13,-1669.35 263.13,-1669.35"/>
+<polygon fill="black" stroke="black" points="259.63,-1669.35 263.13,-1679.35 266.63,-1669.35 259.63,-1669.35"/>
+</g>
+<!-- TypeScript -->
+<g id="node35" class="node">
+<title>TypeScript</title>
+<polygon fill="lightblue" stroke="black" points="155.94,-1512.8 73.03,-1512.8 73.03,-1471.2 155.94,-1471.2 155.94,-1512.8"/>
+<text text-anchor="middle" x="114.49" y="-1496.2" font-family="Arial" font-size="14.00">TypeScript</text>
+<text text-anchor="middle" x="114.49" y="-1479.4" font-family="Arial" font-size="14.00">(Tipado)</text>
+</g>
+<!-- Docs Dev -->
+<g id="node41" class="node">
+<title>Docs Dev</title>
+<polygon fill="lightblue" stroke="black" points="409.47,-1662.8 274.42,-1662.8 274.42,-1621.2 409.47,-1621.2 409.47,-1662.8"/>
+<text text-anchor="middle" x="341.94" y="-1646.2" font-family="Arial" font-size="14.00">Desarrollo de Docs</text>
+<text text-anchor="middle" x="341.94" y="-1629.4" font-family="Arial" font-size="14.00">(pnpm dev:docs)</text>
+</g>
+<!-- TypeScript&#45;&gt;Docs Dev -->
+<g id="edge25" class="edge">
+<title>TypeScript-&gt;Docs Dev</title>
+<path fill="none" stroke="black" d="M156.14,-1499.6C188.88,-1499.6 228.97,-1499.6 228.97,-1499.6 228.97,-1499.6 228.97,-1625.07 228.97,-1625.07 228.97,-1625.07 262.43,-1625.07 262.43,-1625.07"/>
+<polygon fill="black" stroke="black" points="262.43,-1628.57 272.43,-1625.07 262.43,-1621.57 262.43,-1628.57"/>
+</g>
+<!-- ESLint -->
+<g id="node36" class="node">
+<title>ESLint</title>
+<polygon fill="lightblue" stroke="black" points="183.19,-1812.8 45.79,-1812.8 45.79,-1771.2 183.19,-1771.2 183.19,-1812.8"/>
+<text text-anchor="middle" x="114.49" y="-1796.2" font-family="Arial" font-size="14.00">ESLint &amp; Prettier</text>
+<text text-anchor="middle" x="114.49" y="-1779.4" font-family="Arial" font-size="14.00">(Calidad de código)</text>
+</g>
+<!-- Linting -->
+<g id="node44" class="node">
+<title>Linting</title>
+<polygon fill="lightblue" stroke="black" points="442.92,-1782.8 240.97,-1782.8 240.97,-1741.2 442.92,-1741.2 442.92,-1782.8"/>
+<text text-anchor="middle" x="341.94" y="-1766.2" font-family="Arial" font-size="14.00">Linter y Formato</text>
+<text text-anchor="middle" x="341.94" y="-1749.4" font-family="Arial" font-size="14.00">(pnpm lint, pnpm format:write)</text>
+</g>
+<!-- ESLint&#45;&gt;Linting -->
+<g id="edge26" class="edge">
+<title>ESLint-&gt;Linting</title>
+<path fill="none" stroke="black" d="M183.66,-1777C183.66,-1777 229.31,-1777 229.31,-1777"/>
+<polygon fill="black" stroke="black" points="229.31,-1780.5 239.31,-1777 229.31,-1773.5 229.31,-1780.5"/>
+</g>
+<!-- Jest -->
+<g id="node37" class="node">
+<title>Jest</title>
+<polygon fill="lightblue" stroke="black" points="150.1,-1872.8 78.87,-1872.8 78.87,-1831.2 150.1,-1831.2 150.1,-1872.8"/>
+<text text-anchor="middle" x="114.49" y="-1856.2" font-family="Arial" font-size="14.00">Jest</text>
+<text text-anchor="middle" x="114.49" y="-1839.4" font-family="Arial" font-size="14.00">(Testing)</text>
+</g>
+<!-- Testing -->
+<g id="node43" class="node">
+<title>Testing</title>
+<polygon fill="lightblue" stroke="black" points="385.34,-1842.8 298.54,-1842.8 298.54,-1801.2 385.34,-1801.2 385.34,-1842.8"/>
+<text text-anchor="middle" x="341.94" y="-1826.2" font-family="Arial" font-size="14.00">Pruebas</text>
+<text text-anchor="middle" x="341.94" y="-1809.4" font-family="Arial" font-size="14.00">(pnpm test)</text>
+</g>
+<!-- Jest&#45;&gt;Testing -->
+<g id="edge27" class="edge">
+<title>Jest-&gt;Testing</title>
+<path fill="none" stroke="black" d="M150.53,-1837C150.53,-1837 286.78,-1837 286.78,-1837"/>
+<polygon fill="black" stroke="black" points="286.78,-1840.5 296.78,-1837 286.78,-1833.5 286.78,-1840.5"/>
+</g>
+<!-- Changesets -->
+<g id="node38" class="node">
+<title>Changesets</title>
+<polygon fill="lightblue" stroke="black" points="204.97,-1692.8 24,-1692.8 24,-1651.2 204.97,-1651.2 204.97,-1692.8"/>
+<text text-anchor="middle" x="114.49" y="-1676.2" font-family="Arial" font-size="14.00">Changesets</text>
+<text text-anchor="middle" x="114.49" y="-1659.4" font-family="Arial" font-size="14.00">(Versionado y publicación)</text>
+</g>
+<!-- Changesets&#45;&gt;Build -->
+<g id="edge28" class="edge">
+<title>Changesets-&gt;Build</title>
+<path fill="none" stroke="black" d="M205.36,-1688.93C205.36,-1688.93 240.07,-1688.93 240.07,-1688.93"/>
+<polygon fill="black" stroke="black" points="240.07,-1692.43 250.07,-1688.93 240.07,-1685.43 240.07,-1692.43"/>
+</g>
+<!-- Plop -->
+<g id="node39" class="node">
+<title>Plop</title>
+<polygon fill="lightblue" stroke="black" points="195.63,-1752.8 33.34,-1752.8 33.34,-1711.2 195.63,-1711.2 195.63,-1752.8"/>
+<text text-anchor="middle" x="114.49" y="-1736.2" font-family="Arial" font-size="14.00">Plop</text>
+<text text-anchor="middle" x="114.49" y="-1719.4" font-family="Arial" font-size="14.00">(Generación de código)</text>
+</g>
+<!-- Plop&#45;&gt;Build -->
+<g id="edge29" class="edge">
+<title>Plop-&gt;Build</title>
+<path fill="none" stroke="black" d="M195.96,-1717C195.96,-1717 239.88,-1717 239.88,-1717"/>
+<polygon fill="black" stroke="black" points="239.88,-1720.5 249.88,-1717 239.88,-1713.5 239.88,-1720.5"/>
+</g>
+<!-- Storybook Dev -->
+<g id="node40" class="node">
+<title>Storybook Dev</title>
+<polygon fill="lightblue" stroke="black" points="437.1,-1602.8 246.79,-1602.8 246.79,-1561.2 437.1,-1561.2 437.1,-1602.8"/>
+<text text-anchor="middle" x="341.94" y="-1586.2" font-family="Arial" font-size="14.00">Desarrollo de Componentes</text>
+<text text-anchor="middle" x="341.94" y="-1569.4" font-family="Arial" font-size="14.00">(pnpm sb)</text>
+</g>
+<!-- Storybook Dev&#45;&gt;storybook/ -->
+<g id="edge30" class="edge">
+<title>Storybook Dev-&gt;storybook/</title>
+<path fill="none" stroke="black" d="M437.33,-1599.6C484.1,-1599.6 530.51,-1599.6 530.51,-1599.6 530.51,-1599.6 530.51,-1792.29 530.51,-1792.29"/>
+<polygon fill="black" stroke="black" points="527.01,-1792.29 530.51,-1802.29 534.01,-1792.29 527.01,-1792.29"/>
+</g>
+</g>
+</svg>

@@ -1,11 +1,11 @@
 # Own UI
 
-A React component library built with TypeScript, Emotion, and Vite.
+A React component library built with TypeScript, Tailwind, and Vite.
 
 ## Features
 
 - 🚀 Built with React and TypeScript
-- 💅 Styled with Emotion
+- 💅 Styled with tailwind v4
 - 📦 Bundled with Vite
 - 📚 Documented with Storybook
 - ✅ Tested with Jest and React Testing Library
@@ -63,8 +63,8 @@ A customizable button component with different variants and sizes.
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- pnpm
+- Node.js (v18 or higher)
+- pnpm (v10)
 
 ### Setup
 
