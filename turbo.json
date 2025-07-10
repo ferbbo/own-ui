@@ -10,6 +10,14 @@
     "dev": {
       "persistent": true,
       "cache": false
+    },
+    "version": {
+      "dependsOn": ["build"],
+      "outputs": ["package.json"]
+    },
+    "release": {
+      "dependsOn": ["build", "version"],
+      "outputs": []
     }
   }
 }

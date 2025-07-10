@@ -1,0 +1,53 @@
+{
+  "name": "@ownui/tw-theme",
+  "version": "0.1.0",
+  "description": "Tailwind CSS plugin for semantic theming with CSS custom properties",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./theme/*": "./dist/theme/*.json"
+  },
+  "type": "module",
+  "scripts": {
+    "build:components": "node src/build/build.js",
+    "build:lib": "tsup",
+    "build": "npm run build:components && npm run build:lib",
+    "postbuild": "rimraf .tmp",
+    "dev": "npm run build:lib --watch",
+    "prepare": "pnpm run build"
+  },
+  "keywords": [
+    "tailwindcss",
+    "theme",
+    "plugin",
+    "css",
+    "custom-properties"
+  ],
+  "peerDependencies": {
+    "tailwindcss": ">= 3.4.17 <4.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "@tailwindcss/postcss": "^4.1.7",
+    "autoprefixer": "^10.4.21",
+    "cssnano": "^7.0.7",
+    "postcss": "^8.4.38",
+    "postcss-apply": "^0.12.0",
+    "postcss-js": "^4.0.1",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "4.1.7",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

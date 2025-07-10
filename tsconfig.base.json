@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "useDefineForClassFields": true,
     "types": ["@testing-library/jest-dom", "node"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "module": "NodeNext",
     "skipLibCheck": true,
     "sourceMap": true,
-    "moduleResolution": "node",
-    // "allowImportingTsExtensions": true,
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -20,10 +19,11 @@
     "noFallthroughCasesInSwitch": true,
     "declaration": true,
     // "declarationDir": "dist",
-    // "emitDeclarationOnly": true,
+    "emitDeclarationOnly": true,
     // "outDir": "dist",
     "jsx": "react-jsx",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "noImplicitAny": false
   },
   "include": ["packages"],
   "exclude": ["**/node_modules", "**/dist", "**/.turbo"]
