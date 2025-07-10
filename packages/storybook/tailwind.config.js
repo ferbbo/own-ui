@@ -1,24 +1,9 @@
 /** @type {import('tailwindcss').Config} */
-export default {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          DEFAULT: "#3366FF",
-          hover: "#254EDB",
-        },
-        secondary: {
-          DEFAULT: "#E0E0E0",
-          hover: "#CCCCCC",
-        },
-        tertiary: {
-          DEFAULT: "transparent",
-          text: "#3366FF",
-          hover: "#254EDB",
-        },
-      },
-    },
-  },
-  plugins: [],
+export default   {
+  //  safelist: [
+  //   { pattern: /^btn-(primary|secondary|accent|neutral|info|success|warning|error)$/ }
+  // ],
+  content: ["../components/**/src/*.{js,ts,jsx,tsx}",
+     "../components/**/stories/*.{js,ts,jsx,tsx}"
+    ],
 };

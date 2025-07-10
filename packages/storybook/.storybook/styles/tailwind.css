@@ -1,1 +1,9 @@
+/* 1 – Carga la configuración o los presets */
+@config "../../tailwind.config.js";
+
+/* 2 – Carga tu plugin antes de Tailwind */
+@plugin "@ownui/tw-theme";
+
+/* 3 – Ahora sí, importa Tailwind con sus cuatro capas,
+       que se mezclarán con lo que tu plugin haya registrado */
 @import "tailwindcss";
