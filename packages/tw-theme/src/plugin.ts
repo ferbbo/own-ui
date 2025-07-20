@@ -1,90 +1,122 @@
 import { plugin } from './functions/pluginWithOptions.ts'
-import { PluginOptions, ThemeColors } from './types.ts';
+import { PluginOptions, ThemeColors, Flags } from './types.ts';
 import { builtInThemes } from './themes/index.ts';
-//import processCSS from "./functions/processCSS.ts";
 import splitStyles from './functions/splitStyles.ts';
 
 import {
-  hexToRgb,
   generateColorUtilities,
   cssVarName,
 } from './utilities/index.ts';
-/** 
- * Import button styles from themes *
- */
 
-//import { buttonStyles } from './themes/imports.ts';
 
 /**
- * Generate CSS custom properties for a theme
+ * Generate CSS custom properties for a theme.
  */
-const  generateThemeProperties = (
+const generateThemeProperties = (
   theme: ThemeColors
 ): Record<string, string> => {
   const properties: Record<string, string> = {};
 
   // Generate CSS custom properties for each color
-  Object.entries(theme).forEach(([colorName, colorValue]) => {
-    // Convert hex colors to RGB values for better alpha support
-    if (colorValue.startsWith('#')) {
-      properties[cssVarName(colorName)] = hexToRgb(colorValue);
-    } else {
-      properties[cssVarName(colorName)] = colorValue;
-    }
+  Object.entries(theme).map(([colorName, colorValue]) => {
+    properties[cssVarName(colorName)] = colorValue;
+
   });
 
   return properties;
 };
 
 /**
- * Create the Tailwind plugin
+ * Generates the theme configuration by combining default and custom themes.
+ */
+const getThemeConfig = (theme : string[]): Record<string, string> => {
+
+  return theme.reduce((acc, theme) => {
+    const themeParts = theme.split(' ');
+    if (themeParts[1]?.includes('--default')) {
+      acc['light'] = themeParts[0];
+    }
+    if (themeParts[1]?.includes('--prefersdark')) {
+      acc['dark'] = themeParts[0];
+    }
+    if (acc[themeParts[0]]) {
+      acc[themeParts[0]] = themeParts[0];
+    }
+    return acc;
+  }, {})
+};
+
+
+const formatAndCleanConfig = (options: PluginOptions): Record<string, string | string> => {
+  const { root , colorScheme, themes } = options;
+
+  return {
+    root: root && !Number.isNaN(root) 
+      ? root.toString().replace(/[^/w]+/g,'').trim().toLowerCase()
+      : ':root',
+    colorScheme: colorScheme && !Number.isNaN(colorScheme)  
+      ? colorScheme.replace(/[^a-z\s]+/g,'').trim().toLowerCase()
+      : 'light dark',
+    themes: themes && !Number.isNaN(themes)
+      ? themes.toString().replace(/[^a-z,-\s]+/g,'').trim().toLowerCase().split(',').filter((cnf) => cnf.length > 0 ).join(',')
+      : ''
+  };
+};
+
+/**
+ * Creates the Tailwind plugin for semantic theming.
  */
 const createPlugin = () => {
   return plugin.withOptions(function (options: PluginOptions = {}) {
     return function ({ addBase, addUtilities, addComponents }) {
+      const flagList= [Flags.DEFAULT, Flags.PREFER_DARK];
+      const defaultThemeCnf = [`light ${flagList[0]}`, `dark ${flagList[1]}`];
       const {
-        root = ':root',
-        colorScheme = 'light dark',      
-      } = options;
-      const flags = ['--default', '--prefersdark']
-      const themes = [`light ${flags[0]}`, `dark ${flags[1]}`];
-      const defaultThemes = themes.filter((theme) => flags.includes(theme.split(" ").pop() || ''))
-                                  .map((theme) => theme.split(" ")[0]);
-
-    try {
-      // Add base styles with CSS custom properties for each theme
-      const defaultSelector = `:where(${root}),[data-theme="${defaultThemes[0]}"]`;
-
+        root,
+        colorScheme,
+        themes
+      } = formatAndCleanConfig(options);
       
-      // Add root theme light and dark      
-      addBase({
-        [root]: { 'color-scheme': colorScheme },
-        [root]: { ...builtInThemes.root },
-        [defaultSelector]: generateThemeProperties(builtInThemes.light),
-        '@media (prefers-color-scheme: dark)': {
-          [root]: generateThemeProperties(builtInThemes.dark),
-        },
-        [`[data-theme="${defaultThemes[1]}"]`]: generateThemeProperties(builtInThemes.dark),
-      });
-  
-      // Add utility classes - use type assertion only at the API boundary
-      addUtilities(generateColorUtilities());
-
-      // Add Components
+      const themeCnf = getThemeConfig([...defaultThemeCnf, ...themes.split(',')]);
       try {
-        // button
-        //const buttonStyles = processCSS({ fileName: "button" });
-        const {buttonStyles} = require('./build/components');
-        const { classes, rest } = splitStyles(buttonStyles);
-        addComponents(classes);
-        addBase(rest);
-      } catch (error) {
-        console.error('Error loading component:', error);
-      }
+        // Add base styles with CSS custom properties for each theme
+        const defaultSelector = `:where(${root}),[data-theme="${themeCnf.light}"]`;
+        const darkSelector = `[data-theme="${themeCnf.dark}"]`;
+        const othersSelectors: Record<string, Record<string, string>> = Object.keys(themeCnf)
+          .filter((name) => !['light', 'dark'].includes(name) && builtInThemes[name])
+          .reduce((acc, name) => {
+            acc[`[data-theme="${name}"]`] = generateThemeProperties(builtInThemes[name]);
+            return acc;
+          }, {});
+        // Add root theme light and dark
+        addBase({
+          [root]: { 'color-scheme': colorScheme },
+          [root]: { ...builtInThemes.root },
+          [defaultSelector]: generateThemeProperties(builtInThemes.light),
+          '@media (prefers-color-scheme: dark)': {
+            [root]: generateThemeProperties(builtInThemes.dark),
+          },
+          [darkSelector]: generateThemeProperties(builtInThemes.dark),
+          ...othersSelectors
+        });
+    
+        // Add utility classes - use type assertion only at the API boundary
+        addUtilities(generateColorUtilities());
 
-    } catch (error) {
-      console.error('Error in @ownui/tw-theme plugin:', error);
-    }
+        // Add Components
+        try {
+          /* button */
+          const {buttonStyles} = require('./build/components');
+          const { classes, rest } = splitStyles(buttonStyles);
+          addComponents(classes);
+          addBase(rest);
+        } catch (error) {
+          console.error('Error loading component:', error);
+        }
+
+      } catch (error) {
+        console.error('Error in @ownui/tw-theme plugin:', error);
+      }
     };
   })
 };

@@ -12,7 +12,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.js"
     },
-    "./theme/*": "./dist/theme/*.json"
+    "./theme": {
+      "import": "./dist/theme.js",
+      "require": "./dist/theme.js"
+    }
   },
   "type": "module",
   "scripts": {
@@ -20,7 +23,7 @@
     "build:lib": "tsup",
     "build": "npm run build:components && npm run build:lib",
     "postbuild": "rimraf .tmp",
-    "dev": "npm run build:lib --watch",
+    "dev": "tsup --watch",
     "prepare": "pnpm run build"
   },
   "keywords": [
