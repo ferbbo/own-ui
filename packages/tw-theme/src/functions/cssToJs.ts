@@ -1,12 +1,12 @@
 /**
- * Función de transformación de conveniencia:
- * Simplemente clona el objeto, pero aquí puedes renombrar selectores,
- * agregar prefijos, validaciones, etc.
+ * Prepares CSS objects for component generation.
+ * Currently clones the object, but can be extended for
+ * selector renaming, prefixes, validations, etc.
  */
-export const prepareComponents = (
-  cssObj: Record<string, any>
+export const prepareComponentStyles = (
+  cssObject: Record<string, any>
 ): Record<string, any> => ({
-  ...cssObj
+  ...cssObject
 });
 
 

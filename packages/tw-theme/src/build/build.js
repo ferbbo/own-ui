@@ -1,32 +1,31 @@
-import execa from 'execa';             // ejecución de CLI moderna :contentReference[oaicite:4]{index=4}
-import fg from 'fast-glob'                 // localizar archivos rápido :contentReference[oaicite:5]{index=5}
-import fs from 'node:fs/promises'          // escribir archivo plugin :contentReference[oaicite:6]{index=6}
+import execa from 'execa';
+import fg from 'fast-glob'
+import fs from 'node:fs/promises'
 import postcss from 'postcss'
 import postcssJs from 'postcss-js'
 
-const Componentsfiles = await fg('src/components/*.css')
-let componentFile = ''
+const componentFiles = await fg('src/components/*.css')
+let generatedComponentFile = ''
 
-for (const path of Componentsfiles) {
-  const name = path.split('/').pop().replace('.css', '') // p.ej. "button"
-  const tmp   = `.tmp/${name}.css`
+for (const filePath of componentFiles) {
+  const componentName = filePath.split('/').pop().replace('.css', '')
+  const temporaryOutputPath = `.tmp/${componentName}.css`
 
-  // 1) Tailwind CLI -> CSS minificado
-  await execa('tailwindcss', ['-i', path, '-o', tmp, '--minify'], { stdio: 'inherit', preferLocal: true }) // :contentReference[oaicite:7]{index=7}
+  // 1) Tailwind CLI -> minified CSS
+  await execa('tailwindcss', ['-i', filePath, '-o', temporaryOutputPath, '--minify'], { stdio: 'inherit', preferLocal: true })
 
-  // 2) CSS -> objeto JS
-  const css   = await fs.readFile(tmp, 'utf8')
-  const result = await postcss().process(css, { from: undefined });
-  const root = result?.root;
-  if (!root) {
+  // 2) CSS -> JS object
+  const cssContent = await fs.readFile(temporaryOutputPath, 'utf8')
+  const result = await postcss().process(cssContent, { from: undefined });
+  const parsedRoot = result?.root;
+  if (!parsedRoot) {
     throw new Error(`Error parsing CSS: ${result}`);
   }
-  const obj = postcssJs.objectify(root);
-  //const obj   = postcssJs.objectify(postcss.parse(css))               // :contentReference[oaicite:8]{index=8}
-  const constName = `${name}Styles`
+  const cssObject = postcssJs.objectify(parsedRoot);
+  const constantName = `${componentName}Styles`
 
-  componentFile += `export const ${constName} = ${JSON.stringify(obj)}\n`
+  generatedComponentFile += `export const ${constantName} = ${JSON.stringify(cssObject)}\n`
 }
     
-// 3) plugin principal: addComponents a todos
-await fs.writeFile('src/build/components.js', componentFile)
+// 3) Main plugin: add components to all
+await fs.writeFile('src/build/components.js', generatedComponentFile)

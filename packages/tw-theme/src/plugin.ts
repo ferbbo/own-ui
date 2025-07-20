@@ -1,7 +1,7 @@
 import { plugin } from './functions/pluginWithOptions.ts'
 import { PluginOptions, ThemeColors, Flags } from './types.ts';
 import { builtInThemes } from './themes/index.ts';
-import splitStyles from './functions/splitStyles.ts';
+import separateClassSelectorsFromStyles from './functions/splitStyles.ts';
 
 import {
   generateColorUtilities,
@@ -47,7 +47,7 @@ const getThemeConfig = (theme : string[]): Record<string, string> => {
 };
 
 
-const formatAndCleanConfig = (options: PluginOptions): Record<string, string | string> => {
+const formatAndCleanPluginConfig = (options: PluginOptions): Record<string, string> => {
   const { root , colorScheme, themes } = options;
 
   return {
@@ -58,7 +58,7 @@ const formatAndCleanConfig = (options: PluginOptions): Record<string, string | s
       ? colorScheme.replace(/[^a-z\s]+/g,'').trim().toLowerCase()
       : 'light dark',
     themes: themes && !Number.isNaN(themes)
-      ? themes.toString().replace(/[^a-z,-\s]+/g,'').trim().toLowerCase().split(',').filter((cnf) => cnf.length > 0 ).join(',')
+      ? themes.toString().replace(/[^a-z,-\s]+/g,'').trim().toLowerCase().split(',').filter((config) => config.length > 0 ).join(',')
       : ''
   };
 };
@@ -75,7 +75,7 @@ const createPlugin = () => {
         root,
         colorScheme,
         themes
-      } = formatAndCleanConfig(options);
+      } = formatAndCleanPluginConfig(options);
       
       const themeCnf = getThemeConfig([...defaultThemeCnf, ...themes.split(',')]);
       try {
@@ -107,9 +107,9 @@ const createPlugin = () => {
         try {
           /* button */
           const {buttonStyles} = require('./build/components');
-          const { classes, rest } = splitStyles(buttonStyles);
-          addComponents(classes);
-          addBase(rest);
+          const { classSelectors, otherStyles } = separateClassSelectorsFromStyles(buttonStyles);
+          addComponents(classSelectors);
+          addBase(otherStyles);
         } catch (error) {
           console.error('Error loading component:', error);
         }

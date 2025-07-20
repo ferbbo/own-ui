@@ -10,9 +10,8 @@ const generateThemeProperties = (
   const properties: Record<string, string> = {};
 
   // Generate CSS custom properties for each color
-  Object.entries(theme).map(([colorName, colorValue]) => {
+  Object.entries(theme).forEach(([colorName, colorValue]) => {
     properties[cssVarName(colorName)] = colorValue;
-
   });
 
   return properties;

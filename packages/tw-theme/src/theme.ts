@@ -5,19 +5,18 @@ import getThemeNameConfig from './functions/getThemeNameConfig.ts';
 
 
 /**
- * Builds a custom theme from user options.
+ * Extracts theme variables from plugin options and associates them with a theme name.
  */
-const getCustomTheme  = ({rest, name}:{ rest: PluginOptions, name: string }): { name: string, vars: ThemeColors } | null => {
-  const vars: ThemeColors = {};
-  if (name) {
-    const themeName = name;
-    Object.entries(rest).forEach(([key, value]) => {
+const extractThemeVariablesFromOptions = ({pluginOptions, themeName}: { pluginOptions: PluginOptions, themeName: string }): { name: string, vars: ThemeColors } | null => {
+  const themeVariables: ThemeColors = {};
+  if (themeName) {
+    Object.entries(pluginOptions).forEach(([key, value]) => {
       if (key.startsWith('--') && typeof value === 'string') {
-        vars[key] = value;
+        themeVariables[key] = value;
       }
     });  
 
-    return { name: themeName, vars: vars };
+    return { name: themeName, vars: themeVariables };
   }
   return null;
 }
@@ -25,17 +24,17 @@ const getCustomTheme  = ({rest, name}:{ rest: PluginOptions, name: string }): { 
 /**
  * Creates the Tailwind plugin for semantic theming.
  */
-const createPlugin = () => {
+const createSemanticThemePlugin = () => {
   return plugin.withOptions(function (options: PluginOptions = {}) {
     return function ({ addBase }) {
       const {
         root = ':root',
         name = '',
-        ...rest
+        ...pluginOptions
       } = options;
       const nameCnf = getThemeNameConfig(name);
       if (!nameCnf) return;
-      const customTheme = getCustomTheme({ name: nameCnf.name, rest });
+      const customTheme = extractThemeVariablesFromOptions({ themeName: nameCnf.name, pluginOptions });
     
       if (!customTheme) return
 
@@ -63,6 +62,6 @@ const createPlugin = () => {
   });
 };
 
-const themePlugin =  createPlugin();
+const tailwindThemePlugin = createSemanticThemePlugin();
 
-export default themePlugin;
+export default tailwindThemePlugin;
