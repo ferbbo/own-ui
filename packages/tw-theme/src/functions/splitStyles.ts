@@ -1,5 +1,8 @@
 /**
  * Separates CSS class selectors from other CSS rules.
+ *
+ * @param cssObject - An object containing CSS rules.
+ * @returns An object with `classSelectors` and `otherStyles` separated.
  */
 function separateClassSelectorsFromStyles(cssObject: Record<string, unknown>) {
   const classSelectors: Record<string, unknown> = {}

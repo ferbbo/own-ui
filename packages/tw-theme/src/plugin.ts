@@ -1,16 +1,22 @@
-import { plugin } from './functions/pluginWithOptions.ts'
 import { PluginOptions, ThemeColors, Flags } from './types.ts';
 import { builtInThemes } from './themes/index.ts';
-import separateClassSelectorsFromStyles from './functions/splitStyles.ts';
+import { 
+  separateClassSelectorsFromStyles,
+  formatAndCleanPluginConfig,
+  plugin 
+} from './functions/index.ts';
 
 import {
   generateColorUtilities,
   cssVarName,
-} from './utilities/index.ts';
+} from './utilities/colors.ts';
 
 
 /**
- * Generate CSS custom properties for a theme.
+ * Generates CSS custom properties for a given theme.
+ *
+ * @param theme - The theme object containing color definitions.
+ * @returns A record of CSS custom properties.
  */
 const generateThemeProperties = (
   theme: ThemeColors
@@ -27,7 +33,10 @@ const generateThemeProperties = (
 };
 
 /**
- * Generates the theme configuration by combining default and custom themes.
+ * Combines default and custom themes into a single configuration.
+ *
+ * @param theme - An array of theme strings.
+ * @returns A record mapping theme names to their configurations.
  */
 const getThemeConfig = (theme : string[]): Record<string, string> => {
 
@@ -47,24 +56,10 @@ const getThemeConfig = (theme : string[]): Record<string, string> => {
 };
 
 
-const formatAndCleanPluginConfig = (options: PluginOptions): Record<string, string> => {
-  const { root , colorScheme, themes } = options;
-
-  return {
-    root: root && !Number.isNaN(root) 
-      ? root.toString().replace(/[^/w]+/g,'').trim().toLowerCase()
-      : ':root',
-    colorScheme: colorScheme && !Number.isNaN(colorScheme)  
-      ? colorScheme.replace(/[^a-z\s]+/g,'').trim().toLowerCase()
-      : 'light dark',
-    themes: themes && !Number.isNaN(themes)
-      ? themes.toString().replace(/[^a-z,-\s]+/g,'').trim().toLowerCase().split(',').filter((config) => config.length > 0 ).join(',')
-      : ''
-  };
-};
-
 /**
- * Creates the Tailwind plugin for semantic theming.
+ * Creates a Tailwind CSS plugin for semantic theming.
+ *
+ * @returns A configured Tailwind plugin with theme support.
  */
 const createPlugin = () => {
   return plugin.withOptions(function (options: PluginOptions = {}) {

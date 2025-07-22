@@ -3,10 +3,10 @@
  * Currently clones the object, but can be extended for
  * selector renaming, prefixes, validations, etc.
  */
-export const prepareComponentStyles = (
+const prepareComponentStyles = (
   cssObject: Record<string, any>
 ): Record<string, any> => ({
   ...cssObject
 });
 
-
+export default prepareComponentStyles;

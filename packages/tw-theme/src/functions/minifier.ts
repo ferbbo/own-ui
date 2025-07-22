@@ -6,7 +6,7 @@ import cssnano from 'cssnano';
  * Takes a CSS object, serializes it, minifies it and returns
  * the resulting CSS as a string.
  */
-export const minifyCssObject = async (cssObject: Record<string, any>): Promise<string> => {
+const minifyCssObject = async (cssObject: Record<string, any>): Promise<string> => {
   // Simple serialization
   const rawCss = Object.entries(cssObject)
     .map(([selector, rules]) => {
@@ -20,3 +20,5 @@ export const minifyCssObject = async (cssObject: Record<string, any>): Promise<s
   const result = await postcss([cssnano]).process(rawCss, { from: undefined });
   return result.css;
 };
+
+export default minifyCssObject;
