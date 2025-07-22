@@ -72,26 +72,57 @@ const createPlugin = () => {
         themes
       } = formatAndCleanPluginConfig(options);
       
-      const themeCnf = getThemeConfig([...defaultThemeCnf, ...themes.split(',')]);
+      // Check if default themes should be disabled
+      const useDefaultThemes = themes !== 'false';
+      let themesToUse = useDefaultThemes ? [...defaultThemeCnf] : [];
+      
+      // Only add custom themes if there are any
+      if (themes && themes !== 'false' && themes.length > 0) {
+        // Add custom themes from the themes option
+        themesToUse.push(...themes.split(','));
+      }
+      
+      // Always include user-defined themes with @plugin "@ownui/tw-theme/theme"
+      // These themes are registered independently through theme.ts plugin
+      
+      const themeCnf = getThemeConfig(themesToUse);
       try {
         // Add base styles with CSS custom properties for each theme
-        const defaultSelector = `:where(${root}),[data-theme="${themeCnf.light}"]`;
-        const darkSelector = `[data-theme="${themeCnf.dark}"]`;
+        const baseStyles: Record<string, any> = {
+          [root]: { 'color-scheme': colorScheme },
+          [root]: { ...builtInThemes.root },
+        };
+        
+        // Only add default themes if they're not disabled
+        if (useDefaultThemes) {
+          const defaultSelector = `:where(${root}),[data-theme="${themeCnf.light}"]`;
+          const darkSelector = `[data-theme="${themeCnf.dark}"]`;
+          
+          // Add light theme
+          if (themeCnf.light) {
+            baseStyles[defaultSelector] = generateThemeProperties(builtInThemes.light);
+          }
+          
+          // Add dark theme
+          if (themeCnf.dark) {
+            baseStyles['@media (prefers-color-scheme: dark)'] = {
+              [root]: generateThemeProperties(builtInThemes.dark),
+            };
+            baseStyles[darkSelector] = generateThemeProperties(builtInThemes.dark);
+          }
+        }
+        
+        // Add other custom themes if any
         const othersSelectors: Record<string, Record<string, string>> = Object.keys(themeCnf)
           .filter((name) => !['light', 'dark'].includes(name) && builtInThemes[name])
           .reduce((acc, name) => {
             acc[`[data-theme="${name}"]`] = generateThemeProperties(builtInThemes[name]);
             return acc;
           }, {});
-        // Add root theme light and dark
+          
+        // Add base styles
         addBase({
-          [root]: { 'color-scheme': colorScheme },
-          [root]: { ...builtInThemes.root },
-          [defaultSelector]: generateThemeProperties(builtInThemes.light),
-          '@media (prefers-color-scheme: dark)': {
-            [root]: generateThemeProperties(builtInThemes.dark),
-          },
-          [darkSelector]: generateThemeProperties(builtInThemes.dark),
+          ...baseStyles,
           ...othersSelectors
         });
     

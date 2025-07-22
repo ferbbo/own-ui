@@ -60,10 +60,9 @@ const createSemanticThemePlugin = () => {
       } = formatAndCleanPluginConfig(options);
 
       const nameCnf = getThemeNameConfig(name);
-      if (!nameCnf) return;
+      if (!nameCnf) throw new Error('Invalid theme name configuration');
       const customTheme = extractThemeVariablesFromOptions({ themeName: nameCnf.name, pluginOptions });
-    
-      if (!customTheme) return
+      if (!customTheme) throw new Error('Invalid theme variables');
 
       try {
         // Add base styles with CSS custom properties for each theme

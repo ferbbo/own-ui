@@ -57,7 +57,7 @@ interface PluginOptionsBase {
   // logs?: boolean; TODO: HABILITAR SEGUN SE REQUIERA
   name?: string;
   config?: string;
-  themes?: string;
+  themes?: string | boolean;
 }
 
 export type PluginOptions =  PluginOptionsBase  & {

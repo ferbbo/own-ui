@@ -22,11 +22,13 @@ const formatAndCleanPluginConfig = (options: PluginOptions): Record<string, stri
     colorScheme: colorScheme && !Number.isNaN(colorScheme)  
       ? colorScheme.replace(/[^a-z\s]+/g,'').trim().toLowerCase()
       : 'light dark',
-    themes: themes && !Number.isNaN(themes)
-      ? themes.toString().replace(/[^a-z,-\s]+/g,'').trim().toLowerCase().split(',').filter((config) => config.length > 0 ).join(',')
-      : '',
+    themes: themes === false 
+      ? 'false'
+      : themes && !Number.isNaN(themes)
+        ? themes.toString().replace(/[^a-z,-\s]+/g,'').trim().toLowerCase().split(',').filter((config) => config.length > 0 ).join(',')
+        : '',
     name: name && !Number.isNaN(name)
-      ? name.replace(/[^a-z\s]+/g,'').trim().toLowerCase()
+      ? name.toString().replace(/[^a-z,-\s]+/g,'').trim().toLowerCase()
       : '',
     ...rest
   };

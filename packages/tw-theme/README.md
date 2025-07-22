@@ -108,7 +108,7 @@ module.exports = {
 function Button({ children, variant = "primary", size = "md" }) {
   return (
     <button 
-      className={`
+      className={`btn btn-${variant}
         bg-${variant} text-${variant}-content 
         hover:bg-${variant}-focus focus:ring-${variant}
         px-4 py-2 rounded-md transition-colors
@@ -171,85 +171,6 @@ For creating single custom themes:
 }
 ```
 
-## API Reference
-
-### Core Functions
-
-#### `generateThemeProperties(theme: ThemeColors): Record<string, string>`
-
-Generates CSS custom properties from a theme object.
-
-```typescript
-import { generateThemeProperties } from '@ownui/tw-theme';
-
-const theme = {
-  primary: '#3b82f6',
-  'primary-content': '#ffffff',
-  'primary-focus': '#2563eb'
-};
-
-const properties = generateThemeProperties(theme);
-// Result: { '--color-primary': '#3b82f6', '--color-primary-content': '#ffffff', '--color-primary-focus': '#2563eb' }
-```
-
-#### `createSemanticThemePlugin()`
-
-Creates a Tailwind plugin for individual theme management.
-
-```typescript
-import { createSemanticThemePlugin } from '@ownui/tw-theme/theme';
-
-const myThemePlugin = createSemanticThemePlugin();
-```
-
-### Utility Functions
-
-#### `cssVarName(colorName: string): string`
-
-Converts a color name to CSS custom property format.
-
-```typescript
-import { cssVarName } from '@ownui/tw-theme';
-
-cssVarName('primary'); // returns '--color-primary'
-cssVarName('primary-content'); // returns '--color-primary-content'
-```
-
-#### `separateClassSelectorsFromStyles(cssObject: Record<string, unknown>)`
-
-Separates CSS class selectors from other CSS rules.
-
-```typescript
-import { separateClassSelectorsFromStyles } from '@ownui/tw-theme';
-
-const styles = {
-  '.btn': { padding: '8px' },
-  '@media (min-width: 768px)': { /* ... */ }
-};
-
-const { classSelectors, otherStyles } = separateClassSelectorsFromStyles(styles);
-```
-
-### File Utilities
-
-#### `readTextFile(path: string): Promise<string>`
-#### `writeTextFile(path: string, content: string): Promise<void>`
-#### `loadJsonFile(path: string): Promise<Record<string, any>>`
-
-File system utilities for theme management:
-
-```typescript
-import { readTextFile, writeTextFile, loadJsonFile } from '@ownui/tw-theme';
-
-// Read a theme file
-const themeContent = await readTextFile('./themes/custom.json');
-
-// Write generated theme
-await writeTextFile('./dist/theme.css', generatedCSS);
-
-// Load theme configuration
-const themeConfig = await loadJsonFile('./theme-config.json');
-```
 
 ## Theme Management
 
@@ -516,77 +437,6 @@ src/
 │   └── generateThemeProperties.ts
 └── __tests__/
     └── test-utils.ts                              # Test utilities and fixtures
-```
-
-### Writing Tests
-
-The package provides test utilities for consistent testing:
-
-```typescript
-import { generateThemeProperties } from '../generateThemeProperties';
-import { mockThemes, validateCSSCustomProperties } from '../../__tests__/test-utils';
-
-describe('Custom theme tests', () => {
-  it('should handle custom theme', () => {
-    const result = generateThemeProperties(mockThemes.light);
-    expect(validateCSSCustomProperties(result)).toBe(true);
-  });
-});
-```
-
-### Test Categories
-
-#### Unit Tests
-- Test individual function behavior
-- Cover edge cases and error conditions
-- Validate input/output transformations
-- Performance testing for large datasets
-
-#### Integration Tests
-- Test interaction between functions
-- Validate real-world usage scenarios
-- Test with complete theme configurations
-- CSS output validation
-
-### Mock Data
-
-Pre-defined test data available:
-
-```typescript
-import { 
-  mockThemes,           // Complete light/dark/minimal themes
-  mockColorFormats,     // Various color format examples
-  generateLargeTheme,   // Function to create large test themes
-  createThemeWithVariants // Helper for theme variant testing
-} from '@ownui/tw-theme/test-utils';
-```
-
-## Development
-
-### Building the Package
-
-```bash
-# Build components
-pnpm build:components
-
-# Build library
-pnpm build:lib
-
-# Build everything
-pnpm build
-```
-
-### Development Workflow
-
-```bash
-# Start development mode with file watching
-pnpm dev
-
-# Run tests continuously
-pnpm test:watch
-
-# Type checking
-pnpm type-check
 ```
 
 ### Project Structure
@@ -857,6 +707,5 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
 ## Support
 
-- 📚 [Documentation](https://own-ui.dev)
 - 🐛 [Report Issues](https://github.com/ferbbo/own-ui/issues)
 - 💬 [Discussions](https://github.com/ferbbo/own-ui/discussions)
