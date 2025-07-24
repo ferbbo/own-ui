@@ -51,12 +51,13 @@ export interface ThemeConfig {
  * Plugin options for @plugin directive
  */
 interface PluginOptionsBase {
-  // themes?: string; TODO: HABILITAR SEGUN SE REQUIERA
   root?: string;
   colorScheme?: 'light' | 'dark';
   // prefix?: string; TODO: HABILITAR SEGUN SE REQUIERA
   // logs?: boolean; TODO: HABILITAR SEGUN SE REQUIERA
   name?: string;
+  config?: string;
+  themes?: string | boolean;
 }
 
 export type PluginOptions =  PluginOptionsBase  & {
@@ -71,3 +72,7 @@ export type PluginOptions =  PluginOptionsBase  & {
 export type CssStyles = {
   [key: string]: string | string[] | CssStyles | CssStyles[];
 };
+export enum Flags {
+  DEFAULT = '--default',
+  PREFER_DARK = '--prefersdark',
+}

@@ -24,6 +24,9 @@ export const semanticColorVariants: SemanticColorVariant[] = ['', '-content', '-
  * Generate CSS variable name for a semantic color
  */
 export const cssVarName = (colorName: string): string => {
+  if (colorName.startsWith('--')) {
+    return colorName;
+  }
   return `--${colorName}`;
 };
 

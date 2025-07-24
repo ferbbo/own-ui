@@ -7,15 +7,5 @@ const tailwindPlugin = createPlugin();
 // Export the plugin as default
 export default tailwindPlugin;
 
-// Export plugin for @plugin directive
-// export const pluginTailwindSemantic = {
-//   handler: tailwindPlugin,
-//   config: {
-//     theme: {
-//       extend: {},
-//     },
-//   },
-// };
-
 // Re-export types
 export * from './types.ts';

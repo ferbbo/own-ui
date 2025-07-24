@@ -1,90 +1,148 @@
-import { plugin } from './functions/pluginWithOptions.ts'
-import { PluginOptions, ThemeColors } from './types.ts';
+import { PluginOptions, ThemeColors, Flags } from './types.ts';
 import { builtInThemes } from './themes/index.ts';
-//import processCSS from "./functions/processCSS.ts";
-import splitStyles from './functions/splitStyles.ts';
+import { 
+  separateClassSelectorsFromStyles,
+  formatAndCleanPluginConfig,
+  plugin 
+} from './functions/index.ts';
 
 import {
-  hexToRgb,
   generateColorUtilities,
   cssVarName,
-} from './utilities/index.ts';
-/** 
- * Import button styles from themes *
- */
+} from './utilities/colors.ts';
 
-//import { buttonStyles } from './themes/imports.ts';
 
 /**
- * Generate CSS custom properties for a theme
+ * Generates CSS custom properties for a given theme.
+ *
+ * @param theme - The theme object containing color definitions.
+ * @returns A record of CSS custom properties.
  */
-const  generateThemeProperties = (
+const generateThemeProperties = (
   theme: ThemeColors
 ): Record<string, string> => {
   const properties: Record<string, string> = {};
 
   // Generate CSS custom properties for each color
-  Object.entries(theme).forEach(([colorName, colorValue]) => {
-    // Convert hex colors to RGB values for better alpha support
-    if (colorValue.startsWith('#')) {
-      properties[cssVarName(colorName)] = hexToRgb(colorValue);
-    } else {
-      properties[cssVarName(colorName)] = colorValue;
-    }
+  Object.entries(theme).map(([colorName, colorValue]) => {
+    properties[cssVarName(colorName)] = colorValue;
+
   });
 
   return properties;
 };
 
 /**
- * Create the Tailwind plugin
+ * Combines default and custom themes into a single configuration.
+ *
+ * @param theme - An array of theme strings.
+ * @returns A record mapping theme names to their configurations.
+ */
+const getThemeConfig = (theme : string[]): Record<string, string> => {
+
+  return theme.reduce((acc, theme) => {
+    const themeParts = theme.split(' ');
+    if (themeParts[1]?.includes('--default')) {
+      acc['light'] = themeParts[0];
+    }
+    if (themeParts[1]?.includes('--prefersdark')) {
+      acc['dark'] = themeParts[0];
+    }
+    if (acc[themeParts[0]]) {
+      acc[themeParts[0]] = themeParts[0];
+    }
+    return acc;
+  }, {})
+};
+
+
+/**
+ * Creates a Tailwind CSS plugin for semantic theming.
+ *
+ * @returns A configured Tailwind plugin with theme support.
  */
 const createPlugin = () => {
   return plugin.withOptions(function (options: PluginOptions = {}) {
     return function ({ addBase, addUtilities, addComponents }) {
+      const flagList= [Flags.DEFAULT, Flags.PREFER_DARK];
+      const defaultThemeCnf = [`light ${flagList[0]}`, `dark ${flagList[1]}`];
       const {
-        root = ':root',
-        colorScheme = 'light dark',      
-      } = options;
-      const flags = ['--default', '--prefersdark']
-      const themes = [`light ${flags[0]}`, `dark ${flags[1]}`];
-      const defaultThemes = themes.filter((theme) => flags.includes(theme.split(" ").pop() || ''))
-                                  .map((theme) => theme.split(" ")[0]);
-
-    try {
-      // Add base styles with CSS custom properties for each theme
-      const defaultSelector = `:where(${root}),[data-theme="${defaultThemes[0]}"]`;
-
+        root,
+        colorScheme,
+        themes
+      } = formatAndCleanPluginConfig(options);
       
-      // Add root theme light and dark      
-      addBase({
-        [root]: { 'color-scheme': colorScheme },
-        [root]: { ...builtInThemes.root },
-        [defaultSelector]: generateThemeProperties(builtInThemes.light),
-        '@media (prefers-color-scheme: dark)': {
-          [root]: generateThemeProperties(builtInThemes.dark),
-        },
-        [`[data-theme="${defaultThemes[1]}"]`]: generateThemeProperties(builtInThemes.dark),
-      });
-  
-      // Add utility classes - use type assertion only at the API boundary
-      addUtilities(generateColorUtilities());
-
-      // Add Components
-      try {
-        // button
-        //const buttonStyles = processCSS({ fileName: "button" });
-        const {buttonStyles} = require('./build/components');
-        const { classes, rest } = splitStyles(buttonStyles);
-        addComponents(classes);
-        addBase(rest);
-      } catch (error) {
-        console.error('Error loading component:', error);
+      // Check if default themes should be disabled
+      const useDefaultThemes = themes !== 'false';
+      let themesToUse = useDefaultThemes ? [...defaultThemeCnf] : [];
+      
+      // Only add custom themes if there are any
+      if (themes && themes !== 'false' && themes.length > 0) {
+        // Add custom themes from the themes option
+        themesToUse.push(...themes.split(','));
       }
+      
+      // Always include user-defined themes with @plugin "@ownui/tw-theme/theme"
+      // These themes are registered independently through theme.ts plugin
+      
+      const themeCnf = getThemeConfig(themesToUse);
+      try {
+        // Add base styles with CSS custom properties for each theme
+        const baseStyles: Record<string, any> = {
+          [root]: { 'color-scheme': colorScheme },
+          [root]: { ...builtInThemes.root },
+        };
+        
+        // Only add default themes if they're not disabled
+        if (useDefaultThemes) {
+          const defaultSelector = `:where(${root}),[data-theme="${themeCnf.light}"]`;
+          const darkSelector = `[data-theme="${themeCnf.dark}"]`;
+          
+          // Add light theme
+          if (themeCnf.light) {
+            baseStyles[defaultSelector] = generateThemeProperties(builtInThemes.light);
+          }
+          
+          // Add dark theme
+          if (themeCnf.dark) {
+            baseStyles['@media (prefers-color-scheme: dark)'] = {
+              [root]: generateThemeProperties(builtInThemes.dark),
+            };
+            baseStyles[darkSelector] = generateThemeProperties(builtInThemes.dark);
+          }
+        }
+        
+        // Add other custom themes if any
+        const othersSelectors: Record<string, Record<string, string>> = Object.keys(themeCnf)
+          .filter((name) => !['light', 'dark'].includes(name) && builtInThemes[name])
+          .reduce((acc, name) => {
+            acc[`[data-theme="${name}"]`] = generateThemeProperties(builtInThemes[name]);
+            return acc;
+          }, {});
+          
+        // Add base styles
+        addBase({
+          ...baseStyles,
+          ...othersSelectors
+        });
+    
+        // Add utility classes - use type assertion only at the API boundary
+        addUtilities(generateColorUtilities());
 
-    } catch (error) {
-      console.error('Error in @ownui/tw-theme plugin:', error);
-    }
+        // Add Components
+        try {
+          /* button */
+          const {buttonStyles} = require('./build/components');
+          const { classSelectors, otherStyles } = separateClassSelectorsFromStyles(buttonStyles);
+          addComponents(classSelectors);
+          addBase(otherStyles);
+        } catch (error) {
+          console.error('Error loading component:', error);
+        }
+
+      } catch (error) {
+        console.error('Error in @ownui/tw-theme plugin:', error);
+      }
     };
   })
 };

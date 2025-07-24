@@ -1,13 +1,22 @@
-function splitStyles(obj: Record<string, unknown>) {
-  const classes: Record<string, unknown> = {}
-  const rest:    Record<string, unknown> = {}
+/**
+ * Separates CSS class selectors from other CSS rules.
+ *
+ * @param cssObject - An object containing CSS rules.
+ * @returns An object with `classSelectors` and `otherStyles` separated.
+ */
+function separateClassSelectorsFromStyles(cssObject: Record<string, unknown>) {
+  const classSelectors: Record<string, unknown> = {}
+  const otherStyles: Record<string, unknown> = {}
 
-  const classRx = /^\.[a-z0-9-_]+$/i           // una sola clase, sin espacios, comas ni :
-  for (const [k, v] of Object.entries(obj)) {
-    if (classRx.test(k)) classes[k] = v
-    else rest[k] = v
+  const classRegex = /^\.[a-z0-9-_]+$/i
+  for (const [key, value] of Object.entries(cssObject)) {
+    if (classRegex.test(key)) {
+      classSelectors[key] = value
+    } else {
+      otherStyles[key] = value
+    }
   }
-  return { classes, rest }
+  return { classSelectors, otherStyles }
 }
 
-export default splitStyles
+export default separateClassSelectorsFromStyles

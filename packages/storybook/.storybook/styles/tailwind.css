@@ -1,9 +1,68 @@
-/* 1 – Carga la configuración o los presets */
+@import "tailwindcss";
 @config "../../tailwind.config.js";
 
-/* 2 – Carga tu plugin antes de Tailwind */
-@plugin "@ownui/tw-theme";
+/* 
+ * OPCIÓN 1: Usar el plugin con los temas predeterminados (light y dark)
+ * @plugin "@ownui/tw-theme";
+ */
 
-/* 3 – Ahora sí, importa Tailwind con sus cuatro capas,
-       que se mezclarán con lo que tu plugin haya registrado */
-@import "tailwindcss";
+/* 
+ * OPCIÓN 2: Usar el plugin sin temas predeterminados 
+ * pero con temas personalizados definidos en el mismo archivo
+ */
+@plugin "@ownui/tw-theme" {
+  themes: false;
+}
+
+/* 
+ * OPCIÓN 3: Configuración de tema independiente
+ * Esta opción permite definir un tema en detalle y funciona incluso
+ * si se desactivan los temas predeterminados en @ownui/tw-theme.
+ * Se procesará a través del plugin en theme.ts
+ */
+@plugin "@ownui/tw-theme/theme" {
+name: "onion --prefersdark";
+--color-primary: #8e44ad; /* Blue */
+--color-brand: #8e44ad; /* Purple */
+--color-primary-content: #f0e9e0;
+--color-primary-focus: #1e40af;
+
+/* Secondary color and variants */
+--color-secondary: #ff7f50; /* Coral */
+--color-secondary-content: #2d2a26;
+--color-secondary-focus: #e25822;
+
+/* Accent color and variants */
+--color-accent: #ffd700; /* Gold */
+--color-accent-content: #3a2c00;
+--color-accent-focus: #c9a100;
+
+/* Neutral color and variants */
+--color-neutral: #22223b; /* Deep Blue */
+--color-neutral-content: #f2e9e4;
+--color-neutral-focus: #4a4e69;
+
+/* Info color and variants */
+--color-info: #38b6ff; /* Light Blue */
+--color-info-content: #0a2239;
+--color-info-focus: #1e96fc;
+
+/* Success color and variants */
+--color-success: #43aa8b; /* Teal */
+--color-success-content: #e9f5ec;
+--color-success-focus: #2d6a4f;
+
+/* Warning color and variants */
+--color-warning: #ffb347; /* Light Orange */
+--color-warning-content: #3d2c00;
+--color-warning-focus: #ff8800;
+
+/* Error color and variants */
+--color-error: #d7263d; /* Crimson */
+--color-error-content: #fff0f3;
+--color-error-focus: #a4133c;
+
+}
+
+
+
