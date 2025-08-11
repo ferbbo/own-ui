@@ -8,6 +8,11 @@ import {
  * Variantes permitidas para el botón (coinciden con las clases CSS definidas).
  */
 export type ButtonVariant =
+  | "outline"
+  | "dash"
+  | "soft";
+
+export type ButtonTheme =
   | "primary"
   | "secondary"
   | "accent"
@@ -17,21 +22,24 @@ export type ButtonVariant =
   | "warning"
   | "error"
   | "ghost"
-  | "link"
-  | "outline"
-  | "dash"
-  | "soft";
+  | "link";
 
 /**
  * Tamaños permitidos para el botón (coinciden con las clases CSS definidas).
  */
-export type ButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
+export type ButtonSize =
+  | "xs"
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl";
 
 /**
  * Props comunes a ambos elementos (<button> y <a>), excepto `children` y atributos nativos.
  */
 interface ButtonBaseProps {
   variant?: ButtonVariant;
+  theme?: ButtonTheme;
   size?: ButtonSize;
   className?: string;
   disabled?: boolean;

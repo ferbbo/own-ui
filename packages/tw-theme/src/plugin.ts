@@ -92,7 +92,6 @@ const createPlugin = () => {
           [root]: { 'color-scheme': colorScheme },
           [root]: { ...builtInThemes.root },
         };
-        
         // Only add default themes if they're not disabled
         if (useDefaultThemes) {
           const defaultSelector = `:where(${root}),[data-theme="${themeCnf.light}"]`;
@@ -131,11 +130,18 @@ const createPlugin = () => {
 
         // Add Components
         try {
-          /* button */
-          const {buttonStyles} = require('./build/components');
+          /* components */
+          const {buttonStyles, dropdownStyles} = require('./build/components.js');
+          /* Button */
           const { classSelectors, otherStyles } = separateClassSelectorsFromStyles(buttonStyles);
           addComponents(classSelectors);
           addBase(otherStyles);
+          
+          /* Dropdown */
+          const { classSelectors: dropdownClassSelectors, otherStyles: dropdownOtherStyles } = separateClassSelectorsFromStyles(dropdownStyles);
+          addComponents(dropdownClassSelectors);
+          addBase(dropdownOtherStyles);
+
         } catch (error) {
           console.error('Error loading component:', error);
         }

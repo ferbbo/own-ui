@@ -2,7 +2,8 @@
 import { useMemo } from "react";
 import { useButton as useAriaButton } from "@react-aria/button";
 import { mergeProps } from "@react-aria/utils";
-import { useDOMRef } from "../../../utils/dom";
+import { useDOMRef } from "@ownui/dom-utils";
+import { button } from "@ownui/tw-theme/variants"
 import {
   ButtonProps,
   ButtonAsButtonProps,
@@ -10,38 +11,30 @@ import {
 } from "./Button.types";
 
 export type ReactRef<T> = React.RefObject<T> | React.Ref<T>;
-/**
- * Hook que encapsula:
- * 1) Lógica de clases (useMemo + concatenación de “btn”, “btn-{variant}”, “btn-{size}”, disabled, className).
- * 2) Lógica de accesibilidad (useAriaButton + mergeProps) para roles, eventos de teclado y atributos ARIA.
- * 3) Determina qué props aplicar a <button> vs. <a> según `as`.
- *
- * Recibe todas las props que irán al elemento y el ref del mismo.
- * Retorna:
- * - classNames: cadena de clases CSS
- * - buttonProps: props combinados para el elemento (ARIA + nativos)
- */
+
 export function useButton(
   props: ButtonProps,
   ref: ReactRef<HTMLButtonElement | HTMLAnchorElement | null>
 ): { classNames: string; buttonProps: any, Comp: string } {
   // Extraemos sin default 'as'
-  const { as: rawAs, variant = "primary", size = "md", className = "", disabled = false, onClick, children, ...restProps } =
+  const { as: rawAs, theme= "primary", variant = "", size = "md", className = "", disabled = false, onClick, children, ...restProps } =
     props;
   // Si rawAs es undefined, asumimos "button"
   const as = rawAs ?? "button";
 
   // 1) Generar (y memoizar) cadena de clases CSS
   const classNames = useMemo(() => {
-    const base = "btn btn-primary";
-    const variantCls = variant ? `btn-${variant}` : "";
-    const sizeCls = size ? `btn-${size}` : "";
+    // Construir la cadena de clases  
+    const base = "btn";
+    const themeCls = button[theme] || "";
+    const variantCls = button[variant] || "";
+    const sizeCls = button[size] || "";
     const disabledCls = disabled ? "opacity-50 cursor-not-allowed" : "";
-    return [base, variantCls, sizeCls, disabledCls, className]
+    return [base, themeCls, variantCls, sizeCls, disabledCls, className]
       .filter((part) => part && part.length > 0)
       .join(" ")
       .trim();
-  }, [variant, size, disabled, className]);
+  }, [theme, variant, size, disabled, className]);
 
   // 2) Determinar `type` (para <button>) o `href` (para <a>)
   let typeAttr: "button" | "submit" | "reset" | undefined;

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
-/* 
+/* x
  * OPCIÓN 1: Usar el plugin con los temas predeterminados (light y dark)
  * @plugin "@ownui/tw-theme";
  */

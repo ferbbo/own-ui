@@ -1,4 +1,4 @@
- :where(.btn) {
+:where(.btn) {
   width: unset;
 }
 .btn {
@@ -25,19 +25,17 @@
   border-color: var(--btn-border);
   text-shadow: 0 0.5px oklch(100% 0 0 / calc(var(--depth) * 0.15));
   touch-action: manipulation;
-  box-shadow:
-    0 0.5px 0 0.5px oklch(100% 0 0 / calc(var(--depth) * 6%)) inset,
-    var(--btn-shadow);
+  box-shadow: 0 0.5px 0 0.5px oklch(100% 0 0 / calc(var(--depth) * 6%)) inset, var(--btn-shadow);
   --btn-color: var(--color-base-200);
   --size: calc(var(--size-field, 0.25rem) * 10);
   --btn-bg: var(--btn-color, var(--color-base-200));
   --btn-fg: var(--color-base-content);
   --btn-p: 1rem;
-  --btn-border: color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%));
-  --btn-shadow:
-    0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
+  --btn-border: var(--btn-bg);
+  --btn-shadow: 0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),
     0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000);
   --btn-noise: var(--fx-noise);
+  --btn-border: color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%));
   .prose & {
     @apply no-underline;
   }
@@ -73,8 +71,6 @@
 
     @media (hover: hover) {
       &:hover {
-        @apply pointer-events-none;
-        --btn-border: #0000;
         --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
       }
     }
@@ -252,16 +248,8 @@
   &:not(.btn-active, :hover, :active:focus, :focus-visible, :disabled, [disabled], .btn-disabled) {
     --btn-shadow: "";
     --btn-fg: var(--btn-color, var(--color-base-content));
-    --btn-bg: color-mix(
-      in oklab,
-      var(--btn-color, var(--color-base-content)) 8%,
-      var(--color-base-100)
-    );
-    --btn-border: color-mix(
-      in oklab,
-      var(--btn-color, var(--color-base-content)) 10%,
-      var(--color-base-100)
-    );
+    --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-content));
+    --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-content));
     --btn-noise: none;
   }
 
@@ -269,16 +257,8 @@
     &:hover:not(.btn-active, :active, :focus-visible, :disabled, [disabled], .btn-disabled) {
       --btn-shadow: "";
       --btn-fg: var(--btn-color, var(--color-base-content));
-      --btn-bg: color-mix(
-        in oklab,
-        var(--btn-color, var(--color-base-content)) 8%,
-        var(--color-base-100)
-      );
-      --btn-border: color-mix(
-        in oklab,
-        var(--btn-color, var(--color-base-content)) 10%,
-        var(--color-base-100)
-      );
+      --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 8%, var(--color-base-content));
+      --btn-border: color-mix(in oklab, var(--btn-color, var(--color-base-content)) 10%, var(--color-base-content));
       --btn-noise: none;
     }
   }
@@ -294,7 +274,7 @@
   --fontsize: 0.75rem;
   --btn-p: 0.75rem;
   --size: calc(var(--size-field, 0.25rem) * 8);
-} 
+}
 
 .btn-md {
   --fontsize: 0.875rem;

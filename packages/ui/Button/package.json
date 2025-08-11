@@ -2,7 +2,7 @@
   "name": "@ownui/button",
   "version": "1.0.0",
   "description": "Buttons allow users to perform actions and choose with a single tap.",
-  "main": ".src/index.ts",
+  "main": "dist/index.js",
   "keywords": [
     "button"
   ],
@@ -14,7 +14,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src --dts",
+    "build": "tsup",
     "dev": "pnpm build:fast --watch",
     "typecheck": "tsc --noEmit",
     "build:fast": "tsup src"
@@ -24,6 +24,10 @@
   "peerDependencies": {
     "react": ">=18 || <20.0.0",
     "react-dom": ">=18 <20.0.0"
+  },
+  "dependencies": {
+    "@ownui/dom-utils": "workspace:*",
+    "@ownui/tw-theme": "workspace:*"
   },
   "devDependencies": {
     "@storybook/react": "^8.6.12",

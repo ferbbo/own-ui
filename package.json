@@ -6,6 +6,11 @@
     "build": "turbo build",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:components": "jest --selectProjects components",
+    "test:tw-theme": "jest --selectProjects tw-theme",
+    "test:components:watch": "jest --selectProjects components --watch",
+    "test:tw-theme:watch": "jest --selectProjects tw-theme --watch",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}'",
@@ -13,7 +18,10 @@
     "semantic-release": "semantic-release",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "changeset publish"
+    "release": "changeset publish",
+    "example": "cd apps/example-app && pnpm dev",
+    "example:build": "cd apps/example-app && pnpm build",
+    "example:install": "cd apps/example-app && pnpm install"
   },
   "keywords": [
     "react",

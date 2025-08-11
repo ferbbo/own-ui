@@ -8,9 +8,15 @@ function separateClassSelectorsFromStyles(cssObject: Record<string, unknown>) {
   const classSelectors: Record<string, unknown> = {}
   const otherStyles: Record<string, unknown> = {}
 
-  const classRegex = /^\.[a-z0-9-_]+$/i
+  // Updated regex to match component class selectors even with pseudo-classes
+  // Matches patterns like:
+  // .btn-dash
+  // .btn-dash:not(...)
+  // .btn-outline:hover
+  // .btn-soft:not(.btn-active,:hover,:focus-visible)
+  const componentClassRegex = /^\.[a-z0-9-_]+(?::[^{}]*)?$/i
   for (const [key, value] of Object.entries(cssObject)) {
-    if (classRegex.test(key)) {
+    if (componentClassRegex.test(key)) {
       classSelectors[key] = value
     } else {
       otherStyles[key] = value
