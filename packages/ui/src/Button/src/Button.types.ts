@@ -43,6 +43,10 @@ interface ButtonBaseProps {
   size?: ButtonSize;
   className?: string;
   disabled?: boolean;
+  icon?: React.ReactNode;
+  loading?: boolean;
+  startIcon?: boolean;
+  endIcon?: boolean;
 }
 
 /**

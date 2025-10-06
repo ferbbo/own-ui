@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 import { useButton as useAriaButton } from "@react-aria/button";
 import { mergeProps } from "@react-aria/utils";
-import { useDOMRef } from "@ownui/dom-utils";
+import {useDOMRef }from "@ownui/dom-utils";
 import { button } from "@ownui/tw-theme/variants"
 import {
   ButtonProps,
@@ -26,9 +26,9 @@ export function useButton(
   const classNames = useMemo(() => {
     // Construir la cadena de clases  
     const base = "btn";
-    const themeCls = button[theme] || "";
-    const variantCls = button[variant] || "";
-    const sizeCls = button[size] || "";
+    const themeCls = button.theme[theme] || "";
+    const variantCls = button.theme[variant] || "";
+    const sizeCls = button.size[size] || "";
     const disabledCls = disabled ? "opacity-50 cursor-not-allowed" : "";
     return [base, themeCls, variantCls, sizeCls, disabledCls, className]
       .filter((part) => part && part.length > 0)

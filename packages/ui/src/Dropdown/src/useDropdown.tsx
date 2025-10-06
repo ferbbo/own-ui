@@ -1,8 +1,9 @@
 // useDropdown.tsx
-import { useMemo, useCallback, RefObject, Ref, useRef, useImperativeHandle } from "react";
+import { useMemo, useCallback, RefObject, Ref } from "react";
 import { useButton } from "@react-aria/button";
 import { mergeProps } from "@react-aria/utils";
 import { useDropdownContext } from "./DropdownContext";
+import { useDOMRef } from "@ownui/dom-utils";
 import { 
   DropdownProps, 
   DropdownTriggerProps, 
@@ -13,11 +14,12 @@ import {
 export type ReactRef<T> = RefObject<T> | Ref<T>;
 
 // Hook local para manejar DOM refs (equivalente al useDOMRef)
-const useDOMRef = <T extends HTMLElement>(ref: ReactRef<T | null>) => {
+/*const useDOMRef = <T extends HTMLElement>(ref: ReactRef<T | null>) => {
   const innerRef = useRef<T>(null);
   useImperativeHandle(ref, () => innerRef.current as T);
   return innerRef;
-};
+};*/
+
 
 /**
  * Hook principal del dropdown para generar clases CSS del contenedor.

@@ -1,10 +1,9 @@
 // Button.stories.tsx
 import { Meta, StoryObj } from "@storybook/react";
 import Button from "./Button";
-import { ButtonProps } from "./Button.types";
 
 
-const meta: Meta<ButtonProps> = {
+const meta: Meta<typeof Button> = {
   title: "Components/Button",
   component: Button,
   argTypes: {
@@ -38,6 +37,7 @@ const meta: Meta<ButtonProps> = {
       },
     },
     disabled: { control: "boolean" },
+    loading: { control: "boolean" },
     as: {
       control: {
         type: "radio",
@@ -51,7 +51,7 @@ const meta: Meta<ButtonProps> = {
 };
 
 export default meta;
-type Story = StoryObj<ButtonProps>;
+type Story = StoryObj<typeof Button>;
 
 export const Primary: Story = {
   args: {
@@ -124,13 +124,22 @@ export const SuccessGhost: Story = {
 };
 
 export const LinkAsAnchor: Story = {
-  args: {
-    theme: "link",
-    size: "md",
-    disabled: false,
-    children: "Visit Example",
-    href: "https://example.com",
-    as: "a",
+  render: () => (
+    <Button 
+      theme="link" 
+      size="md" 
+      href="https://example.com" 
+      as="a"
+    >
+      Visit Example
+    </Button>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "Button rendered as an anchor element with href attribute.",
+      },
+    },
   },
 };
 
@@ -190,4 +199,139 @@ export const VariantCombinations: Story = {
       </div>
     </div>
   ),
+};
+
+// Historias para estado de loading
+export const Loading: Story = {
+  args: {
+    theme: "primary",
+    size: "md",
+    loading: true,
+    children: "Loading...",
+    as: "button",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Button en estado de loading mostrando el componente Loader.",
+      },
+    },
+  },
+};
+
+export const LoadingWithoutText: Story = {
+  args: {
+    theme: "primary",
+    size: "md",
+    loading: true,
+    children: "",
+    as: "button",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Button en estado de loading sin texto, solo mostrando el spinner.",
+      },
+    },
+  },
+};
+
+export const LoadingDifferentSizes: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+      <Button theme="primary" size="xs" loading>
+        Saving
+      </Button>
+      <Button theme="primary" size="sm" loading>
+        Processing
+      </Button>
+      <Button theme="primary" size="md" loading>
+        Loading
+      </Button>
+      <Button theme="primary" size="lg" loading>
+        Uploading
+      </Button>
+      <Button theme="primary" size="xl" loading>
+        Downloading
+      </Button>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "Botones en estado de loading en diferentes tamaños.",
+      },
+    },
+  },
+};
+
+export const LoadingDifferentThemes: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+      <Button theme="primary" loading>Saving...</Button>
+      <Button theme="secondary" loading>Processing...</Button>
+      <Button theme="success" loading>Uploading...</Button>
+      <Button theme="warning" loading>Converting...</Button>
+      <Button theme="error" loading>Deleting...</Button>
+      <Button theme="info" loading>Analyzing...</Button>
+      <Button theme="accent" loading>Generating...</Button>
+      <Button theme="neutral" loading>Loading...</Button>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "Botones en estado de loading con diferentes temas de color.",
+      },
+    },
+  },
+};
+
+export const LoadingWithVariants: Story = {
+  render: () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div style={{ display: "flex", gap: "1rem" }}>
+        <Button theme="primary" loading>Primary Loading</Button>
+        <Button theme="primary" variant="outline" loading>Outline Loading</Button>
+        <Button theme="primary" variant="dash" loading>Dash Loading</Button>
+        <Button theme="primary" variant="soft" loading>Soft Loading</Button>
+      </div>
+      <div style={{ display: "flex", gap: "1rem" }}>
+        <Button theme="success" loading>Success Loading</Button>
+        <Button theme="success" variant="outline" loading>Success Outline</Button>
+        <Button theme="success" variant="dash" loading>Success Dash</Button>
+        <Button theme="success" variant="soft" loading>Success Soft</Button>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "Botones en estado de loading con diferentes variantes de estilo.",
+      },
+    },
+  },
+};
+
+export const LoadingDisabled: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: "1rem" }}>
+      <Button theme="primary" loading disabled>
+        Loading & Disabled
+      </Button>
+      <Button theme="secondary" loading disabled>
+        Processing...
+      </Button>
+      <Button theme="success" loading disabled>
+        Uploading...
+      </Button>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "Botones en estado de loading y deshabilitados simultáneamente.",
+      },
+    },
+  },
 };

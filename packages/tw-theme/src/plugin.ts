@@ -131,7 +131,7 @@ const createPlugin = () => {
         // Add Components
         try {
           /* components */
-          const {buttonStyles, dropdownStyles} = require('./build/components.js');
+          const {buttonStyles, dropdownStyles, loaderStyles} = require('./build/components.js');
           /* Button */
           const { classSelectors, otherStyles } = separateClassSelectorsFromStyles(buttonStyles);
           addComponents(classSelectors);
@@ -141,6 +141,11 @@ const createPlugin = () => {
           const { classSelectors: dropdownClassSelectors, otherStyles: dropdownOtherStyles } = separateClassSelectorsFromStyles(dropdownStyles);
           addComponents(dropdownClassSelectors);
           addBase(dropdownOtherStyles);
+
+          /* Loader */
+          const { classSelectors: loaderClassSelectors, otherStyles: loaderOtherStyles } = separateClassSelectorsFromStyles(loaderStyles);
+          addComponents(loaderClassSelectors);
+          addBase(loaderOtherStyles);
 
         } catch (error) {
           console.error('Error loading component:', error);

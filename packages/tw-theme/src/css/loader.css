@@ -1,0 +1,110 @@
+/* Loader CSS Component - Own UI Design System */
+
+/* Base loader styles */
+.loader {
+  @apply inline-flex items-center justify-center relative;
+  
+  /* CSS Custom Properties for theming */
+  --loader-color: var(--color-primary);
+  --loader-size: 1.5rem;
+  --loader-border-width: 2px;
+  --loader-animation-duration: 1s;
+}
+
+/* Loader spinner animation */
+.loader-spinner {
+  width: var(--loader-size);
+  height: var(--loader-size);
+  border: var(--loader-border-width) solid transparent;
+  border-top-color: var(--loader-color);
+  border-radius: 50%;
+  animation: loader-spin var(--loader-animation-duration) linear infinite;
+}
+
+/* Keyframe animation for spinning */
+@keyframes loader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Size variants */
+.loader-2xs {
+  --loader-size: 0.75rem;
+  --loader-border-width: 1px;
+}
+
+.loader-xs {
+  --loader-size: 1rem;
+  --loader-border-width: 1.5px;
+}
+
+.loader-sm {
+  --loader-size: 1.25rem;
+  --loader-border-width: 1.5px;
+}
+
+.loader-md {
+  --loader-size: 1.5rem;
+  --loader-border-width: 2px;
+}
+
+.loader-lg {
+  --loader-size: 2rem;
+  --loader-border-width: 2.5px;
+}
+
+/* Color variants using semantic color system */
+.loader-primary {
+  --loader-color: var(--color-primary);
+}
+
+.loader-secondary {
+  --loader-color: var(--color-secondary);
+}
+
+.loader-accent {
+  --loader-color: var(--color-accent);
+}
+
+.loader-neutral {
+  --loader-color: var(--color-neutral);
+}
+
+.loader-info {
+  --loader-color: var(--color-info);
+}
+
+.loader-success {
+  --loader-color: var(--color-success);
+}
+
+.loader-warning {
+  --loader-color: var(--color-warning);
+}
+
+.loader-error {
+  --loader-color: var(--color-error);
+}
+
+/* Accessibility improvements */
+.loader[aria-label]::after {
+  @apply sr-only;
+  content: attr(aria-label);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .loader-spinner {
+    animation-duration: 2s;
+  }
+}
+
+/* Focus styles for accessibility */
+.loader:focus-visible {
+  outline: 2px solid var(--loader-color);
+  outline-offset: 2px;
+}

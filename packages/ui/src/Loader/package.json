@@ -1,10 +1,12 @@
 {
-  "name": "@ownui/button",
+  "name": "@ownui/loader",
   "version": "1.0.0",
-  "description": "Buttons allow users to perform actions and choose with a single tap.",
+  "description": "Loader component for loading states with different sizes and colors.",
   "main": "dist/index.js",
   "keywords": [
-    "button"
+    "loader",
+    "spinner",
+    "loading"
   ],
   "files": [
     "dist"
@@ -26,11 +28,12 @@
     "react-dom": ">=18 <20.0.0"
   },
   "dependencies": {
-    "@ownui/dom-utils": "workspace:*",
     "@ownui/tw-theme": "workspace:*"
   },
   "devDependencies": {
     "@storybook/react": "^8.6.12",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tsup": "^8.4.0"

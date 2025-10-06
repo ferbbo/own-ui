@@ -1,0 +1,39 @@
+{
+  "name": "@ownui/button",
+  "version": "1.0.0",
+  "description": "Buttons allow users to perform actions and choose with a single tap.",
+  "main": "dist/index.js",
+  "keywords": [
+    "button"
+  ],
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "pnpm build:fast --watch",
+    "typecheck": "tsc --noEmit",
+    "build:fast": "tsup src"
+  },
+  "author": "ferbbo <Diego Benitez>",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18 || <20.0.0",
+    "react-dom": ">=18 <20.0.0"
+  },
+  "dependencies": {
+    "@ownui/dom-utils": "workspace:*",
+    "@ownui/tw-theme": "workspace:*",
+    "@ownui/loader": "workspace:*"
+  },
+  "devDependencies": {
+    "@storybook/react": "^8.6.12",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.4.0"
+  }
+}
