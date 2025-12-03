@@ -34,8 +34,8 @@
   },
   "devDependencies": {
     "@storybook/react": "^8.6.12",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
     "tsup": "^8.4.0"
   }
 }
