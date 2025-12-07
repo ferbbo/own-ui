@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "Buttons allow users to perform actions and choose with a single tap.",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
   "keywords": [
     "button"
   ],
