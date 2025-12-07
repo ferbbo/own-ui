@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "description": "Loader component for loading states with different sizes and colors.",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+    }
+  },
   "keywords": [
     "loader",
     "spinner",

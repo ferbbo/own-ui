@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "description": "Dropdown allows users to select from a list of options with semantic theming support.",
   "main": ".src/index.ts",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "keywords": [
     "dropdown",
     "menu",
