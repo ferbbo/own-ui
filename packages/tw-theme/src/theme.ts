@@ -34,15 +34,18 @@ const extractThemeVariablesFromOptions = ({pluginOptions, themeName}: { pluginOp
  * @returns An object with the theme name and flag, or null if invalid.
  */
 const getThemeNameConfig = (theme: string): { name: string; flag: Flags } | null => {
-  const [name, flag] = theme.split(' ');
-  if (
-    name && typeof flag === 'string' &&
-    Object.values(Flags).includes(flag as Flags) &&
-    theme.includes(flag)
-  ) {
-    return { name, flag: flag as Flags };
+  const [name, flag] = theme.trim().split(' ');
+
+  if (name && flag !== "string") {
+    return { name, flag: Flags.DEFAULT }
   }
-  return null;
+
+  if (name && Object.values(Flags).includes(flag as Flags) &&
+    theme.includes(flag)) {
+    return  { name, flag: flag as Flags };
+  }
+   
+  return null
 };
 
 /**
