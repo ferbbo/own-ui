@@ -502,6 +502,7 @@ import { button, dropdown, loader } from '@ownui/tw-theme/variants';
 ### Button Variants Structure
 
 ```typescript
+// Theme variants - semantic color-based button styles
 button.theme = {
   'primary': 'btn-primary',
   'secondary': 'btn-secondary',
@@ -515,12 +516,14 @@ button.theme = {
   'link': 'btn-link',
 };
 
+// Style variants - visual style modifiers
 button.variant = {
   'outline': 'btn-outline',
   'solid': 'btn-solid',
   'ghost': 'btn-ghost',
 };
 
+// Size variants
 button.size = {
   'xs': 'btn-xs',
   'sm': 'btn-sm',
@@ -529,6 +532,8 @@ button.size = {
   'xl': 'btn-xl'
 };
 ```
+
+**Note**: The `ghost` variant appears in both `button.theme` and `button.variant` for flexibility. Use `button.theme.ghost` when ghost is your primary semantic style, or combine with `button.variant.ghost` as a style modifier for other theme colors (e.g., `btn btn-primary btn-ghost`).
 
 ### Usage in Component Libraries
 
