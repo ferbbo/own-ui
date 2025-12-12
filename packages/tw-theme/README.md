@@ -736,8 +736,7 @@ packages/tw-theme/
 │   ├── css/                # CSS component source files
 │   │   ├── button.css      # Button component styles
 │   │   ├── dropdown.css    # Dropdown component styles
-│   │   ├── loader.css      # Loader component styles
-│   │   └── menu.css        # Menu component styles
+│   │   └── loader.css      # Loader component styles
 │   ├── variants/           # Component variant exports
 │   │   ├── button.ts       # Button variant definitions
 │   │   ├── dropdown.ts     # Dropdown variant definitions
