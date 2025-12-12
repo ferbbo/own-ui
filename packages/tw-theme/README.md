@@ -240,7 +240,7 @@ The button component provides a comprehensive set of variants and sizes with bui
 **Base Classes:**
 - `.btn` - Base button styles with semantic theming
 
-**Theme Variants:**
+**Theme Variants (Semantic Colors):**
 - `.btn-primary` - Primary action button
 - `.btn-secondary` - Secondary action button
 - `.btn-accent` - Accent button
@@ -249,13 +249,12 @@ The button component provides a comprehensive set of variants and sizes with bui
 - `.btn-success` - Success state button
 - `.btn-warning` - Warning state button
 - `.btn-error` - Error state button
-- `.btn-ghost` - Transparent button with hover effects
+- `.btn-ghost` - Ghost/transparent theme variant
 - `.btn-link` - Link-styled button
 
-**Style Variants:**
-- `.btn-outline` - Outlined button style
-- `.btn-solid` - Solid button style
-- `.btn-ghost` - Ghost/transparent style
+**Style Modifiers (Visual Styles):**
+- `.btn-outline` - Outlined style modifier
+- `.btn-solid` - Solid style modifier (default)
 
 **Size Variants:**
 - `.btn-xs` - Extra small button
@@ -533,7 +532,7 @@ button.size = {
 };
 ```
 
-**Note**: The `ghost` variant appears in both `button.theme` and `button.variant` for flexibility. Use `button.theme.ghost` when ghost is your primary semantic style, or combine with `button.variant.ghost` as a style modifier for other theme colors (e.g., `btn btn-primary btn-ghost`).
+**Note on Ghost Variant**: The `ghost` class exists in both `button.theme` and `button.variant` as `btn-ghost`. In practice, use it as a theme variant: `btn btn-ghost` creates a transparent button. The style modifiers (`outline`, `solid`) are designed to be combined with color-based theme variants (e.g., `btn btn-primary btn-outline`).
 
 ### Usage in Component Libraries
 
@@ -558,8 +557,10 @@ function Button({ variant = 'primary', size = 'md', styleVariant }: ButtonProps)
   );
 }
 
-// Usage
-<Button variant="primary" size="lg" styleVariant="outline" />
+// Usage examples
+<Button variant="primary" size="lg" styleVariant="outline" /> // Primary outlined button
+<Button variant="secondary" size="md" styleVariant="solid" />  // Secondary solid button
+<Button variant="ghost" size="sm" />                           // Ghost button (no styleVariant needed)
 ```
 
 This approach provides:
@@ -567,6 +568,7 @@ This approach provides:
 - **Consistency**: Ensures correct class name usage across your codebase
 - **Maintainability**: Centralized variant definitions that stay in sync with CSS
 - **DRY principle**: No need to hardcode class name strings throughout your app
+- **Clear semantics**: Theme variants define the color, style variants modify the appearance
 
 ## Advanced Usage
 
