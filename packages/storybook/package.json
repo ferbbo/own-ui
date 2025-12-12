@@ -38,8 +38,8 @@
   },
   "dependencies": {
     "@ownui/tw-theme": "workspace:^",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1"
+    "react": "^19.0.3",
+    "react-dom": "^19.0.3"
   },
   "tsup": {
     "clean": true,
