@@ -38,35 +38,35 @@ const App = () => {
             <div data-theme={theme} className="space-y-6">
                 <section>
                     <h2 className="text-xl font-semibold mb-3">Default Button with Theme Colors</h2>
-                    <Button id="btn-primary" className="bg-primary text-primary-content">
+                    <Button id="btn-primary" theme="primary">
                         Primary Button
                     </Button>
                 </section>
 
                 <section>
                     <h2 className="text-xl font-semibold mb-3">Secondary Color</h2>
-                    <Button id="btn-secondary" className="bg-secondary text-secondary-content">
+                    <Button id="btn-secondary" theme="secondary">
                         Secondary Button
                     </Button>
                 </section>
 
                 <section>
                     <h2 className="text-xl font-semibold mb-3">Accent Color</h2>
-                    <Button id="btn-accent" className="bg-accent text-accent-content">
+                    <Button id="btn-accent" theme="accent">
                         Accent Button
                     </Button>
                 </section>
-
+        
                 <section>
                     <h2 className="text-xl font-semibold mb-3">Info Color</h2>
-                    <Button id="btn-info" className="bg-info text-info-content">
+                    <Button id="btn-info" theme="info">
                         Info Button
                     </Button>
                 </section>
 
                 <section>
                     <h2 className="text-xl font-semibold mb-3">Success Color</h2>
-                    <Button id="btn-success" className="bg-success text-success-content">
+                    <Button id="btn-success" theme="success">
                         Success Button
                     </Button>
                 </section>
