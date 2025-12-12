@@ -23,9 +23,8 @@
   },
   "type": "module",
   "scripts": {
-    "build:components": "node src/build/build.js",
     "build:lib": "tsup",
-    "build": "npm run build:components && npm run build:lib",
+    "build": "npm run build:lib",
     "postbuild": "rimraf .tmp",
     "dev": "tsup --watch",
     "prepare": "pnpm run build",

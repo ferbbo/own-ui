@@ -1,7 +1,6 @@
 import { PluginOptions, ThemeColors, Flags } from './types.ts';
 import { builtInThemes } from './themes/index.ts';
-import { 
-  separateClassSelectorsFromStyles,
+import {
   formatAndCleanPluginConfig,
   plugin 
 } from './functions/index.ts';
@@ -63,7 +62,7 @@ const getThemeConfig = (theme : string[]): Record<string, string> => {
  */
 const createPlugin = () => {
   return plugin.withOptions(function (options: PluginOptions = {}) {
-    return function ({ addBase, addUtilities, addComponents }) {
+    return function ({ addBase, addUtilities }) {
       const flagList= [Flags.DEFAULT, Flags.PREFER_DARK];
       const defaultThemeCnf = [`light ${flagList[0]}`, `dark ${flagList[1]}`];
       const {
@@ -132,29 +131,6 @@ const createPlugin = () => {
         // Add utility classes - use type assertion only at the API boundary
         const colorUtilities = generateColorUtilities();
         addUtilities(colorUtilities);
-
-        // Add Components
-        try {
-          /* components */
-          const {buttonStyles, dropdownStyles, loaderStyles} = require('./build/components.js');
-          /* Button */
-          const { classSelectors, otherStyles } = separateClassSelectorsFromStyles(buttonStyles);
-          addComponents(classSelectors);
-          addBase(otherStyles);
-          
-          /* Dropdown */
-          const { classSelectors: dropdownClassSelectors, otherStyles: dropdownOtherStyles } = separateClassSelectorsFromStyles(dropdownStyles);
-          addComponents(dropdownClassSelectors);
-          addBase(dropdownOtherStyles);
-
-          /* Loader */
-          const { classSelectors: loaderClassSelectors, otherStyles: loaderOtherStyles } = separateClassSelectorsFromStyles(loaderStyles);
-          addComponents(loaderClassSelectors);
-          addBase(loaderOtherStyles);
-
-        } catch (error) {
-          console.error('Error loading component:', error);
-        }
 
       } catch (error) {
         console.error('Error in @ownui/tw-theme plugin:', error);
