@@ -8,9 +8,10 @@ A powerful Tailwind CSS v4 plugin that provides a comprehensive semantic theming
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
-- [API Reference](#api-reference)
+- [Built-in CSS Components](#built-in-css-components)
 - [Theme Management](#theme-management)
 - [Available Utility Classes](#available-utility-classes)
+- [Component Variants](#component-variants)
 - [Advanced Usage](#advanced-usage)
 - [Testing](#testing)
 - [Development](#development)
@@ -25,6 +26,8 @@ A powerful Tailwind CSS v4 plugin that provides a comprehensive semantic theming
 - 🌓 **Built-in light and dark themes** with automatic preference detection
 - 🔄 **Runtime theme switching** with data-theme attribute
 - 🧩 **Automatic utility class generation** for all semantic colors
+- 🎁 **Pre-built CSS components** (Button, Dropdown, Loader) with comprehensive variants
+- 📐 **Component variants system** for structured component theming
 - ✅ **Comprehensive testing suite** with Jest and TypeScript
 - 🔌 **Compatible with Tailwind CSS v4** plugin architecture
 - 🚀 **Performance optimized** for large theme objects
@@ -52,6 +55,26 @@ For contributing or testing:
 ```bash
 pnpm add -D @types/jest jest ts-jest typescript
 ```
+
+### Package Exports
+
+The package provides multiple entry points for different use cases:
+
+```typescript
+// Main plugin with components and utilities
+import tailwindPlugin from '@ownui/tw-theme';
+
+// Individual theme plugin for custom themes
+import themePlugin from '@ownui/tw-theme/theme';
+
+// Component variants for programmatic usage
+import { button, dropdown, loader } from '@ownui/tw-theme/variants';
+```
+
+**Available Exports:**
+- `@ownui/tw-theme` - Main plugin (includes all features)
+- `@ownui/tw-theme/theme` - Individual theme plugin
+- `@ownui/tw-theme/variants` - Component variant definitions
 
 ## Quick Start
 
@@ -104,11 +127,30 @@ module.exports = {
 
 ### 3. Use in your components
 
+The plugin provides both pre-built CSS components and semantic color utilities:
+
+**Using Pre-built CSS Components:**
+```html
+<!-- Buttons with built-in variants -->
+<button class="btn btn-primary btn-md">Primary Action</button>
+<button class="btn btn-secondary btn-outline">Secondary</button>
+<button class="btn btn-ghost btn-lg">Ghost Button</button>
+
+<!-- Dropdown component -->
+<div class="dropdown">
+  <button class="btn btn-primary">Menu</button>
+  <div class="dropdown-menu">
+    <!-- Menu content -->
+  </div>
+</div>
+```
+
+**Using Semantic Color Utilities:**
 ```jsx
-function Button({ children, variant = "primary", size = "md" }) {
+function CustomButton({ children, variant = "primary" }) {
   return (
     <button 
-      className={`btn btn-${variant}
+      className={`
         bg-${variant} text-${variant}-content 
         hover:bg-${variant}-focus focus:ring-${variant}
         px-4 py-2 rounded-md transition-colors
@@ -124,6 +166,19 @@ function Card({ children }) {
     <div className="bg-base-100 text-base-content border-base-300 rounded-lg p-6">
       {children}
     </div>
+  );
+}
+```
+
+**Using Component Variants API:**
+```typescript
+import { button } from '@ownui/tw-theme/variants';
+
+function Button({ variant = 'primary', size = 'md' }) {
+  return (
+    <button className={`btn ${button.theme[variant]} ${button.size[size]}`}>
+      Click me
+    </button>
   );
 }
 ```
@@ -171,6 +226,114 @@ For creating single custom themes:
 }
 ```
 
+
+## Built-in CSS Components
+
+The plugin includes pre-built, fully-styled CSS components that work seamlessly with the semantic theming system. These components are automatically available when you include the plugin.
+
+### Available Components
+
+#### Button Component
+
+The button component provides a comprehensive set of variants and sizes with built-in accessibility features.
+
+**Base Classes:**
+- `.btn` - Base button styles with semantic theming
+
+**Theme Variants:**
+- `.btn-primary` - Primary action button
+- `.btn-secondary` - Secondary action button
+- `.btn-accent` - Accent button
+- `.btn-neutral` - Neutral button
+- `.btn-info` - Informational button
+- `.btn-success` - Success state button
+- `.btn-warning` - Warning state button
+- `.btn-error` - Error state button
+- `.btn-ghost` - Transparent button with hover effects
+- `.btn-link` - Link-styled button
+
+**Style Variants:**
+- `.btn-outline` - Outlined button style
+- `.btn-solid` - Solid button style
+- `.btn-ghost` - Ghost/transparent style
+
+**Size Variants:**
+- `.btn-xs` - Extra small button
+- `.btn-sm` - Small button
+- `.btn-md` - Medium button (default)
+- `.btn-lg` - Large button
+- `.btn-xl` - Extra large button
+
+**Usage Example:**
+```html
+<!-- Primary button with medium size -->
+<button class="btn btn-primary btn-md">Click me</button>
+
+<!-- Outlined secondary button -->
+<button class="btn btn-secondary btn-outline">Learn More</button>
+
+<!-- Ghost button with large size -->
+<button class="btn btn-ghost btn-lg">Cancel</button>
+```
+
+#### Dropdown Component
+
+A fully-featured dropdown component with menu support.
+
+**Base Classes:**
+- `.dropdown` - Base dropdown container
+
+**Usage Example:**
+```html
+<div class="dropdown">
+  <button class="btn btn-primary">Menu</button>
+  <div class="dropdown-menu">
+    <!-- Menu items go here -->
+  </div>
+</div>
+```
+
+#### Loader Component
+
+Loading spinner component with various styles.
+
+**Base Classes:**
+- `.loader` - Base loader/spinner styles
+
+**Usage Example:**
+```html
+<div class="loader"></div>
+```
+
+### Component CSS Architecture
+
+All CSS components follow a hierarchical custom property pattern:
+
+```css
+.btn {
+  /* Core styles using CSS custom properties */
+  background-color: var(--btn-bg);
+  color: var(--btn-fg);
+  border-color: var(--btn-border);
+  
+  /* Component-specific variables that cascade with theme colors */
+  --btn-color: var(--color-base-200);
+  --btn-bg: var(--btn-color);
+  --btn-fg: var(--color-base-content);
+}
+
+.btn-primary {
+  /* Override the base color, cascading to dependent properties */
+  --btn-color: var(--color-primary);
+  --btn-fg: var(--color-primary-content);
+}
+```
+
+This architecture ensures:
+- **Automatic theme adaptation**: Components automatically adapt to theme changes
+- **Consistent styling**: All components follow the same theming patterns
+- **Easy customization**: Override CSS custom properties to customize components
+- **Performance**: CSS custom properties provide runtime theming without re-computation
 
 ## Theme Management
 
@@ -326,6 +489,80 @@ For each semantic color, the following utility classes are automatically generat
 - `placeholder-*` - Placeholder text colors
 - `caret-*` - Text input caret colors
 
+## Component Variants
+
+The package exports a structured variants system for component theming. This is useful for building component libraries that need programmatic access to variant class names.
+
+### Importing Variants
+
+```typescript
+import { button, dropdown, loader } from '@ownui/tw-theme/variants';
+```
+
+### Button Variants Structure
+
+```typescript
+button.theme = {
+  'primary': 'btn-primary',
+  'secondary': 'btn-secondary',
+  'accent': 'btn-accent',
+  'neutral': 'btn-neutral',
+  'info': 'btn-info',
+  'success': 'btn-success',
+  'warning': 'btn-warning',
+  'error': 'btn-error',
+  'ghost': 'btn-ghost',
+  'link': 'btn-link',
+};
+
+button.variant = {
+  'outline': 'btn-outline',
+  'solid': 'btn-solid',
+  'ghost': 'btn-ghost',
+};
+
+button.size = {
+  'xs': 'btn-xs',
+  'sm': 'btn-sm',
+  'md': 'btn-md',
+  'lg': 'btn-lg',
+  'xl': 'btn-xl'
+};
+```
+
+### Usage in Component Libraries
+
+```typescript
+import { button } from '@ownui/tw-theme/variants';
+
+interface ButtonProps {
+  variant?: keyof typeof button.theme;
+  size?: keyof typeof button.size;
+  styleVariant?: keyof typeof button.variant;
+}
+
+function Button({ variant = 'primary', size = 'md', styleVariant }: ButtonProps) {
+  const themeClass = button.theme[variant];
+  const sizeClass = button.size[size];
+  const variantClass = styleVariant ? button.variant[styleVariant] : '';
+  
+  return (
+    <button className={`btn ${themeClass} ${sizeClass} ${variantClass}`.trim()}>
+      Click me
+    </button>
+  );
+}
+
+// Usage
+<Button variant="primary" size="lg" styleVariant="outline" />
+```
+
+This approach provides:
+- **Type safety**: TypeScript autocomplete for all available variants
+- **Consistency**: Ensures correct class name usage across your codebase
+- **Maintainability**: Centralized variant definitions that stay in sync with CSS
+- **DRY principle**: No need to hardcode class name strings throughout your app
+
 ## Advanced Usage
 
 ### Performance Optimization
@@ -378,21 +615,66 @@ const Button = styled.button`
 
 ### Component Library Integration
 
+**Option 1: Using Pre-built CSS Components**
 ```tsx
-// Design system example
+// Simplest approach - use built-in CSS components
 interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'accent' | 'neutral';
   size?: 'sm' | 'md' | 'lg';
+  styleVariant?: 'outline' | 'solid' | 'ghost';
   children: React.ReactNode;
 }
 
-export function Button({ variant = 'primary', size = 'md', children }: ButtonProps) {
-  const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg'
-  };
+export function Button({ 
+  variant = 'primary', 
+  size = 'md', 
+  styleVariant,
+  children 
+}: ButtonProps) {
+  const variantClass = `btn-${variant}`;
+  const sizeClass = `btn-${size}`;
+  const styleClass = styleVariant ? `btn-${styleVariant}` : '';
+  
+  return (
+    <button className={`btn ${variantClass} ${sizeClass} ${styleClass}`.trim()}>
+      {children}
+    </button>
+  );
+}
+```
 
+**Option 2: Using Component Variants API (Type-safe)**
+```tsx
+import { button } from '@ownui/tw-theme/variants';
+
+interface ButtonProps {
+  variant?: keyof typeof button.theme;
+  size?: keyof typeof button.size;
+  styleVariant?: keyof typeof button.variant;
+  children: React.ReactNode;
+}
+
+export function Button({ 
+  variant = 'primary', 
+  size = 'md',
+  styleVariant,
+  children 
+}: ButtonProps) {
+  const classes = [
+    'btn',
+    button.theme[variant],
+    button.size[size],
+    styleVariant ? button.variant[styleVariant] : ''
+  ].filter(Boolean).join(' ');
+  
+  return <button className={classes}>{children}</button>;
+}
+```
+
+**Option 3: Custom Components with Semantic Colors**
+```tsx
+// Build your own component using semantic color utilities
+export function CustomButton({ variant = 'primary', children }: ButtonProps) {
   return (
     <button
       className={`
@@ -400,7 +682,7 @@ export function Button({ variant = 'primary', size = 'md', children }: ButtonPro
         hover:bg-${variant}-focus focus:ring-${variant}
         rounded-md font-medium transition-all duration-200
         focus:outline-none focus:ring-2 focus:ring-offset-2
-        ${sizeClasses[size]}
+        px-4 py-2
       `}
     >
       {children}
@@ -444,27 +726,62 @@ src/
 ```
 packages/tw-theme/
 ├── src/
-│   ├── functions/           # Core functionality
+│   ├── css/                # CSS component source files
+│   │   ├── button.css      # Button component styles
+│   │   ├── dropdown.css    # Dropdown component styles
+│   │   ├── loader.css      # Loader component styles
+│   │   └── menu.css        # Menu component styles
+│   ├── variants/           # Component variant exports
+│   │   ├── button.ts       # Button variant definitions
+│   │   ├── dropdown.ts     # Dropdown variant definitions
+│   │   ├── loader.ts       # Loader variant definitions
+│   │   └── index.ts        # Variants barrel export
+│   ├── functions/          # Core functionality
 │   │   ├── generateThemeProperties.ts
 │   │   ├── getThemeNameConfig.ts
 │   │   ├── splitStyles.ts
-│   │   ├── minifier.ts
-│   │   ├── file.ts
-│   │   └── __tests__/       # Function tests
-│   ├── utilities/           # Utility functions
+│   │   └── __tests__/      # Function tests
+│   ├── utilities/          # Utility functions
+│   │   └── colors.ts       # Color utility generation
 │   ├── themes/             # Built-in themes
-│   ├── build/              # Build scripts
-│   ├── plugin.ts           # Main plugin
-│   ├── theme.ts           # Individual theme plugin
-│   └── types.ts           # TypeScript definitions
+│   │   ├── light.ts        # Light theme colors
+│   │   ├── dark.ts         # Dark theme colors
+│   │   ├── root.ts         # Root CSS properties
+│   │   └── index.ts        # Theme exports
+│   ├── build/              # Build output
+│   │   ├── build.js        # CSS-to-JS build script
+│   │   └── components.js   # Generated component styles
+│   ├── plugin.ts           # Main plugin (includes components)
+│   ├── theme.ts            # Individual theme plugin
+│   ├── types.ts            # TypeScript definitions
+│   └── index.ts            # Package entry point
 ├── jest.config.js          # Test configuration
-├── tsconfig.json          # TypeScript configuration
-└── TESTING.md             # Testing documentation
+├── tsup.config.ts          # Build configuration
+├── tsconfig.json           # TypeScript configuration
+└── TESTING.md              # Testing documentation
 ```
+
+### Build Process
+
+The package uses a unique two-step build process:
+
+1. **Component CSS Build** (`pnpm build:components`):
+   - Reads CSS files from `src/css/*.css`
+   - Processes with Tailwind CSS CLI
+   - Applies PostCSS transformations (nesting, etc.)
+   - Converts CSS to JavaScript objects
+   - Outputs to `src/build/components.js`
+
+2. **Library Build** (`pnpm build:lib`):
+   - Bundles TypeScript files with tsup
+   - Generates type definitions
+   - Creates ESM modules in `dist/`
+
+This ensures that CSS components are pre-processed and available as JavaScript objects that the plugin can inject directly into Tailwind.
 
 ## Examples
 
-### Example 1: E-commerce Site
+### Example 1: E-commerce Site with CSS Components
 
 ```css
 /* Theme for e-commerce */
@@ -483,11 +800,22 @@ function ProductCard({ product }) {
         <p className="text-neutral-content text-sm mt-1">{product.description}</p>
         <div className="flex justify-between items-center mt-4">
           <span className="text-primary font-bold text-lg">${product.price}</span>
-          <button className="bg-primary text-primary-content px-4 py-2 rounded hover:bg-primary-focus">
+          {/* Using built-in button component */}
+          <button className="btn btn-primary btn-md">
             Add to Cart
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ProductActions() {
+  return (
+    <div className="flex gap-2">
+      <button className="btn btn-primary btn-md">Buy Now</button>
+      <button className="btn btn-secondary btn-outline btn-md">Add to Wishlist</button>
+      <button className="btn btn-ghost btn-md">Share</button>
     </div>
   );
 }
@@ -673,8 +1001,23 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 1. Clone the repository
 2. Install dependencies: `pnpm install`
-3. Run tests: `pnpm test`
-4. Start development: `pnpm dev`
+3. Build components: `pnpm build:components` (processes CSS to JS)
+4. Build library: `pnpm build:lib` (compiles TypeScript)
+5. Run full build: `pnpm build` (runs both steps)
+6. Run tests: `pnpm test`
+7. Start development: `pnpm dev`
+
+### Adding New CSS Components
+
+To add a new CSS component:
+
+1. Create a CSS file in `src/css/[component-name].css`
+2. Add component styles using Tailwind CSS syntax and CSS custom properties
+3. Create a variant definition in `src/variants/[component-name].ts`
+4. Export the variant from `src/variants/index.ts`
+5. Import and add component styles in `src/plugin.ts`
+6. Run `pnpm build:components` to process the CSS
+7. Test the component in your application
 
 ### Testing Requirements
 
