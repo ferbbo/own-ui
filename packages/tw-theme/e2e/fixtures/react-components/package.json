@@ -1,0 +1,29 @@
+{
+  "name": "react-components",
+  "version": "1.0.0",
+  "description": "Test react components",
+  "license": "ISC",
+  "author": "Diego Benitez (ferbbo)",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ownui/tw-theme": "workspace:^",
+    "@ownui/button": "workspace:^",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "vite": "^5.2.6",
+    "vite-tsconfig-paths": "^5.1.4",
+    "@tailwindcss/vite": "4.1.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "4.1.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1"
+  }
+}

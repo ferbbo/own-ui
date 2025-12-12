@@ -17,7 +17,7 @@ export function useButton(
   ref: ReactRef<HTMLButtonElement | HTMLAnchorElement | null>
 ): { classNames: string; buttonProps: any, Comp: string } {
   // Extraemos sin default 'as'
-  const { as: rawAs, theme= "primary", variant = "", size = "md", className = "", disabled = false, onClick, children, ...restProps } =
+  const { as: rawAs, theme="primary", variant = "", size = "md", className = "", disabled = false, onClick, children, ...restProps } =
     props;
   // Si rawAs es undefined, asumimos "button"
   const as = rawAs ?? "button";

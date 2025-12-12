@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Utility Classes Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Utility Classes E2E Test</h1>
+  <p>Valida que todas las clases utilitarias se generan correctamente</p>
+
+  <!-- Background Classes -->
+  <div class="test-section">
+    <h2>🎨 Background Classes (bg-*)</h2>
+    <div class="grid grid-cols-4 gap-2">
+      <div id="bg-primary" class="bg-primary text-primary-content p-3 rounded">bg-primary</div>
+      <div id="bg-secondary" class="bg-secondary text-secondary-content p-3 rounded">bg-secondary</div>
+      <div id="bg-accent" class="bg-accent text-accent-content p-3 rounded">bg-accent</div>
+      <div id="bg-neutral" class="bg-neutral text-neutral-content p-3 rounded">bg-neutral</div>
+      <div id="bg-info" class="bg-info text-info-content p-3 rounded">bg-info</div>
+      <div id="bg-success" class="bg-success text-success-content p-3 rounded">bg-success</div>
+      <div id="bg-warning" class="bg-warning text-warning-content p-3 rounded">bg-warning</div>
+      <div id="bg-error" class="bg-error text-error-content p-3 rounded">bg-error</div>
+    </div>
+  </div>
+
+  <!-- Text Classes -->
+  <div class="test-section bg-white">
+    <h2>📝 Text Classes (text-*)</h2>
+    <div class="space-y-2">
+      <p id="text-primary" class="text-primary text-xl font-bold">text-primary</p>
+      <p id="text-secondary" class="text-secondary text-xl font-bold">text-secondary</p>
+      <p id="text-accent" class="text-accent text-xl font-bold">text-accent</p>
+      <p id="text-neutral" class="text-neutral text-xl font-bold">text-neutral</p>
+      <p id="text-info" class="text-info text-xl font-bold">text-info</p>
+      <p id="text-success" class="text-success text-xl font-bold">text-success</p>
+      <p id="text-warning" class="text-warning text-xl font-bold">text-warning</p>
+      <p id="text-error" class="text-error text-xl font-bold">text-error</p>
+    </div>
+  </div>
+
+  <!-- Border Classes -->
+  <div class="test-section">
+    <h2>📦 Border Classes (border-*)</h2>
+    <div class="grid grid-cols-4 gap-2">
+      <div id="border-primary" class="border-4 border-primary p-3 rounded">border-primary</div>
+      <div id="border-secondary" class="border-4 border-secondary p-3 rounded">border-secondary</div>
+      <div id="border-accent" class="border-4 border-accent p-3 rounded">border-accent</div>
+      <div id="border-neutral" class="border-4 border-neutral p-3 rounded">border-neutral</div>
+      <div id="border-info" class="border-4 border-info p-3 rounded">border-info</div>
+      <div id="border-success" class="border-4 border-success p-3 rounded">border-success</div>
+      <div id="border-warning" class="border-4 border-warning p-3 rounded">border-warning</div>
+      <div id="border-error" class="border-4 border-error p-3 rounded">border-error</div>
+    </div>
+  </div>
+
+  <!-- Content Variant Classes -->
+  <div class="test-section">
+    <h2>✨ Content Variant (text-*-content)</h2>
+    <div class="grid grid-cols-4 gap-2">
+      <div class="bg-primary p-3 rounded">
+        <p id="text-primary-content" class="text-primary-content">text-primary-content</p>
+      </div>
+      <div class="bg-secondary p-3 rounded">
+        <p id="text-secondary-content" class="text-secondary-content">text-secondary-content</p>
+      </div>
+      <div class="bg-accent p-3 rounded">
+        <p id="text-accent-content" class="text-accent-content">text-accent-content</p>
+      </div>
+      <div class="bg-info p-3 rounded">
+        <p id="text-info-content" class="text-info-content">text-info-content</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hover States -->
+  <div class="test-section">
+    <h2>🖱️ Hover States (hover:bg-*-focus)</h2>
+    <div class="grid grid-cols-4 gap-2">
+      <button id="hover-primary" class="bg-primary hover:bg-primary-focus text-primary-content p-3 rounded transition">
+        Hover Primary
+      </button>
+      <button id="hover-secondary" class="bg-secondary hover:bg-secondary-focus text-secondary-content p-3 rounded transition">
+        Hover Secondary
+      </button>
+      <button id="hover-accent" class="bg-accent hover:bg-accent-focus text-accent-content p-3 rounded transition">
+        Hover Accent
+      </button>
+      <button id="hover-info" class="bg-info hover:bg-info-focus text-info-content p-3 rounded transition">
+        Hover Info
+      </button>
+    </div>
+  </div>
+
+  <!-- Combined Classes -->
+  <div class="test-section">
+    <h2>🔗 Combined Classes</h2>
+    <div id="combined-test" class="bg-primary text-primary-content border-4 border-primary-focus p-4 rounded-lg">
+      <p class="text-xl font-bold">Multiple utility classes combined</p>
+      <p>bg-primary + text-primary-content + border-primary-focus</p>
+    </div>
+  </div>
+
+  <!-- Outline Classes -->
+  <div class="test-section bg-white">
+    <h2>🔲 Outline Classes (outline-*)</h2>
+    <div class="grid grid-cols-4 gap-4">
+      <button id="outline-primary" class="outline outline-4 outline-primary p-3 rounded">outline-primary</button>
+      <button id="outline-secondary" class="outline outline-4 outline-secondary p-3 rounded">outline-secondary</button>
+      <button id="outline-accent" class="outline outline-4 outline-accent p-3 rounded">outline-accent</button>
+      <button id="outline-info" class="outline outline-4 outline-info p-3 rounded">outline-info</button>
+    </div>
+  </div>
+
+  <script>
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getElementTextColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).color : null;
+    };
+
+    window.getElementBorderColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).borderTopColor : null;
+    };
+
+    window.getElementOutlineColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).outlineColor : null;
+    };
+
+    window.triggerHover = async (id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      
+      el.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      return getComputedStyle(el).backgroundColor;
+    };
+  </script>
+</body>
+</html>

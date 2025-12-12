@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Default Themes (Light/Dark) Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Default Themes E2E Test</h1>
+  <p>Valida que los temas light y dark predeterminados funcionan correctamente</p>
+
+  <!-- Test Light Theme (default) -->
+  <div class="test-section">
+    <h2>☀️ Light Theme (Default)</h2>
+    <div id="light-primary" class="bg-primary text-primary-content p-4 rounded mb-2">
+      Primary Color
+    </div>
+    <div id="light-secondary" class="bg-secondary text-secondary-content p-4 rounded mb-2">
+      Secondary Color
+    </div>
+    <div id="light-accent" class="bg-accent text-accent-content p-4 rounded">
+      Accent Color
+    </div>
+  </div>
+
+  <!-- Test Dark Theme (explicit) -->
+  <div class="test-section" data-theme="dark">
+    <h2>🌙 Dark Theme (data-theme="dark")</h2>
+    <div id="dark-primary" class="bg-primary text-primary-content p-4 rounded mb-2">
+      Primary Color
+    </div>
+    <div id="dark-secondary" class="bg-secondary text-secondary-content p-4 rounded mb-2">
+      Secondary Color
+    </div>
+    <div id="dark-accent" class="bg-accent text-accent-content p-4 rounded">
+      Accent Color
+    </div>
+  </div>
+
+  <!-- Test Light Theme (explicit) -->
+  <div class="test-section" data-theme="light">
+    <h2>☀️ Light Theme (data-theme="light")</h2>
+    <div id="explicit-light" class="bg-success text-success-content p-4 rounded">
+      Success Color
+    </div>
+  </div>
+
+  <!-- Toggle Test -->
+  <div class="test-section">
+    <h2>🔄 Dynamic Theme Toggle</h2>
+    <div id="toggle-container" class="bg-primary text-primary-content p-4 rounded mb-4">
+      <p>Current theme: <span id="current-theme">light</span></p>
+    </div>
+    <button id="toggle-btn" class="bg-accent text-accent-content px-4 py-2 rounded cursor-pointer">
+      Toggle Theme
+    </button>
+  </div>
+
+  <!-- All Semantic Colors -->
+  <div class="test-section">
+    <h2>🎨 All Semantic Colors</h2>
+    <div class="grid grid-cols-2 gap-2">
+      <div id="color-primary" class="bg-primary text-primary-content p-2 rounded">Primary</div>
+      <div id="color-secondary" class="bg-secondary text-secondary-content p-2 rounded">Secondary</div>
+      <div id="color-accent" class="bg-accent text-accent-content p-2 rounded">Accent</div>
+      <div id="color-neutral" class="bg-neutral text-neutral-content p-2 rounded">Neutral</div>
+      <div id="color-info" class="bg-info text-info-content p-2 rounded">Info</div>
+      <div id="color-success" class="bg-success text-success-content p-2 rounded">Success</div>
+      <div id="color-warning" class="bg-warning text-warning-content p-2 rounded">Warning</div>
+      <div id="color-error" class="bg-error text-error-content p-2 rounded">Error</div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle theme functionality
+    const toggleBtn = document.getElementById('toggle-btn');
+    const currentThemeSpan = document.getElementById('current-theme');
+    
+    toggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      currentThemeSpan.textContent = newTheme;
+    });
+
+    // Helper functions for tests
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+
+    window.setTheme = (theme) => {
+      document.documentElement.setAttribute('data-theme', theme);
+    };
+
+    window.getTheme = () => {
+      return document.documentElement.getAttribute('data-theme') || 'light';
+    };
+  </script>
+</body>
+</html>

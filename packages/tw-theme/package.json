@@ -28,7 +28,12 @@
     "build": "npm run build:components && npm run build:lib",
     "postbuild": "rimraf .tmp",
     "dev": "tsup --watch",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "e2e:build": "node e2e/scripts/compile-fixtures.js",
+    "e2e:test": "playwright test --config=e2e/playwright.config.ts",
+    "e2e:test:ui": "playwright test --config=e2e/playwright.config.ts --ui",
+    "e2e:report": "playwright show-report e2e/playwright-report",
+    "e2e": "pnpm e2e:build && pnpm e2e:test"
   },
   "keywords": [
     "tailwindcss",
@@ -41,8 +46,10 @@
     "tailwindcss": ">= 3.4.17 <4.1.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@tailwindcss/cli": "^4.1.11",
     "@types/jest": "^29.5.12",
+    "@types/node": "^22.10.0",
     "cssnano": "^7.0.7",
     "execa": "^9.6.0",
     "fast-glob": "^3.3.3",
@@ -53,6 +60,7 @@
     "postcss-js": "^4.0.1",
     "postcss-nesting": "^13.0.2",
     "rimraf": "^6.0.1",
+    "sirv-cli": "^2.0.2",
     "tailwindcss": "4.1.7",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",

@@ -41,7 +41,7 @@ export const buttonStyles = {
     "--size": "calc(var(--size-field, 0.25rem) * 10)",
     "--btn-bg": "var(--btn-color, var(--color-base-200))",
     "--btn-fg": "var(--color-base-content)",
-    "--btn-p": "1rem",
+    "--btn-p": "var(--paragraph, 1rem)",
     "--btn-border": "color-mix(in oklab, var(--btn-bg), #000 calc(var(--depth) * 5%))",
     "--btn-shadow": "0 3px 2px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000),\n    0 4px 3px -2px color-mix(in oklab, var(--btn-bg) calc(var(--depth) * 30%), #0000)",
     "--btn-noise": "var(--fx-noise)"
