@@ -8,7 +8,7 @@ import { ThemeColors } from "../types.ts";
 
 const root: ThemeColors = {
     // Base sizes and spacing
-    "--btn-p": "1rem",
+    "--paragraph": "1rem",
     "--fontsize": "0.875rem",
     "--size-field": "0.25rem",
     "--size": "calc(var(--size-field) * 10)",

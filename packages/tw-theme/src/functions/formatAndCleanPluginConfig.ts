@@ -17,7 +17,7 @@ const formatAndCleanPluginConfig = (options: PluginOptions): Record<string, stri
 
   return {
     root: root && !Number.isNaN(root) 
-      ? root.toString().replace(/[^/w]+/g,'').trim().toLowerCase()
+      ? root.toString().trim()
       : ':root',
     colorScheme: colorScheme && !Number.isNaN(colorScheme)  
       ? colorScheme.replace(/[^a-z\s]+/g,'').trim().toLowerCase()

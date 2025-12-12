@@ -88,7 +88,7 @@ const createPlugin = () => {
       const themeCnf = getThemeConfig(themesToUse);
       try {
         // Add base styles with CSS custom properties for each theme
-        const baseStyles: Record<string, any> = {
+        let baseStyles: Record<string, any> = {
           [root]: { 'color-scheme': colorScheme },
           [root]: { ...builtInThemes.root },
         };
@@ -109,24 +109,29 @@ const createPlugin = () => {
             };
             baseStyles[darkSelector] = generateThemeProperties(builtInThemes.dark);
           }
-        }
-        
-        // Add other custom themes if any
-        const othersSelectors: Record<string, Record<string, string>> = Object.keys(themeCnf)
+            // Add other custom themes if any
+          const othersSelectors: Record<string, Record<string, string>> = Object.keys(themeCnf)
           .filter((name) => !['light', 'dark'].includes(name) && builtInThemes[name])
           .reduce((acc, name) => {
             acc[`[data-theme="${name}"]`] = generateThemeProperties(builtInThemes[name]);
             return acc;
           }, {});
           
+          baseStyles = {
+            ...baseStyles,
+            ...othersSelectors,
+          }
+        }
+        
+          
         // Add base styles
         addBase({
           ...baseStyles,
-          ...othersSelectors
         });
     
         // Add utility classes - use type assertion only at the API boundary
-        addUtilities(generateColorUtilities());
+        const colorUtilities = generateColorUtilities();
+        addUtilities(colorUtilities);
 
         // Add Components
         try {

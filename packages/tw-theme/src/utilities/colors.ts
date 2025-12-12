@@ -34,16 +34,10 @@ export const cssVarName = (colorName: string): string => {
  * Generate CSS variable reference for a semantic color
  */
 export const cssVarRef = (colorName: string): string => {
-  return `var(${cssVarName(colorName)})`;
+  // Add 'color-' prefix if not present
+  const varName = colorName.startsWith('--color-') ? colorName : `--color-${colorName}`;
+  return `var(${varName})`;
 };
-
-/**
- * generate a colorMap with semanticaColorNames
- */
-
-const colorMap = semanticColorNames
-  .flatMap(name => semanticColorVariants.map(variant => ({ [name + variant]: `var(--${name})` })))
-  .reduce((a, o) => Object.assign(a, o), {})
 
 /**
  * Generate CSS variable reference with alpha channel
@@ -103,7 +97,7 @@ export const generateColorUtilities = ( ) => {
       const className = `.bg-${tokenName}`;
       
       utilities[className] = {
-        'background-color': cssVarRefRgb(tokenName),
+        'background-color': cssVarRef(tokenName),
       };
     });
   });
@@ -115,7 +109,7 @@ export const generateColorUtilities = ( ) => {
       const className = `.text-${tokenName}`;
       
       utilities[className] = {
-        color: cssVarRefRgb(tokenName),
+        color: cssVarRef(tokenName),
       };
     });
   });
@@ -127,7 +121,7 @@ export const generateColorUtilities = ( ) => {
       const className = `.border-${tokenName}`;
       
       utilities[className] = {
-        'border-color': cssVarRefRgb(tokenName),
+        'border-color': cssVarRef(tokenName),
       };
     });
   });
@@ -139,7 +133,7 @@ export const generateColorUtilities = ( ) => {
       const className = `.ring-${tokenName}`;
       
       utilities[className] = {
-        '--tw-ring-color': cssVarRefRgb(tokenName),
+        '--tw-ring-color': cssVarRef(tokenName),
       };
     });
   });
@@ -151,7 +145,7 @@ export const generateColorUtilities = ( ) => {
       const className = `.divide-${tokenName}`;
       
       utilities[className] = {
-        '--tw-divide-color': cssVarRefRgb(tokenName),
+        '--tw-divide-color': cssVarRef(tokenName),
       };
     });
   });
