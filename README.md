@@ -10,7 +10,7 @@ A React component library built with TypeScript, Tailwind, and Vite.
 - 📚 Documented with Storybook
 - ✅ Tested with Jest and React Testing Library
 - 🧹 Code quality with ESLint and Prettier
-- 🔄 Automated releases with semantic-release
+- 🔄 Automated releases with Changesets
 
 ## Installation
 
@@ -201,13 +201,65 @@ export default {
 - `pnpm storybook` - Start Storybook
 - `pnpm build-storybook` - Build Storybook
 
+## Release Process
+
+This project uses [Changesets](https://github.com/changesets/changesets) to manage versioning and publishing. The workflow automatically publishes only packages that have changes to npm.
+
+### How It Works
+
+1. **Making Changes**: When you make changes to a package, create a changeset:
+   ```bash
+   pnpm changeset
+   ```
+   This will prompt you to:
+   - Select which packages have changed
+   - Specify the type of change (major, minor, patch)
+   - Write a summary of the changes
+
+2. **Version PR Creation**: When changesets are merged to `main`, the GitHub Action automatically:
+   - Creates or updates a "Version Packages" PR
+   - Aggregates all changesets
+   - Updates package versions
+   - Updates CHANGELOG.md files
+
+3. **Publishing**: When the "Version Packages" PR is merged:
+   - Packages are automatically built
+   - Only changed packages are published to npm
+   - GitHub releases are created
+   - A summary of published packages is shown in the workflow
+
+### Published Packages
+
+The following packages are published to npm:
+- `@ownui/tw-theme` - Tailwind CSS theme plugin
+- `@ownui/ui` - Main UI component package
+- `@ownui/button` - Button component
+- `@ownui/dropdown` - Dropdown component
+- `@ownui/loader` - Loader component
+- `@ownui/dom-utils` - DOM utility functions
+
+### Manual Release (Maintainers Only)
+
+If you need to manually publish packages:
+
+```bash
+# Build all packages
+pnpm build
+
+# Publish changed packages
+pnpm release
+```
+
+**Note**: You need to have `NPM_TOKEN` configured in your environment or GitHub secrets.
+
 ## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'feat: add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+4. Create a changeset (`pnpm changeset`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
 ## License
 
