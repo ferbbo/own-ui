@@ -129,8 +129,8 @@ const createPlugin = () => {
         });
     
         // Add utility classes - use type assertion only at the API boundary
-        const colorUtilities = generateColorUtilities();
-        addUtilities(colorUtilities);
+        addUtilities( generateColorUtilities());
+
 
       } catch (error) {
         console.error('Error in @ownui/tw-theme plugin:', error);

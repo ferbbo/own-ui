@@ -87,8 +87,44 @@ export const utilityExists = (
  * Generate utility classes for semantic colors
  */
 
-export const generateColorUtilities = ( ) => {  
+export const generateColorUtilities = () => {  
   const utilities = {}
+
+  // const colorsVarsKeys = Object.keys(vars)
+
+  // for (let i = 0; i < colorsVarsKeys.length; i++ ){
+  //   if (colorsVarsKeys[i].startsWith("--color-")) {
+  //     const token = colorsVarsKeys[i];
+  //     const tokenName = colorsVarsKeys[i].replace("--color", "").trim()
+
+  //     const bgClassName = `.bg-${tokenName}`;
+  //     const colorClassName = `.text-${tokenName}`;
+  //     const borderClassName = `.border-${tokenName}`;
+  //     const ringClassName = `.ring-${tokenName}`;
+  //     const divideClassName = `.divide-${tokenName}`;
+      
+      
+  //     utilities[bgClassName] = {
+  //       'background-color': cssVarRef(token),
+  //     };
+      
+  //     utilities[colorClassName] = {
+  //       color: cssVarRef(token),
+  //     };
+      
+  //     utilities[borderClassName] = {
+  //       'border-color': cssVarRef(token),
+  //     };
+
+  //     utilities[divideClassName] = {
+  //       '--tw-divide-color': cssVarRef(token),
+  //     };
+      
+  //     utilities[ringClassName] = {
+  //       '--tw-ring-color': cssVarRef(token),
+  //     };
+  //   }
+  // }
 
   // Generate background color utilities
   semanticColorNames.forEach((colorName) => {
