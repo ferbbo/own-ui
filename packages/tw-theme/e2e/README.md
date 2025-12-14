@@ -1,118 +1,118 @@
-# Tests E2E - Plugin @ownui/tw-theme
+# E2E Tests - @ownui/tw-theme Plugin
 
-> **💡 Inicio Rápido**: Ver [QUICKSTART.md](QUICKSTART.md) para ejecutar en 3 pasos.  
-> **📊 Resumen Completo**: Ver [FINAL-SUMMARY.md](FINAL-SUMMARY.md) para estadísticas y cobertura.
+> **💡 Quick Start**: See [QUICKSTART.md](QUICKSTART.md) to run in 3 steps.  
+> **📊 Complete Summary**: See [FINAL-SUMMARY.md](FINAL-SUMMARY.md) for statistics and coverage.
 
-## 📚 Documentación
+## 📚 Documentation
 
-| Documento | Descripción |
-|-----------|-------------|
-| **[QUICKSTART.md](QUICKSTART.md)** | ⚡ Inicio rápido en 3 pasos |
-| **[FINAL-SUMMARY.md](FINAL-SUMMARY.md)** | 📊 Resumen completo con estadísticas (LEER PRIMERO) |
-| **[README.md](README.md)** | 📖 Este archivo - índice general |
-| **[INSTALLATION.md](INSTALLATION.md)** | 🔧 Guía de instalación, ejecución y troubleshooting |
-| **[EXAMPLES.md](EXAMPLES.md)** | 🎨 Ejemplos visuales, casos de uso y comparaciones |
-| **[SUMMARY.md](SUMMARY.md)** | 📄 Resumen de custom-root-scope |
-| **[CHECKLIST.md](CHECKLIST.md)** | ✅ Checklist de tareas y verificación |
-| **[ROADMAP.md](ROADMAP.md)** | 🚀 Plan de expansión (fixtures adicionales opcionales) |
+| Document | Description |
+|----------|-------------|
+| **[QUICKSTART.md](QUICKSTART.md)** | ⚡ Quick start in 3 steps |
+| **[FINAL-SUMMARY.md](FINAL-SUMMARY.md)** | 📊 Complete summary with statistics (READ FIRST) |
+| **[README.md](README.md)** | 📖 This file - general index |
+| **[INSTALLATION.md](INSTALLATION.md)** | 🔧 Installation, execution and troubleshooting guide |
+| **[EXAMPLES.md](EXAMPLES.md)** | 🎨 Visual examples, use cases and comparisons |
+| **[SUMMARY.md](SUMMARY.md)** | 📄 custom-root-scope summary |
+| **[CHECKLIST.md](CHECKLIST.md)** | ✅ Task and verification checklist |
+| **[ROADMAP.md](ROADMAP.md)** | 🚀 Expansion plan (optional additional fixtures) |
 
 ## 🎯 Quick Start
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 pnpm install
 npx playwright install chromium
 
-# Ejecutar tests E2E (compilación + tests)
+# Run E2E tests (compilation + tests)
 cd packages/tw-theme
 pnpm e2e
 ```
 
-**Resultado esperado**: ~88 tests passed ✅
+**Expected result**: ~88 tests passed ✅
 
-## 📋 Tests Implementados (6 Fixtures)
+## 📋 Implemented Tests (6 Fixtures)
 
 ### 1. Default Themes (E2E-1) ✅
 **Fixture**: `default-themes/`  
 **Tests**: 10
 
-Valida que los temas light y dark predeterminados funcionan correctamente.
+Validates that the default light and dark themes work correctly.
 
 ### 2. No Default Themes (E2E-2) ✅
 **Fixture**: `no-default-themes/`  
 **Tests**: 6
 
-Valida que `themes: false` deshabilita temas predeterminados correctamente.
+Validates that `themes: false` correctly disables default themes.
 
 ### 3. Custom Theme (E2E-3) ✅
 **Fixture**: `custom-theme/`  
 **Tests**: 10
 
-Valida que se puede crear un tema completamente custom usando `@plugin theme`.
+Validates that a completely custom theme can be created using `@plugin theme`.
 
 ### 4. Theme Switching (E2E-4) ✅
 **Fixture**: `theme-switching/`  
 **Tests**: 10
 
-Valida el cambio dinámico entre múltiples temas usando `data-theme`.
+Validates dynamic switching between multiple themes using `data-theme`.
 
 ### 5. Utility Classes (E2E-5) ✅
 **Fixture**: `utility-classes/`  
 **Tests**: ~40
 
-Valida que todas las clases utilitarias se generan correctamente.
+Validates that all utility classes are generated correctly.
 
 ### 6. Custom Root Scope (Extra) ✅
 **Fixture**: `custom-root-scope/`  
 **Tests**: 12
 
-Valida que los estilos se pueden aplicar en scopes específicos usando la opción `root`.
+Validates that styles can be applied in specific scopes using the `root` option.
 
-## 📊 Estadísticas
+## 📊 Statistics
 
 - **Total Fixtures**: 6
 - **Total Tests**: ~88
-- **Cobertura**: >90% de funcionalidad del plugin
+- **Coverage**: >90% of plugin functionality
 
-## Descripción
+## Description
 
-Este test E2E valida la capacidad del plugin `@ownui/tw-theme` de aplicar estilos de tema en **scopes específicos** usando la opción `root`, en lugar de aplicarlos globalmente a todo el documento (`:root`).
+This E2E test validates the ability of the `@ownui/tw-theme` plugin to apply theme styles in **specific scopes** using the `root` option, instead of applying them globally to the entire document (`:root`).
 
-## Escenarios Cubiertos
+## Covered Scenarios
 
-### 1. Variables CSS Aplicadas Solo en el Scope
-- ✅ Verifica que `.app-container` tenga las variables CSS (`--color-primary`, etc.)
-- ✅ Verifica que elementos fuera del scope NO tengan las variables
+### 1. CSS Variables Applied Only in the Scope
+- ✅ Verifies that `.app-container` has the CSS variables (`--color-primary`, etc.)
+- ✅ Verifies that elements outside the scope DO NOT have the variables
 
-### 2. Clases Utilitarias Funcionan Solo Dentro del Scope
-- ✅ `bg-primary` funciona correctamente dentro de `.app-container`
-- ✅ `bg-primary` NO funciona fuera del scope
+### 2. Utility Classes Work Only Within the Scope
+- ✅ `bg-primary` works correctly inside `.app-container`
+- ✅ `bg-primary` DOES NOT work outside the scope
 
-### 3. Múltiples Scopes Independientes
-- ✅ Varios elementos con `.app-container` pueden coexistir
-- ✅ Cada scope tiene acceso a las variables CSS del tema
+### 3. Multiple Independent Scopes
+- ✅ Multiple elements with `.app-container` can coexist
+- ✅ Each scope has access to the theme's CSS variables
 
-### 4. Temas con data-theme Dentro del Scope
-- ✅ `data-theme="dark"` funciona correctamente dentro del scope
-- ✅ Los colores cambian según el tema aplicado
+### 4. Themes with data-theme Within the Scope
+- ✅ `data-theme="dark"` works correctly within the scope
+- ✅ Colors change according to the applied theme
 
-### 5. Todos los Colores Semánticos
-- ✅ Valida que los 8 colores semánticos se generen correctamente:
+### 5. All Semantic Colors
+- ✅ Validates that the 8 semantic colors are generated correctly:
   - primary, secondary, accent, neutral
   - info, success, warning, error
 
-### 6. Variantes de Colores
-- ✅ Valida las 3 variantes de cada color:
+### 6. Color Variants
+- ✅ Validates the 3 variants of each color:
   - `--color-{name}` (base)
-  - `--color-{name}-content` (texto/contenido)
-  - `--color-{name}-focus` (estado focus/hover)
+  - `--color-{name}-content` (text/content)
+  - `--color-{name}-focus` (focus/hover state)
 
 ### 7. Edge Cases
-- ✅ Elementos que adquieren dinámicamente `.app-container` heredan estilos
-- ✅ Remover `.app-container` elimina el acceso a las variables
-- ✅ Elementos anidados profundamente dentro del scope funcionan correctamente
+- ✅ Elements that dynamically acquire `.app-container` inherit styles
+- ✅ Removing `.app-container` eliminates access to variables
+- ✅ Deeply nested elements within the scope work correctly
 
-## Configuración del Fixture
+## Fixture Configuration
 
 ### input.css
 ```css
@@ -123,56 +123,56 @@ Este test E2E valida la capacidad del plugin `@ownui/tw-theme` de aplicar estilo
 }
 ```
 
-La opción `root: ".app-container"` indica que:
-- Las variables CSS se aplicarán a elementos con clase `.app-container`
-- En lugar del selector predeterminado `:root` (que apunta a `<html>`)
+The `root: ".app-container"` option indicates that:
+- CSS variables will be applied to elements with the `.app-container` class
+- Instead of the default `:root` selector (which points to `<html>`)
 
 ### HTML
-El HTML de prueba contiene:
-- Elementos FUERA del scope (sin `.app-container`)
-- Elementos DENTRO del scope (con `.app-container`)
-- Múltiples scopes en la misma página
-- Cambio dinámico de temas con `data-theme`
+The test HTML contains:
+- Elements OUTSIDE the scope (without `.app-container`)
+- Elements INSIDE the scope (with `.app-container`)
+- Multiple scopes on the same page
+- Dynamic theme switching with `data-theme`
 
-## Casos de Uso Reales
+## Real-World Use Cases
 
-Este comportamiento es útil para:
+This behavior is useful for:
 
-1. **Componentes Aislados**: Aplicar temas solo a componentes específicos
-2. **Microfrontends**: Cada aplicación puede tener su propio tema
-3. **Widgets Embebidos**: Widgets que no afectan el sitio host
-4. **Migración Gradual**: Aplicar temas solo a secciones específicas durante una migración
+1. **Isolated Components**: Apply themes only to specific components
+2. **Microfrontends**: Each application can have its own theme
+3. **Embedded Widgets**: Widgets that don't affect the host site
+4. **Gradual Migration**: Apply themes only to specific sections during a migration
 
-## Ejecución
+## Execution
 
 ```bash
-# Compilar fixtures y ejecutar tests
+# Compile fixtures and run tests
 pnpm e2e
 
-# Solo compilar fixtures
+# Only compile fixtures
 pnpm e2e:build
 
-# Solo ejecutar tests (fixtures ya compilados)
+# Only run tests (fixtures already compiled)
 pnpm e2e:test
 
-# Ejecutar en modo UI interactivo
+# Run in interactive UI mode
 pnpm e2e:test:ui
 
-# Ver reporte de tests anteriores
+# View previous test report
 pnpm e2e:report
 ```
 
-## Resultados Esperados
+## Expected Results
 
-Todos los tests deben pasar, validando que:
-- El scope funciona correctamente
-- Las variables CSS se aplican solo donde corresponde
-- Los colores se renderizan correctamente en el navegador
-- Los cambios dinámicos de tema funcionan
+All tests should pass, validating that:
+- The scope works correctly
+- CSS variables are applied only where appropriate
+- Colors are rendered correctly in the browser
+- Dynamic theme changes work
 
-## Tecnologías Utilizadas
+## Technologies Used
 
-- **Playwright**: Framework de testing E2E
-- **Tailwind CSS CLI**: Compilación de CSS
-- **sirv**: Servidor estático ligero para servir fixtures
-- **Node.js**: Script de compilación de fixtures
+- **Playwright**: E2E testing framework
+- **Tailwind CSS CLI**: CSS compilation
+- **sirv**: Lightweight static server to serve fixtures
+- **Node.js**: Fixture compilation script

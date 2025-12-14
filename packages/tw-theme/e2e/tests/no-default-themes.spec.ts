@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E-2: Plugin sin temas predeterminados (themes: false)
+ * E2E-2: Plugin without default themes (themes: false)
  *
- * Valida que cuando se deshabilitan los temas predeterminados,
- * NO se generan variables para light/dark.
+ * Validates that when default themes are disabled,
+ * NO variables are generated for light/dark.
  */
 
 test.describe("E2E-2: No Default Themes", () => {
@@ -12,16 +12,16 @@ test.describe("E2E-2: No Default Themes", () => {
     await page.goto("/no-default-themes/");
   });
 
-  test("NO debe generar variables de tema light en :root", async ({ page }) => {
+  test("should NOT generate light theme variables in :root", async ({ page }) => {
     const hasLightVars = await page.evaluate(() => {
       return window.hasLightThemeVars();
     });
 
-    // Con themes: false, NO deberían existir variables de tema
+    // With themes: false, theme variables should NOT exist
     expect(hasLightVars).toBe(false);
   });
 
-  test("NO debe generar variables de tema dark", async ({ page }) => {
+  test("should NOT generate dark theme variables", async ({ page }) => {
     const hasDarkVars = await page.evaluate(() => {
       return window.hasDarkThemeVars();
     });
@@ -29,25 +29,25 @@ test.describe("E2E-2: No Default Themes", () => {
     expect(hasDarkVars).toBe(false);
   });
 
-  test('data-theme="dark" NO debe tener efecto', async ({ page }) => {
+  test('data-theme="dark" should have NO effect', async ({ page }) => {
     const darkPrimary = await page.evaluate(() => {
       return window.getCSSVariable('[data-theme="dark"]', "--color-primary");
     });
 
-    // No debería haber variables específicas para dark theme
+    // There should be no specific variables for dark theme
     expect(darkPrimary).toBeFalsy();
   });
 
-  test('data-theme="light" NO debe tener efecto', async ({ page }) => {
+  test('data-theme="light" should have NO effect', async ({ page }) => {
     const lightPrimary = await page.evaluate(() => {
       return window.getCSSVariable('[data-theme="light"]', "--color-primary");
     });
 
-    // No debería haber variables específicas para light theme
+    // There should be no specific variables for light theme
     expect(lightPrimary).toBeFalsy();
   });
 
-  test("las variables de rootColors deben estar disponibles en :root", async ({ page }) => {
+  test("rootColors variables should be available in :root", async ({ page }) => {
     const rootVars = await page.evaluate(() => {
       const root = document.querySelector(":root");
       if (root) {
@@ -57,17 +57,17 @@ test.describe("E2E-2: No Default Themes", () => {
       return { radius: "" };
     });
 
-    // rootColors siempre se aplican independientemente de themes
+    // rootColors are always applied regardless of themes
     expect(rootVars.radius).toBeTruthy();
   });
 
-  test("bg-primary NO debe aplicar colores correctamente sin temas", async ({ page }) => {
+  test("bg-primary should NOT apply colors correctly without themes", async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("no-light");
     });
 
-    // Sin temas, bg-primary no tendrá la variable CSS disponible
-    // Podría ser transparent o no aplicarse
+    // Without themes, bg-primary won't have the CSS variable available
+    // Could be transparent or not applied
     expect(bgColor).toBeTruthy();
   });
 });

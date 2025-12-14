@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E-3: Plugin con tema custom usando @plugin theme
+ * E2E-3: Plugin with custom theme using @plugin theme
  *
- * Valida que se puede crear un tema completamente custom
- * usando el plugin individual @ownui/tw-theme/theme.
+ * Validates that a completely custom theme can be created
+ * using the individual @ownui/tw-theme/theme plugin.
  */
 
 test.describe("E2E-3: Custom Theme Plugin", () => {
@@ -12,16 +12,16 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     await page.goto("/custom-theme/");
   });
 
-  test("debe aplicar el tema custom en :root con flag --default", async ({ page }) => {
+  test("should apply custom theme to :root with --default flag", async ({ page }) => {
     const primaryVar = await page.evaluate(() => {
       return window.getCSSVariable(":root", "--color-primary");
     });
 
-    // El color custom definido: #ff6b00
+    // The defined custom color: #ff6b00
     expect(primaryVar).toBe("#ff6b00");
   });
 
-  test("debe aplicar todos los colores custom correctamente", async ({ page }) => {
+  test("should apply all custom colors correctly", async ({ page }) => {
     const customColors = await page.evaluate(() => {
       return window.getAllThemeVars(":root");
     });
@@ -38,7 +38,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     });
   });
 
-  test("debe renderizar el color primary custom", async ({ page }) => {
+  test("should render custom primary color", async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("brand-primary");
     });
@@ -47,7 +47,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     expect(bgColor).toBe("rgb(255, 107, 0)");
   });
 
-  test("debe renderizar el color secondary custom", async ({ page }) => {
+  test("should render custom secondary color", async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("brand-secondary");
     });
@@ -56,7 +56,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     expect(bgColor).toBe("rgb(0, 212, 255)");
   });
 
-  test("debe renderizar el color accent custom", async ({ page }) => {
+  test("should render custom accent color", async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("brand-accent");
     });
@@ -65,7 +65,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     expect(bgColor).toBe("rgb(255, 237, 0)");
   });
 
-  test('debe estar disponible con data-theme="brand"', async ({ page }) => {
+  test('should be available with data-theme="brand"', async ({ page }) => {
     const primaryVar = await page.evaluate(() => {
       return window.getCSSVariable('[data-theme="brand"]', "--color-primary");
     });
@@ -73,7 +73,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     expect(primaryVar).toBe("#ff6b00");
   });
 
-  test('debe renderizar correctamente con data-theme="brand"', async ({ page }) => {
+  test('should render correctly with data-theme="brand"', async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("data-theme-brand");
     });
@@ -81,7 +81,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     expect(bgColor).toBe("rgb(255, 107, 0)");
   });
 
-  test("debe generar variantes -content para cada color", async ({ page }) => {
+  test("should generate -content variants for each color", async ({ page }) => {
     const contentVars = await page.evaluate(() => {
       const root = document.querySelector(":root");
       if (!root) return null;
@@ -99,7 +99,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     expect(contentVars?.accentContent).toBeTruthy();
   });
 
-  test("debe generar variantes -focus para cada color", async ({ page }) => {
+  test("should generate -focus variants for each color", async ({ page }) => {
     const focusVars = await page.evaluate(() => {
       const root = document.querySelector(":root");
       if (!root) return null;
@@ -117,7 +117,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
     expect(focusVars?.accentFocus).toBeTruthy();
   });
 
-  test("todos los colores custom deben renderizarse en la UI", async ({ page }) => {
+  test("all custom colors should render in the UI", async ({ page }) => {
     const expectedColors = {
       "custom-primary": "rgb(255, 107, 0)",
       "custom-secondary": "rgb(0, 212, 255)",
@@ -133,7 +133,7 @@ test.describe("E2E-3: Custom Theme Plugin", () => {
       const bgColor = await page.evaluate((elementId) => {
         return window.getElementBgColor(elementId);
       }, id);
-      expect(bgColor, `${id} debe tener el color correcto`).toBe(expectedColor);
+      expect(bgColor, `${id} should have the correct color`).toBe(expectedColor);
     }
   });
 });

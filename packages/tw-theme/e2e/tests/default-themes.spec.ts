@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E-1: Plugin con temas predeterminados (light/dark)
+ * E2E-1: Plugin with default themes (light/dark)
  *
- * Valida que el plugin genera correctamente los temas light y dark
- * por defecto, y que el cambio entre temas funciona correctamente.
+ * Validates that the plugin correctly generates light and dark themes
+ * by default, and that switching between themes works correctly.
  */
 
 test.describe("E2E-1: Default Themes (Light/Dark)", () => {
@@ -12,7 +12,7 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
     await page.goto("/default-themes/");
   });
 
-  test("debe generar variables CSS para el tema light en :root", async ({ page }) => {
+  test("should generate CSS variables for light theme in :root", async ({ page }) => {
     const primaryVar = await page.evaluate(() => {
       return window.getCSSVariable(":root", "--color-primary");
     });
@@ -21,7 +21,7 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
     expect(primaryVar).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
-  test('debe generar variables CSS para el tema dark en [data-theme="dark"]', async ({ page }) => {
+  test('should generate CSS variables for dark theme in [data-theme="dark"]', async ({ page }) => {
     const primaryVar = await page.evaluate(() => {
       return window.getCSSVariable('[data-theme="dark"]', "--color-primary");
     });
@@ -30,7 +30,7 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
     expect(primaryVar).toMatch(/^#[0-9a-f]{6}$/i);
   });
 
-  test("debe aplicar colores del tema light por defecto", async ({ page }) => {
+  test("should apply light theme colors by default", async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("light-primary");
     });
@@ -39,17 +39,17 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
     expect(bgColor).toBe("rgb(59, 130, 246)");
   });
 
-  test('debe aplicar colores del tema dark cuando data-theme="dark"', async ({ page }) => {
+  test('should apply dark theme colors when data-theme="dark"', async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("dark-primary");
     });
 
-    // Verificar que es un color válido
+    // Verify that it's a valid color
     expect(bgColor).toMatch(/^rgb\(/);
     expect(bgColor).toBeTruthy();
   });
 
-  test("debe generar todos los 8 colores semánticos", async ({ page }) => {
+  test("should generate all 8 semantic colors", async ({ page }) => {
     const colors = [
       "primary",
       "secondary",
@@ -66,12 +66,12 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
         return window.getCSSVariable(":root", `--color-${colorName}`);
       }, color);
 
-      expect(varValue, `--color-${color} debe existir`).toBeTruthy();
-      expect(varValue, `--color-${color} debe ser un color válido`).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(varValue, `--color-${color} should exist`).toBeTruthy();
+      expect(varValue, `--color-${color} should be a valid color`).toMatch(/^#[0-9a-f]{6}$/i);
     }
   });
 
-  test("debe generar variantes -content y -focus para cada color", async ({ page }) => {
+  test("should generate -content and -focus variants for each color", async ({ page }) => {
     const variants = ["", "-content", "-focus"];
 
     for (const variant of variants) {
@@ -79,18 +79,18 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
         return window.getCSSVariable(":root", `--color-primary${v}`);
       }, variant);
 
-      expect(varValue, `--color-primary${variant} debe existir`).toBeTruthy();
-      expect(varValue, `--color-primary${variant} debe ser válido`).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(varValue, `--color-primary${variant} should exist`).toBeTruthy();
+      expect(varValue, `--color-primary${variant} should be valid`).toMatch(/^#[0-9a-f]{6}$/i);
     }
   });
 
-  test("debe cambiar colores dinámicamente al alternar tema", async ({ page }) => {
-    // Color inicial (light)
+  test("should dynamically change colors when switching theme", async ({ page }) => {
+    // Initial color (light)
     const lightColor = await page.evaluate(() => {
       return window.getElementBgColor("toggle-container");
     });
 
-    // Cambiar a dark
+    // Switch to dark
     await page.click("#toggle-btn");
     await page.waitForTimeout(100);
 
@@ -98,13 +98,13 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
       return window.getElementBgColor("toggle-container");
     });
 
-    // Los colores podrían ser iguales o diferentes según la configuración
-    // Lo importante es que ambos sean válidos
+    // Colors could be the same or different depending on configuration
+    // The important thing is that both are valid
     expect(lightColor).toMatch(/^rgb\(/);
     expect(darkColor).toMatch(/^rgb\(/);
   });
 
-  test('data-theme="light" debe aplicar tema light explícitamente', async ({ page }) => {
+  test('data-theme="light" should explicitly apply light theme', async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("explicit-light");
     });
@@ -113,7 +113,7 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
     expect(bgColor).toBe("rgb(34, 197, 94)");
   });
 
-  test("todos los colores semánticos deben renderizarse correctamente", async ({ page }) => {
+  test("all semantic colors should render correctly", async ({ page }) => {
     const expectedColors = {
       "color-primary": "rgb(59, 130, 246)",
       "color-secondary": "rgb(16, 185, 129)",
@@ -130,11 +130,11 @@ test.describe("E2E-1: Default Themes (Light/Dark)", () => {
         return window.getElementBgColor(elementId);
       }, id);
 
-      expect(bgColor, `${id} debe tener el color correcto`).toBe(expectedColor);
+      expect(bgColor, `${id} should have the correct color`).toBe(expectedColor);
     }
   });
 
-  test("debe tener color-scheme configurado correctamente", async ({ page }) => {
+  test("should have color-scheme configured correctly", async ({ page }) => {
     const colorScheme = await page.evaluate(() => {
       return getComputedStyle(document.documentElement).colorScheme;
     });

@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E-5: Clases utilitarias generadas
+ * E2E-5: Generated utility classes
  *
- * Valida que el plugin genera correctamente todas las clases
- * utilitarias para los colores semánticos.
+ * Validates that the plugin correctly generates all utility
+ * classes for semantic colors.
  */
 
 test.describe("E2E-5: Utility Classes", () => {
@@ -25,7 +25,7 @@ test.describe("E2E-5: Utility Classes", () => {
     };
 
     for (const [id, expectedColor] of Object.entries(expectedBgColors)) {
-      test(`${id} debe aplicar el color de fondo correcto`, async ({ page }) => {
+      test(`${id} should apply the correct background color`, async ({ page }) => {
         const bgColor = await page.evaluate((elementId) => {
           return window.getElementBgColor(elementId);
         }, id);
@@ -48,7 +48,7 @@ test.describe("E2E-5: Utility Classes", () => {
     };
 
     for (const [id, expectedColor] of Object.entries(expectedTextColors)) {
-      test(`${id} debe aplicar el color de texto correcto`, async ({ page }) => {
+      test(`${id} should apply the correct text color`, async ({ page }) => {
         const textColor = await page.evaluate((elementId) => {
           return window.getElementTextColor(elementId);
         }, id);
@@ -71,7 +71,7 @@ test.describe("E2E-5: Utility Classes", () => {
     };
 
     for (const [id, expectedColor] of Object.entries(expectedBorderColors)) {
-      test(`${id} debe aplicar el color de borde correcto`, async ({ page }) => {
+      test(`${id} should apply the correct border color`, async ({ page }) => {
         const borderColor = await page.evaluate((elementId) => {
           return window.getElementBorderColor(elementId);
         }, id);
@@ -82,17 +82,17 @@ test.describe("E2E-5: Utility Classes", () => {
   });
 
   test.describe("Content Variant Classes (text-*-content)", () => {
-    test("text-primary-content debe tener color contrastante", async ({ page }) => {
+    test("text-primary-content should have contrasting color", async ({ page }) => {
       const textColor = await page.evaluate(() => {
         return window.getElementTextColor("text-primary-content");
       });
 
-      // Content colors son típicamente blanco o negro para contraste
+      // Content colors are typically white or black for contrast
       expect(textColor).toMatch(/^rgb\(/);
       expect(textColor).toBeTruthy();
     });
 
-    test("text-secondary-content debe tener color contrastante", async ({ page }) => {
+    test("text-secondary-content should have contrasting color", async ({ page }) => {
       const textColor = await page.evaluate(() => {
         return window.getElementTextColor("text-secondary-content");
       });
@@ -101,7 +101,7 @@ test.describe("E2E-5: Utility Classes", () => {
       expect(textColor).toBeTruthy();
     });
 
-    test("text-accent-content debe tener color contrastante", async ({ page }) => {
+    test("text-accent-content should have contrasting color", async ({ page }) => {
       const textColor = await page.evaluate(() => {
         return window.getElementTextColor("text-accent-content");
       });
@@ -111,7 +111,7 @@ test.describe("E2E-5: Utility Classes", () => {
     });
   });
 
-  test("debe combinar múltiples clases utilitarias correctamente", async ({ page }) => {
+  test("should combine multiple utility classes correctly", async ({ page }) => {
     const bgColor = await page.evaluate(() => {
       return window.getElementBgColor("combined-test");
     });
@@ -124,22 +124,22 @@ test.describe("E2E-5: Utility Classes", () => {
     expect(borderColor).toMatch(/^rgb\(/); // primary-focus
   });
 
-  test("hover:bg-*-focus debe aplicarse en hover", async ({ page }) => {
-    // Hover sobre el botón
+  test("hover:bg-*-focus should apply on hover", async ({ page }) => {
+    // Hover over the button
     await page.hover("#hover-primary");
     await page.waitForTimeout(100);
 
-    // El color debería cambiar al focus variant
+    // Color should change to focus variant
     const hoverColor = await page.evaluate(() => {
       const el = document.getElementById("hover-primary");
       return el ? getComputedStyle(el).backgroundColor : null;
     });
 
-    // Focus variant debería ser diferente (más oscuro/claro)
+    // Focus variant should be different (darker/lighter)
     expect(hoverColor).toMatch(/^rgb\(/);
   });
 
-  test("todas las clases bg-* deben existir y ser visibles", async ({ page }) => {
+  test("all bg-* classes should exist and be visible", async ({ page }) => {
     const allBgElements = await page.locator('[id^="bg-"]').all();
 
     expect(allBgElements.length).toBeGreaterThanOrEqual(8);
@@ -149,7 +149,7 @@ test.describe("E2E-5: Utility Classes", () => {
     }
   });
 
-  test("todas las clases text-* deben existir y ser visibles", async ({ page }) => {
+  test("all text-* classes should exist and be visible", async ({ page }) => {
     const allTextElements = await page.locator('[id^="text-"]').all();
 
     expect(allTextElements.length).toBeGreaterThanOrEqual(8);
@@ -159,7 +159,7 @@ test.describe("E2E-5: Utility Classes", () => {
     }
   });
 
-  test("todas las clases border-* deben existir y ser visibles", async ({ page }) => {
+  test("all border-* classes should exist and be visible", async ({ page }) => {
     const allBorderElements = await page.locator('[id^="border-"]').all();
 
     expect(allBorderElements.length).toBeGreaterThanOrEqual(8);

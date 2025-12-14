@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * E2E-4: Cambio dinámico de tema con data-theme
+ * E2E-4: Dynamic theme switching with data-theme
  *
- * Valida que el cambio de tema usando data-theme funciona
- * correctamente y actualiza los colores en tiempo real.
+ * Validates that theme switching using data-theme works
+ * correctly and updates colors in real time.
  */
 
 test.describe("E2E-4: Theme Switching", () => {
@@ -12,7 +12,7 @@ test.describe("E2E-4: Theme Switching", () => {
     await page.goto("/theme-switching/");
   });
 
-  test("debe cambiar a tema dark al hacer click en botón Dark", async ({ page }) => {
+  test("should switch to dark theme when clicking Dark button", async ({ page }) => {
     await page.click("#btn-dark");
     await page.waitForTimeout(100);
 
@@ -20,7 +20,7 @@ test.describe("E2E-4: Theme Switching", () => {
     expect(theme).toBe("dark");
   });
 
-  test("debe cambiar a tema ocean al hacer click en botón Ocean", async ({ page }) => {
+  test("should switch to ocean theme when clicking Ocean button", async ({ page }) => {
     await page.click("#btn-ocean");
     await page.waitForTimeout(100);
 
@@ -28,7 +28,7 @@ test.describe("E2E-4: Theme Switching", () => {
     expect(theme).toBe("ocean");
   });
 
-  test("debe cambiar a tema light al hacer click en botón Light", async ({ page }) => {
+  test("should switch to light theme when clicking Light button", async ({ page }) => {
     await page.click("#btn-light");
     await page.waitForTimeout(100);
 
@@ -36,7 +36,7 @@ test.describe("E2E-4: Theme Switching", () => {
     expect(theme).toBe("light");
   });
 
-  test("debe remover tema al hacer click en Remove Theme", async ({ page }) => {
+  test("should remove theme when clicking Remove Theme", async ({ page }) => {
     await page.click("#btn-ocean");
     await page.waitForTimeout(100);
 
@@ -47,7 +47,7 @@ test.describe("E2E-4: Theme Switching", () => {
     expect(theme).toBe("none");
   });
 
-  test("debe actualizar colores al cambiar de light a dark", async ({ page }) => {
+  test("should update colors when switching from light to dark", async ({ page }) => {
     const lightColor = await page.evaluate(() => {
       return window.getElementBgColor("dynamic-box");
     });
@@ -59,12 +59,12 @@ test.describe("E2E-4: Theme Switching", () => {
       return window.getElementBgColor("dynamic-box");
     });
 
-    // Ambos deben ser colores válidos
+    // Both should be valid colors
     expect(lightColor).toMatch(/^rgb\(/);
     expect(darkColor).toMatch(/^rgb\(/);
   });
 
-  test("debe aplicar colores del tema ocean correctamente", async ({ page }) => {
+  test("should apply ocean theme colors correctly", async ({ page }) => {
     await page.click("#btn-ocean");
     await page.waitForTimeout(100);
 
@@ -76,7 +76,7 @@ test.describe("E2E-4: Theme Switching", () => {
     expect(oceanColor).toBe("rgb(14, 165, 233)");
   });
 
-  test("diferentes elementos con data-theme deben mostrar diferentes colores simultáneamente", async ({
+  test("different elements with data-theme should show different colors simultaneously", async ({
     page,
   }) => {
     const lightPreview = await page.evaluate(() => {
@@ -91,21 +91,21 @@ test.describe("E2E-4: Theme Switching", () => {
       return window.getElementBgColor("preview-ocean");
     });
 
-    // Todos deben ser colores válidos
+    // All should be valid colors
     expect(lightPreview).toMatch(/^rgb\(/);
     expect(darkPreview).toMatch(/^rgb\(/);
     expect(oceanPreview).toMatch(/^rgb\(/);
 
-    // Ocean debe ser diferente a light
+    // Ocean should be different from light
     expect(oceanPreview).toBe("rgb(14, 165, 233)");
   });
 
-  test("debe manejar cambios rápidos de tema sin errores", async ({ page }) => {
+  test("should handle rapid theme changes without errors", async ({ page }) => {
     await page.evaluate(() => {
       return window.switchThemesRapidly(10);
     });
 
-    // Verificar que el elemento sigue siendo válido después de cambios rápidos
+    // Verify that the element is still valid after rapid changes
     const finalColor = await page.evaluate(() => {
       return window.getElementBgColor("dynamic-box");
     });
@@ -113,21 +113,21 @@ test.describe("E2E-4: Theme Switching", () => {
     expect(finalColor).toMatch(/^rgb\(/);
   });
 
-  test("debe mantener el tema después de interacciones del usuario", async ({ page }) => {
+  test("should maintain theme after user interactions", async ({ page }) => {
     await page.click("#btn-ocean");
     await page.waitForTimeout(100);
 
-    // Simular otras interacciones
+    // Simulate other interactions
     await page.click("#btn-rapid");
     await page.waitForTimeout(200);
 
     const theme = await page.evaluate(() => window.getTheme());
 
-    // El tema debería haber cambiado por el rapid cycle
+    // The theme should have changed due to rapid cycle
     expect(theme).toMatch(/light|dark|ocean/);
   });
 
-  test("múltiples cambios de tema deben ser consistentes", async ({ page }) => {
+  test("multiple theme changes should be consistent", async ({ page }) => {
     // Light
     await page.evaluate(() => window.setTheme("light"));
     const lightPrimary = await page.evaluate(() => {
@@ -146,7 +146,7 @@ test.describe("E2E-4: Theme Switching", () => {
       return window.getCSSVariable('[data-theme="ocean"]', "--color-primary");
     });
 
-    // Validar que todos existen y son diferentes
+    // Validate that all exist and are different
     expect(lightPrimary).toBeTruthy();
     expect(darkPrimary).toBeTruthy();
     expect(oceanPrimary).toBeTruthy();
