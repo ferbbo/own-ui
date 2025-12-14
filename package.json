@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A React component library built with TypeScript, Tailwind CSS, and Vite",
   "scripts": {
-    "build": "turbo build --filter='[origin/main]'",
+    "build": "turbo build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
