@@ -1,30 +1,29 @@
-import { SemanticColorName, SemanticColorVariant } from '../types.ts';
+import { SemanticColorName, SemanticColorVariant } from "../types.ts";
 
 /**
  * List of all semantic color names
  */
 export const semanticColorNames: SemanticColorName[] = [
-  'primary',
-  'secondary',
-  'accent',
-  'neutral',
-  'info',
-  'success',
-  'warning',
-  'error',
+  "primary",
+  "secondary",
+  "accent",
+  "neutral",
+  "info",
+  "success",
+  "warning",
+  "error",
 ];
-
 
 /**
  * List of all semantic color variants
  */
-export const semanticColorVariants: SemanticColorVariant[] = ['', '-content', '-focus'];
+export const semanticColorVariants: SemanticColorVariant[] = ["", "-content", "-focus"];
 
 /**
  * Generate CSS variable name for a semantic color
  */
 export const cssVarName = (colorName: string): string => {
-  if (colorName.startsWith('--')) {
+  if (colorName.startsWith("--")) {
     return colorName;
   }
   return `--${colorName}`;
@@ -35,7 +34,7 @@ export const cssVarName = (colorName: string): string => {
  */
 export const cssVarRef = (colorName: string): string => {
   // Add 'color-' prefix if not present
-  const varName = colorName.startsWith('--color-') ? colorName : `--color-${colorName}`;
+  const varName = colorName.startsWith("--color-") ? colorName : `--color-${colorName}`;
   return `var(${varName})`;
 };
 
@@ -44,7 +43,7 @@ export const cssVarRef = (colorName: string): string => {
  */
 export const cssVarRefRgb = (colorName: string): string => {
   return `rgb(var(${cssVarName(colorName)}))`;
-};  
+};
 
 /**
  * Convert hex color to RGB values
@@ -52,43 +51,27 @@ export const cssVarRefRgb = (colorName: string): string => {
  */
 export const hexToRgb = (hex: string): string => {
   // Remove # if present
-  hex = hex.replace('#', '');
-  
+  hex = hex.replace("#", "");
+
   // Handle shorthand hex
   if (hex.length === 3) {
     hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
   }
-  
+
   // Convert to RGB
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  
-  return `${r} ${g} ${b}`;
-};
 
-/**
- * Check if a utility class exists in Tailwind's config
- */
-export const utilityExists = (
-  utilityName: string,
-  theme: any,
-  prefix: string = ''
-): boolean => {
-  // This is a simplified check - in a real implementation,
-  // we would need to check against the actual Tailwind config
-  const prefixedName = prefix ? `${prefix}-${utilityName}` : utilityName;
-  
-  // For now, we'll assume no conflicts with existing utilities
-  return false;
+  return `${r} ${g} ${b}`;
 };
 
 /**
  * Generate utility classes for semantic colors
  */
 
-export const generateColorUtilities = () => {  
-  const utilities = {}
+export const generateColorUtilities = () => {
+  const utilities = {};
 
   // const colorsVarsKeys = Object.keys(vars)
 
@@ -102,16 +85,15 @@ export const generateColorUtilities = () => {
   //     const borderClassName = `.border-${tokenName}`;
   //     const ringClassName = `.ring-${tokenName}`;
   //     const divideClassName = `.divide-${tokenName}`;
-      
-      
+
   //     utilities[bgClassName] = {
   //       'background-color': cssVarRef(token),
   //     };
-      
+
   //     utilities[colorClassName] = {
   //       color: cssVarRef(token),
   //     };
-      
+
   //     utilities[borderClassName] = {
   //       'border-color': cssVarRef(token),
   //     };
@@ -119,7 +101,7 @@ export const generateColorUtilities = () => {
   //     utilities[divideClassName] = {
   //       '--tw-divide-color': cssVarRef(token),
   //     };
-      
+
   //     utilities[ringClassName] = {
   //       '--tw-ring-color': cssVarRef(token),
   //     };
@@ -131,9 +113,9 @@ export const generateColorUtilities = () => {
     semanticColorVariants.forEach((variant) => {
       const tokenName = `${colorName}${variant}`;
       const className = `.bg-${tokenName}`;
-      
+
       utilities[className] = {
-        'background-color': cssVarRef(tokenName),
+        "background-color": cssVarRef(tokenName),
       };
     });
   });
@@ -143,7 +125,7 @@ export const generateColorUtilities = () => {
     semanticColorVariants.forEach((variant) => {
       const tokenName = `${colorName}${variant}`;
       const className = `.text-${tokenName}`;
-      
+
       utilities[className] = {
         color: cssVarRef(tokenName),
       };
@@ -155,37 +137,35 @@ export const generateColorUtilities = () => {
     semanticColorVariants.forEach((variant) => {
       const tokenName = `${colorName}${variant}`;
       const className = `.border-${tokenName}`;
-      
+
       utilities[className] = {
-        'border-color': cssVarRef(tokenName),
+        "border-color": cssVarRef(tokenName),
       };
     });
   });
-  
+
   // Generate ring color utilities
   semanticColorNames.forEach((colorName) => {
     semanticColorVariants.forEach((variant) => {
       const tokenName = `${colorName}${variant}`;
       const className = `.ring-${tokenName}`;
-      
+
       utilities[className] = {
-        '--tw-ring-color': cssVarRef(tokenName),
+        "--tw-ring-color": cssVarRef(tokenName),
       };
     });
   });
-  
+
   // Generate divide color utilities
   semanticColorNames.forEach((colorName) => {
     semanticColorVariants.forEach((variant) => {
       const tokenName = `${colorName}${variant}`;
       const className = `.divide-${tokenName}`;
-      
+
       utilities[className] = {
-        '--tw-divide-color': cssVarRef(tokenName),
+        "--tw-divide-color": cssVarRef(tokenName),
       };
     });
   });
   return utilities;
 };
-
-

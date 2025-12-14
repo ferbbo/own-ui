@@ -1,8 +1,6 @@
-import {ThemeColors } from '../types.ts';
+import { ThemeColors } from "../types.ts";
 
-import {
-  cssVarName,
-} from '../utilities/colors.ts';
+import { cssVarName } from "../utilities/colors.ts";
 
 /**
  * Generates CSS custom properties from a theme object.
@@ -14,9 +12,7 @@ import {
  * const theme = { 'primary': '#3b82f6' };
  * generateThemeProperties(theme); // { '--color-primary': '#3b82f6' }
  */
-const generateThemeProperties = (
-  theme: ThemeColors
-): Record<string, string> => {
+const generateThemeProperties = (theme: ThemeColors): Record<string, string> => {
   const properties: Record<string, string> = {};
 
   // Generate CSS custom properties for each color
