@@ -28,5 +28,8 @@
   },
   "dependencies": {
     "react": "^19.0.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
