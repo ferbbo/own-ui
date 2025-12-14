@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Plugin con configuración por defecto - habilita temas light y dark */
+@plugin "@ownui/tw-theme";

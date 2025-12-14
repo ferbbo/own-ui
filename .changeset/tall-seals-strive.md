@@ -1,5 +1,5 @@
 ---
-"@ownui/button": patch
+"@ownui/tw-theme": patch
 ---
 
 configure versioning

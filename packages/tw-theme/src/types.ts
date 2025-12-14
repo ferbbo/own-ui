@@ -2,19 +2,19 @@
  * Semantic color token names
  */
 export type SemanticColorName =
-  | 'primary'
-  | 'secondary'
-  | 'accent'
-  | 'neutral'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'error';
+  | "primary"
+  | "secondary"
+  | "accent"
+  | "neutral"
+  | "info"
+  | "success"
+  | "warning"
+  | "error";
 
 /**
  * Semantic color variant suffixes
  */
-export type SemanticColorVariant = '' | '-content' | '-focus';
+export type SemanticColorVariant = "" | "-content" | "-focus";
 
 /**
  * Full semantic color token (name + optional variant)
@@ -30,7 +30,7 @@ export type ColorValue = string;
  * Theme colors mapping
  */
 export interface ThemeColors {
-  [key: string]: ColorValue;  
+  [key: string]: ColorValue;
 }
 
 /**
@@ -42,7 +42,7 @@ export interface NamedTheme {
 
 /**
  * Theme configuration options
-*/ 
+ */
 export interface ThemeConfig {
   themes: (string | NamedTheme)[];
 }
@@ -52,7 +52,7 @@ export interface ThemeConfig {
  */
 interface PluginOptionsBase {
   root?: string;
-  colorScheme?: 'light' | 'dark';
+  colorScheme?: "light" | "dark";
   // prefix?: string; TODO: HABILITAR SEGUN SE REQUIERA
   // logs?: boolean; TODO: HABILITAR SEGUN SE REQUIERA
   name?: string;
@@ -60,11 +60,9 @@ interface PluginOptionsBase {
   themes?: string | boolean;
 }
 
-export type PluginOptions =  PluginOptionsBase  & {
+export type PluginOptions = PluginOptionsBase & {
   [key: string]: ColorValue | undefined;
-}
-
-
+};
 
 /**
  * CSS-in-JS style object
@@ -73,6 +71,6 @@ export type CssStyles = {
   [key: string]: string | string[] | CssStyles | CssStyles[];
 };
 export enum Flags {
-  DEFAULT = '--default',
-  PREFER_DARK = '--prefersdark',
+  DEFAULT = "--default",
+  PREFER_DARK = "--prefersdark",
 }

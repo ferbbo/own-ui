@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Root Scope Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+    .test-section h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Custom Root Scope E2E Test</h1>
+  <p>Este test valida que los estilos del tema se aplican solo dentro del scope definido (`.app-container`)</p>
+
+  <!-- Sección 1: FUERA del scope - NO debe tener variables de tema -->
+  <div class="test-section">
+    <h2>❌ Fuera del Scope (sin .app-container)</h2>
+    <div id="outside-scope" class="bg-primary text-primary-content p-4 rounded">
+      <p>Este elemento NO está dentro de .app-container</p>
+      <p>Las clases de tema NO deberían aplicarse correctamente aquí</p>
+      <p class="text-sm mt-2" id="outside-info">
+        Computed background: <span id="outside-bg-color">-</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Sección 2: DENTRO del scope - debe tener variables de tema -->
+  <div class="test-section app-container">
+    <h2>✅ Dentro del Scope (.app-container)</h2>
+    
+    <!-- Test Light Theme (default) -->
+    <div id="inside-scope-light" class="bg-primary text-primary-content p-4 rounded mb-4">
+      <p>Este elemento SÍ está dentro de .app-container</p>
+      <p>Las variables CSS del tema light deberían estar disponibles</p>
+      <p class="text-sm mt-2" id="inside-light-info">
+        Computed background: <span id="inside-light-bg-color">-</span>
+      </p>
+    </div>
+
+    <!-- Test Secondary Color -->
+    <div id="secondary-box" class="bg-secondary text-secondary-content p-4 rounded mb-4">
+      <p>Color secundario dentro del scope</p>
+    </div>
+
+    <!-- Test Accent Color -->
+    <div id="accent-box" class="bg-accent text-accent-content p-4 rounded">
+      <p>Color de acento dentro del scope</p>
+    </div>
+  </div>
+
+  <!-- Sección 3: OTRO scope anidado -->
+  <div class="test-section app-container" data-theme="dark">
+    <h2>🌙 Dentro del Scope + Dark Theme</h2>
+    <div id="inside-scope-dark" class="bg-primary text-primary-content p-4 rounded">
+      <p>Este elemento tiene el tema dark aplicado con data-theme</p>
+      <p class="text-sm mt-2" id="inside-dark-info">
+        Computed background: <span id="inside-dark-bg-color">-</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Sección 4: MÚLTIPLES scopes en la misma página -->
+  <div style="display: flex; gap: 20px; margin-top: 30px;">
+    <div class="test-section app-container" style="flex: 1;">
+      <h2>Scope 1</h2>
+      <div id="scope-1" class="bg-success text-success-content p-4 rounded">
+        Success en scope 1
+      </div>
+    </div>
+    
+    <div class="test-section app-container" style="flex: 1;">
+      <h2>Scope 2</h2>
+      <div id="scope-2" class="bg-warning text-warning-content p-4 rounded">
+        Warning en scope 2
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helper para mostrar computed styles
+    function updateComputedColor(elementId, targetId) {
+      const el = document.getElementById(elementId);
+      const target = document.getElementById(targetId);
+      if (el && target) {
+        const bgColor = getComputedStyle(el).backgroundColor;
+        target.textContent = bgColor;
+      }
+    }
+
+    // Actualizar info al cargar
+    window.addEventListener('load', () => {
+      updateComputedColor('outside-scope', 'outside-bg-color');
+      updateComputedColor('inside-scope-light', 'inside-light-bg-color');
+      updateComputedColor('inside-scope-dark', 'inside-dark-bg-color');
+    });
+
+    // Exponer para los tests
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+  </script>
+</body>
+</html>

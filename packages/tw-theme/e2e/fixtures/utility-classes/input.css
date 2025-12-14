@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Plugin para probar clases utilitarias */
+@plugin "@ownui/tw-theme";

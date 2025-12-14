@@ -1,0 +1,50 @@
+{
+  "name": "@ownui/dropdown",
+  "version": "1.0.0",
+  "description": "Dropdown allows users to select from a list of options with semantic theming support.",
+  "main": ".src/index.ts",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "dropdown",
+    "menu",
+    "select",
+    "options"
+  ],
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src --dts",
+    "dev": "pnpm build:fast --watch",
+    "typecheck": "tsc --noEmit",
+    "build:fast": "tsup src"
+  },
+  "author": "ferbbo <Diego Benitez>",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18 || <20.0.0",
+    "react-dom": ">=18 <20.0.0"
+  },
+  "dependencies": {
+    "@ownui/dom-utils": "workspace:*",
+    "@ownui/tw-theme": "workspace:*"
+  },
+  "devDependencies": {
+    "@storybook/react": "^8.6.12",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "tsup": "^8.4.0"
+  }
+}

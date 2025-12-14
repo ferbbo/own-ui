@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Switching Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>Theme Switching E2E Test</h1>
+  <p>Valida el cambio dinámico entre múltiples temas usando data-theme</p>
+
+  <!-- Control Panel -->
+  <div class="test-section">
+    <h2>🎛️ Control Panel</h2>
+    <p>Tema actual: <strong id="current-theme">light</strong></p>
+    <div class="flex gap-2">
+      <button id="btn-light" class="bg-primary text-primary-content px-4 py-2 rounded">Light</button>
+      <button id="btn-dark" class="bg-secondary text-secondary-content px-4 py-2 rounded">Dark</button>
+      <button id="btn-ocean" class="bg-accent text-accent-content px-4 py-2 rounded">Ocean</button>
+      <button id="btn-remove" class="bg-error text-error-content px-4 py-2 rounded">Remove Theme</button>
+    </div>
+  </div>
+
+  <!-- Dynamic Content -->
+  <div class="test-section">
+    <h2>🎨 Dynamic Colors</h2>
+    <div id="dynamic-box" class="bg-primary text-primary-content p-6 rounded-lg mb-4">
+      <h3 class="text-xl font-bold mb-2">Primary Color Box</h3>
+      <p>Este box cambia de color según el tema activo</p>
+      <p class="text-sm mt-2" id="color-info">RGB: -</p>
+    </div>
+    <div id="secondary-box" class="bg-secondary text-secondary-content p-4 rounded">
+      Secondary Color
+    </div>
+  </div>
+
+  <!-- All Themes Preview -->
+  <div class="test-section">
+    <h2>👁️ All Themes Preview</h2>
+    
+    <div class="mb-4" data-theme="light">
+      <h3 class="text-lg font-bold mb-2">Light Theme</h3>
+      <div id="preview-light" class="bg-primary text-primary-content p-3 rounded">
+        Light Primary
+      </div>
+    </div>
+
+    <div class="mb-4" data-theme="dark">
+      <h3 class="text-lg font-bold mb-2">Dark Theme</h3>
+      <div id="preview-dark" class="bg-primary text-primary-content p-3 rounded">
+        Dark Primary
+      </div>
+    </div>
+
+    <div data-theme="ocean">
+      <h3 class="text-lg font-bold mb-2">Ocean Theme</h3>
+      <div id="preview-ocean" class="bg-primary text-primary-content p-3 rounded">
+        Ocean Primary
+      </div>
+    </div>
+  </div>
+
+  <!-- Transition Test -->
+  <div class="test-section">
+    <h2>⚡ Rapid Switching Test</h2>
+    <div id="rapid-switch" class="bg-accent text-accent-content p-4 rounded">
+      Accent color - cambia rápidamente entre temas
+    </div>
+    <button id="btn-rapid" class="bg-info text-info-content px-4 py-2 rounded mt-2">
+      Cycle Themes (5x)
+    </button>
+  </div>
+
+  <script>
+    const html = document.documentElement;
+    const currentThemeEl = document.getElementById('current-theme');
+    const colorInfoEl = document.getElementById('color-info');
+    const dynamicBox = document.getElementById('dynamic-box');
+
+    const themes = ['light', 'dark', 'ocean'];
+    let currentThemeIndex = 0;
+
+    function setTheme(theme) {
+      if (theme) {
+        html.setAttribute('data-theme', theme);
+        currentThemeEl.textContent = theme;
+      } else {
+        html.removeAttribute('data-theme');
+        currentThemeEl.textContent = 'none (default)';
+      }
+      updateColorInfo();
+    }
+
+    function updateColorInfo() {
+      if (dynamicBox) {
+        const bgColor = getComputedStyle(dynamicBox).backgroundColor;
+        colorInfoEl.textContent = `RGB: ${bgColor}`;
+      }
+    }
+
+    document.getElementById('btn-light').addEventListener('click', () => setTheme('light'));
+    document.getElementById('btn-dark').addEventListener('click', () => setTheme('dark'));
+    document.getElementById('btn-ocean').addEventListener('click', () => setTheme('ocean'));
+    document.getElementById('btn-remove').addEventListener('click', () => setTheme(null));
+
+    document.getElementById('btn-rapid').addEventListener('click', async () => {
+      for (let i = 0; i < 15; i++) {
+        setTheme(themes[i % themes.length]);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    });
+
+    // Helper functions for tests
+    window.setTheme = setTheme;
+    
+    window.getTheme = () => {
+      return html.getAttribute('data-theme') || 'none';
+    };
+
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+
+    window.switchThemesRapidly = async (times) => {
+      for (let i = 0; i < times; i++) {
+        setTheme(themes[i % themes.length]);
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    };
+
+    // Initial
+    updateColorInfo();
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { PluginOptions } from "src/types.ts"
+import { PluginOptions } from "src/types.ts";
 
 /**
  * Provides a utility to create Tailwind plugins with options.
@@ -8,15 +8,18 @@ import { PluginOptions } from "src/types.ts"
  * @returns A function that combines the plugin handler and configuration.
  */
 const plugin = {
-  withOptions: (pluginFunction: (options: PluginOptions) => void, configFunction: (options: PluginOptions) => void = (options) => ({})) => {
+  withOptions: (
+    pluginFunction: (options: PluginOptions) => void,
+    configFunction: (options: PluginOptions) => void = (_options) => ({})
+  ) => {
     const optionsFunction = (options: PluginOptions) => {
-      const handler = pluginFunction(options)
-      const config = configFunction(options)
-      return { handler, config }
-    }
-    optionsFunction.__isOptionsFunction = true
-    return optionsFunction
+      const handler = pluginFunction(options);
+      const config = configFunction(options);
+      return { handler, config };
+    };
+    optionsFunction.__isOptionsFunction = true;
+    return optionsFunction;
   },
-}
+};
 
 export default plugin;
