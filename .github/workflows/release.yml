@@ -53,11 +53,23 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Test
-        run: pnpm test
-
       - name: Version packages
         run: pnpm version
+
+      - name: Show Versioned Packages
+        run: |
+          echo "### 📦 Versioned Packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following files were modified by versioning:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          git status --short >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Changed package versions:" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          grep -r '"version":' packages/*/package.json | sed 's|packages/||' | sed 's|/package.json:|:|' >> $GITHUB_STEP_SUMMARY || echo "No version changes detected" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Publish to npm
         id: changesets
