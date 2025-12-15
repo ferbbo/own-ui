@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A React component library built with TypeScript, Tailwind CSS, and Vite",
   "scripts": {
-    "build": "turbo build --filter=@ownui/tw-theme",
+    "build": "turbo build --filter='@ownui/tw-theme'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -15,7 +15,6 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}'",
     "prepare": "husky",
-    "semantic-release": "semantic-release",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish",

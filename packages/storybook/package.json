@@ -1,6 +1,7 @@
 {
   "name": "@ownui/storybook",
   "version": "1.0.0",
+  "private": true,
   "description": "storybook for each components",
   "main": "src/index.ts",
   "type": "module",
