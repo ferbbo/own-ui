@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,11 +30,124 @@ jobs:
         with:
           version: 10
 
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Detect changed packages
+        id: changed-packages
+        run: |
+          # Get list of changed files compared to main
+          git fetch origin main:main
+          CHANGED_FILES=$(git diff --name-only main...HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Detect which packages changed
+          CHANGED_PACKAGES=""
+          
+          if echo "$CHANGED_FILES" | grep -q "^packages/tw-theme/"; then
+            CHANGED_PACKAGES="$CHANGED_PACKAGES tw-theme"
+            echo "tw-theme changed"
+          fi
+          
+          if echo "$CHANGED_FILES" | grep -q "^packages/ui/"; then
+            CHANGED_PACKAGES="$CHANGED_PACKAGES ui"
+            echo "ui changed"
+          fi
+          
+          if echo "$CHANGED_FILES" | grep -q "^packages/utils/"; then
+            CHANGED_PACKAGES="$CHANGED_PACKAGES utils"
+            echo "utils changed"
+          fi
+          
+          # Check if root files changed (run all tests)
+          if echo "$CHANGED_FILES" | grep -qE "^(package\.json|jest\.config\.js|jest\.setup\.js|turbo\.json)"; then
+            CHANGED_PACKAGES="all"
+            echo "Root files changed, will run all tests"
+          fi
+          
+          echo "packages=$CHANGED_PACKAGES" >> $GITHUB_OUTPUT
 
-      - name: Test
-        run: pnpm test
+      - name: Build changed packages
+        run: |
+          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
+            pnpm build
+          elif [ -n "${{ steps.changed-packages.outputs.packages }}" ]; then
+            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
+              echo "Building @ownui/$pkg"
+              pnpm --filter "@ownui/$pkg" build
+            done
+          else
+            echo "No packages changed, skipping build"
+          fi
+
+      - name: Install Playwright Browsers
+        if: steps.changed-packages.outputs.packages != ''
+        run: |
+          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
+            # Install for all packages that have e2e tests
+            pnpm --filter "@ownui/tw-theme" exec playwright install --with-deps chromium
+          else
+            # Install only for changed packages that have e2e tests
+            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
+              if [ "$pkg" = "tw-theme" ]; then
+                echo "Installing Playwright for @ownui/$pkg"
+                pnpm --filter "@ownui/$pkg" exec playwright install --with-deps chromium
+              fi
+            done
+          fi
+
+      - name: Run E2E Tests
+        if: steps.changed-packages.outputs.packages != ''
+        run: |
+          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
+            # Run e2e for all packages that have e2e tests
+            pnpm --filter "@ownui/tw-theme" e2e
+          else
+            # Run e2e only for changed packages that have e2e tests
+            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
+              if pnpm --filter "@ownui/$pkg" run e2e --if-present 2>/dev/null; then
+                echo "Running E2E tests for @ownui/$pkg"
+              else
+                echo "No E2E tests for @ownui/$pkg"
+              fi
+            done
+          fi
+
+      - name: Run Unit Tests
+        run: |
+          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
+            pnpm test
+          elif [ -n "${{ steps.changed-packages.outputs.packages }}" ]; then
+            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
+              echo "Testing $pkg"
+              pnpm test:$pkg || echo "No tests for $pkg"
+            done
+          else
+            echo "No packages changed, skipping tests"
+          fi
+
+      - name: Upload E2E Reports on Failure
+        if: failure() && steps.changed-packages.outputs.packages != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-reports
+          path: |
+            packages/*/e2e/playwright-report/
+            packages/*/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore

@@ -53,41 +53,31 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Install Playwright Browsers
-        run: pnpm --filter @ownui/tw-theme exec playwright install --with-deps chromium
-
-      - name: Run E2E Tests
-        run: pnpm --filter @ownui/tw-theme e2e
-
-      - name: Run Unit Tests
+      - name: Test
         run: pnpm test
 
-      - name: Create Release Pull Request or Publish to npm
+      - name: Version packages
+        run: pnpm version
+
+      - name: Publish to npm
         id: changesets
+        run: pnpm release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Releases
+        if: success()
         uses: changesets/action@v1
         with:
-          publish: pnpm release
-          version: pnpm version
+          publish: echo "Already published"
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.CHANGESET_PAT }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Upload E2E Report on Failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: packages/tw-theme/e2e/playwright-report/
-          retention-days: 7
 
       - name: Publish Summary
-        if: steps.changesets.outputs.published == 'true'
+        if: success()
         run: |
           echo "### 🚀 Packages Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The following packages were published to npm:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```json' >> $GITHUB_STEP_SUMMARY
-          echo '${{ steps.changesets.outputs.publishedPackages }}' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "Packages have been versioned and published to npm." >> $GITHUB_STEP_SUMMARY
+          echo "Check the releases page for details." >> $GITHUB_STEP_SUMMARY
