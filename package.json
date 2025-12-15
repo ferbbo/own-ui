@@ -17,7 +17,7 @@
     "prepare": "husky",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "changeset publish --filter @ownui/tw-theme",
+    "release": "pnpm --filter @ownui/tw-theme publish --access public --no-git-checks",
     "example": "cd apps/example-app && pnpm dev",
     "example:build": "cd apps/example-app && pnpm build",
     "example:install": "cd apps/example-app && pnpm install"
