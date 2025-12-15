@@ -27,7 +27,7 @@
     "build": "npm run build:lib",
     "postbuild": "rimraf .tmp",
     "dev": "tsup --watch",
-    "prepare": "pnpm run build",
+    "prepublishOnly": "pnpm run build",
     "e2e:build": "node e2e/scripts/compile-fixtures.js",
     "e2e:test": "playwright test --config=e2e/playwright.config.ts",
     "e2e:test:ui": "playwright test --config=e2e/playwright.config.ts --ui",
