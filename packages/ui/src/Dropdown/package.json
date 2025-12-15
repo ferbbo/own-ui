@@ -1,6 +1,6 @@
 {
   "name": "@ownui/dropdown",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Dropdown allows users to select from a list of options with semantic theming support.",
   "main": ".src/index.ts",
   "module": "dist/index.mjs",
