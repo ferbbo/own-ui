@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Plugin principal aplicando temas al selector .app-container */
+@plugin "@ownui/tw-theme" {
+  root: ".app-container";
+}

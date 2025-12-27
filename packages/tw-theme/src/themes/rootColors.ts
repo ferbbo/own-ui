@@ -6,8 +6,8 @@ import { ThemeColors } from "src/types.ts";
  * These variables include base colors and content colors.
  */
 const rootColors: ThemeColors = {
-    "--color-base-200": "#000000",
-    "--color-base-content": "#ffffff"
+  "--color-base-200": "#000000",
+  "--color-base-content": "#ffffff",
 };
 
 export default rootColors;

@@ -45,18 +45,12 @@ npm install -D @ownui/tw-theme
 yarn add -D @ownui/tw-theme
 ```
 
-### Development Dependencies
-
-For contributing or testing:
-
-```bash
-pnpm add -D @types/jest jest ts-jest typescript
-```
-
 ## Quick Start
 
 ### 1. Import the plugin in your CSS
 
+
+#### Using default themes
 ```css
 @import "tailwindcss";
 
@@ -64,13 +58,19 @@ pnpm add -D @types/jest jest ts-jest typescript
 @plugin "@ownui/tw-theme" {
   themes: light --default, dark --prefersdark;
 }
+```
+#### Using custom  themes
+```css
+/* First. Add configuration and root variables */
+@plugin "@ownui/tw-theme";
 
-/* Or use individual theme plugin for custom themes */
+/* Second. individual theme plugin for custom themes */
 @plugin "@ownui/tw-theme/theme" {
   name: "custom --default";
-  primary: "#3b82f6";
-  "primary-content": "#ffffff";
-  "primary-focus": "#2563eb";
+  "--color-primary": "#3b82f6";
+  "--color-primary-content": "#ffffff";
+  "--color-primary-focus": "#2563eb";
+  /* ... other semantics colors */
 }
 ```
 
@@ -80,25 +80,6 @@ pnpm add -D @types/jest jest ts-jest typescript
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,html}"],
-  plugins: ["@ownui/tw-theme"],
-  twTheme: {
-    themes: [
-      "light", // Built-in light theme as default
-      "dark",  // Built-in dark theme
-      {
-        // Custom theme
-        "brand": {
-          "primary": "#3b82f6",
-          "primary-content": "#ffffff",
-          "primary-focus": "#2563eb",
-          "secondary": "#f59e0b",
-          "secondary-content": "#000000",
-          "secondary-focus": "#d97706",
-          // ... other semantic colors
-        }
-      }
-    ],
-  },
 };
 ```
 
@@ -132,25 +113,51 @@ function Card({ children }) {
 
 ### Main Plugin Options
 
-```js
+Tailwind v4
+
+```css
+@import "tailwindcss";
+@plugin "@ownui/tw-theme" {
+  themes: brand --default, dark --prefersdark;
+  root: .app-container
+  "color-schema": light dark, 
+}
+```
+
+Tailwind v3
+
+```javascript
 // tailwind.config.js
+import twTheme from '@ownui/tw-theme';
+
 module.exports = {
-  plugins: ["@ownui/tw-theme"],
-  twTheme: {
-    root: ":root",                    // CSS root selector
-    colorScheme: "light dark",        // CSS color-scheme values
-    themes: [
-      "light",                        // Built-in light theme
-      "dark",                         // Built-in dark theme
-      "custom-theme-name",            // Reference to custom theme
-      {
-        "theme-name": {               // Inline custom theme
-          primary: "#color",
-          // ... other colors
-        }
-      }
-    ]
-  }
+  content: ["./src/**/*.{js,ts,jsx,tsx,html}"],
+  plugins: [
+    twTheme({
+      themes: ['light --default', 'dark --prefersdark'],
+      root: ':root',
+      colorScheme: 'light dark'
+    })
+  ]
+};
+```
+
+**Note**: For Tailwind v3, the plugin is imported as a JavaScript module. For custom themes:
+
+```javascript
+import twTheme from '@ownui/tw-theme';
+import customTheme from '@ownui/tw-theme/theme';
+
+module.exports = {
+  plugins: [
+    twTheme({ themes: false }), // Disable default themes
+    customTheme({
+      name: 'corporate --default',
+      '--color-primary': '#1e40af',
+      '--color-primary-content': '#ffffff',
+      // ... other color variables
+    })
+  ]
 };
 ```
 
@@ -159,14 +166,19 @@ module.exports = {
 For creating single custom themes:
 
 ```css
+@plugin "@ownui/tw-theme" {
+  themes: false; /* [Opcional] Without defaults themes */
+};
+
+
 @plugin "@ownui/tw-theme/theme" {
   name: "corporate --default";
-  primary: "#1e40af";
-  "primary-content": "#ffffff";
-  "primary-focus": "#1d4ed8";
-  secondary: "#059669";
-  "secondary-content": "#ffffff";
-  "secondary-focus": "#047857";
+  "--color-primary": "#1e40af";
+  "--color-primary-content": "#ffffff";
+  "--color-primary-focus": "#1d4ed8";
+  "--color-secondary": "#059669";
+  "--color-secondary-content": "#ffffff";
+  "--color-secondary-focus": "#047857";
   /* ... other semantic colors */
 }
 ```
@@ -224,43 +236,45 @@ The plugin includes two built-in themes:
 
 #### Complete Theme Definition
 
-```javascript
-const customTheme = {
-  // Primary colors
-  "color-primary": "#3b82f6",
-  "color-primary-content": "#ffffff",
-  "color-primary-focus": "#2563eb",
+
+```css
+@plugin "@ownui/tw-theme/theme" {
+name: "brand --default";
+   /* Primary colors */
+  "--color-primary": "#3b82f6",
+  "--color-primary-content": "#ffffff",
+  "--color-primary-focus": "#2563eb",
   
-  // Secondary colors
-  "color-secondary": "#f59e0b",
-  "color-secondary-content": "#000000",
-  "color-secondary-focus": "#d97706",
+  /* Secondary colors */
+  "--color-secondary": "#f59e0b",
+  "--color-secondary-content": "#000000",
+  "--color-secondary-focus": "#d97706",
   
-  // Accent colors
-  "color-accent": "#10b981",
-  "color-accent-content": "#000000",
-  "color-accent-focus": "#059669",
+  /* Accent colors */
+  "--color-accent": "#10b981",
+  "--color-accent-content": "#000000",
+  "--color-accent-focus": "#059669",
   
-  // Neutral colors
-  "color-neutral": "#64748b",
-  "color-neutral-content": "#000000",
-  "color-neutral-focus": "#475569",
+  /* Neutral colors */
+  "--color-neutral": "#64748b",
+  "--color-neutral-content": "#000000",
+  "--color-neutral-focus": "#475569",
   
-  // Base/Background colors
-  "color-base-100": "#ffffff",
-  "color-base-200": "#f1f5f9",
-  "color-base-300": "#e2e8f0",
-  "color-base-content": "#1e293b",
+  /* Base/Background colors */
+  "--color-base-100": "#ffffff",
+  "--color-base-200": "#f1f5f9",
+  "--color-base-300": "#e2e8f0",
+  "--color-base-content": "#1e293b",
   
-  // State colors
-  "color-info": "#0ea5e9",
-  "color-info-content": "#000000",
-  "color-success": "#22c55e",
-  "color-success-content": "#000000",
-  "color-warning": "#f59e0b",
-  "color-warning-content": "#000000",
-  "color-error": "#ef4444",
-  "color-error-content": "#ffffff"
+  /* State colors */
+  "--color-info": "#0ea5e9",
+  "--color-info-content": "#000000",
+  "--color-success": "#22c55e",
+  "--color-success-content": "#000000",
+  "--color-warning": "#f59e0b",
+  "--color-warning-content": "#000000",
+  "--color-error": "#ef4444",
+  "--color-error-content": "#ffffff"
 };
 ```
 
@@ -268,33 +282,37 @@ const customTheme = {
 
 The theme system supports various color formats:
 
-```javascript
-const flexibleTheme = {
-  // Hex colors (3, 6, or 8 digits)
-  primary: "#3b82f6",
-  secondary: "#f59e0b",
-  accent: "#10b981ff", // with alpha
+```css
+@plugin "@ownui/tw-theme/theme" {
+  name: "multi-format --default";
   
-  // RGB/RGBA
-  neutral: "rgb(100, 116, 139)",
-  "neutral-content": "rgba(0, 0, 0, 0.8)",
+  /* Hexadecimal colors */
+  "--color-primary": "#3b82f6";
+  "--color-secondary": "#f59e0b";
   
-  // HSL/HSLA
-  info: "hsl(198, 93%, 60%)",
-  success: "hsla(142, 76%, 36%, 0.9)",
+  /* RGB format */
+  "--color-accent": "rgb(16, 185, 129)";
+  "--color-info": "rgb(14, 165, 233)";
   
-  // Named colors
-  warning: "orange",
-  error: "red",
+  /* RGBA format with transparency */
+  "--color-success": "rgba(34, 197, 94, 0.9)";
+  "--color-warning": "rgba(245, 158, 11, 0.95)";
   
-  // CSS custom properties
-  "base-100": "var(--color-custom-bg)",
+  /* HSL format */
+  "--color-error": "hsl(0, 84%, 60%)";
+  "--color-neutral": "hsl(215, 16%, 47%)";
   
-  // Special values
-  transparent: "transparent",
-  current: "currentColor"
-};
+  /* HSLA format with transparency */
+  "--color-base-100": "hsla(0, 0%, 100%, 1)";
+  "--color-base-200": "hsla(210, 40%, 96%, 1)";
+  
+  /* Named CSS colors */
+  "--color-base-content": "black";
+  "--color-primary-content": "white";
+}
 ```
+
+**Note**: All color formats are converted to CSS custom properties and can be used with any Tailwind utility class.
 
 ## Available Utility Classes
 
@@ -433,8 +451,13 @@ src/
 ├── functions/
 │   ├── __tests__/
 │   │   ├── generateThemeProperties.test.ts        # Unit tests
-│   │   └── generateThemeProperties.integration.test.ts  # Integration tests
-│   └── generateThemeProperties.ts
+│   │   ├── generateThemeProperties.integration.test.ts  # Integration tests
+│   │   ├── splitStyles.test.ts                    # splitStyles unit tests
+│   │   └── formatAndCleanPluginConfig.test.ts     # Config validation tests
+│   ├── generateThemeProperties.ts
+│   ├── splitStyles.ts
+│   ├── formatAndCleanPluginConfig.ts
+│   └── pluginWithOptions.ts
 └── __tests__/
     └── test-utils.ts                              # Test utilities and fixtures
 ```
@@ -446,20 +469,39 @@ packages/tw-theme/
 ├── src/
 │   ├── functions/           # Core functionality
 │   │   ├── generateThemeProperties.ts
-│   │   ├── getThemeNameConfig.ts
+│   │   ├── formatAndCleanPluginConfig.ts
 │   │   ├── splitStyles.ts
-│   │   ├── minifier.ts
-│   │   ├── file.ts
+│   │   ├── pluginWithOptions.ts
+│   │   ├── index.ts
 │   │   └── __tests__/       # Function tests
+│   │       ├── generateThemeProperties.test.ts
+│   │       ├── generateThemeProperties.integration.test.ts
+│   │       ├── splitStyles.test.ts
+│   │       └── formatAndCleanPluginConfig.test.ts
 │   ├── utilities/           # Utility functions
-│   ├── themes/             # Built-in themes
-│   ├── build/              # Build scripts
+│   │   └── colors.ts       # Color generation utilities
+│   ├── variants/           # Tailwind variant generators
+│   ├── themes/             # Built-in themes (light, dark)
+│   │   ├── index.ts
+│   │   ├── light.ts
+│   │   └── dark.ts
+│   ├── css/                # CSS output files
 │   ├── plugin.ts           # Main plugin
 │   ├── theme.ts           # Individual theme plugin
-│   └── types.ts           # TypeScript definitions
+│   ├── types.ts           # TypeScript definitions
+│   ├── index.ts           # Public API exports
+│   └── __tests__/         # Integration tests
+├── e2e/                   # End-to-end tests
+│   ├── tests/            # E2E test files
+│   ├── fixtures/         # Test fixtures
+│   └── playwright.config.ts
 ├── jest.config.js          # Test configuration
+├── jest.setup.js          # Jest setup file
 ├── tsconfig.json          # TypeScript configuration
-└── TESTING.md             # Testing documentation
+├── tsconfig.test.json     # Test TypeScript config
+├── tsup.config.ts         # Build configuration
+├── TESTING.md             # Testing documentation
+└── README.md              # This file
 ```
 
 ## Examples
@@ -499,13 +541,13 @@ function ProductCard({ product }) {
 /* Corporate dashboard theme */
 @plugin "@ownui/tw-theme/theme" {
   name: "corporate --default";
-  primary: "#1e40af";
-  "primary-content": "#ffffff";
-  secondary: "#059669";
-  "secondary-content": "#ffffff";
-  neutral: "#64748b";
-  "base-100": "#f8fafc";
-  "base-content": "#1e293b";
+  "--color-primary": "#1e40af";
+  "--color-primary-content": "#ffffff";
+  "--color-secondary": "#059669";
+  "--color-secondary-content": "#ffffff";
+  "--color-neutral": "#64748b";
+  "--color-base-100": "#f8fafc";
+  "--color-base-content": "#1e293b";
 }
 ```
 
@@ -589,7 +631,9 @@ function ThemeProvider({ tenant, children }) {
 /* Make sure this is in your main CSS file */
 @import "tailwindcss";
 @plugin "@ownui/tw-theme";
+
 ```
+
 
 #### 2. Theme Not Switching
 
@@ -609,18 +653,23 @@ console.log(getComputedStyle(document.documentElement).getPropertyValue('--color
 
 **Problem**: Utility classes like `bg-primary` not available.
 
-**Solution**: Ensure Tailwind is properly scanning your files and the plugin is generating utilities:
+**Solution**: Ensure Tailwind is properly scanning your files and the plugin is generating utilities
+
+```css
+/* Make sure this is in your main CSS file */
+@import "tailwindcss";
+@plugin "@ownui/tw-theme";
+```
 
 ```javascript
 // tailwind.config.js
 module.exports = {
   content: [
-    "./src/**/*.{js,ts,jsx,tsx,html}", // Make sure your files are included
+    "./src/**/*.{js,ts,jsx,tsx,html}",
+     "node_modules/ownui/button/src/**/*.{js}" // Make sure your files are included
   ],
-  plugins: ["@ownui/tw-theme"]
 };
 ```
-
 #### 4. TypeScript Errors
 
 **Problem**: Type errors when using theme functions.
@@ -652,18 +701,27 @@ const loadTheme = async (themeName) => {
 
 ### Debug Mode
 
-Enable debug logging:
+Currently, the plugin does not include a built-in debug mode. For troubleshooting:
 
-```javascript
-// tailwind.config.js
-module.exports = {
-  plugins: ["@ownui/tw-theme"],
-  twTheme: {
-    debug: true, // Enable debug logging
-    themes: ["light", "dark"]
-  }
-};
-```
+1. **Check generated CSS**: Inspect the compiled CSS to verify custom properties are generated
+2. **Browser DevTools**: Use the browser console to check CSS variable values:
+   ```javascript
+   // Check if theme is applied
+   console.log(getComputedStyle(document.documentElement).getPropertyValue('--color-primary'));
+   
+   // List all CSS custom properties
+   const styles = getComputedStyle(document.documentElement);
+   const cssVars = Array.from(styles).filter(prop => prop.startsWith('--color-'));
+   console.log('Available theme colors:', cssVars);
+   ```
+3. **Enable Tailwind debugging**: Use Tailwind's built-in debugging features:
+   ```javascript
+   // tailwind.config.js
+   module.exports = {
+     content: ["./src/**/*.{js,ts,jsx,tsx}"],
+     // Tailwind v4 automatically provides better error messages
+   };
+   ```
 
 ## Contributing
 
@@ -698,8 +756,8 @@ MIT
 
 ## Related Packages
 
-- [`@ownui/components`](../components) - React components using this theme system
-- [`@ownui/utils`](../utils) - Utility functions for Own UI
+- [`@ownui/ui`] - React components using this theme system
+- [`@ownui/utils`] - Utility functions for Own UI
 
 ## Changelog
 
@@ -708,4 +766,3 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 ## Support
 
 - 🐛 [Report Issues](https://github.com/ferbbo/own-ui/issues)
-- 💬 [Discussions](https://github.com/ferbbo/own-ui/discussions)

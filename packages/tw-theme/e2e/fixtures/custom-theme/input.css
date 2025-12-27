@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@plugin "@ownui/tw-theme" {
+  themes: false;
+}
+
+/* Tema custom usando el plugin individual */
+@plugin "@ownui/tw-theme/theme" {
+  name: "brand --default";
+  --color-primary: "#ff6b00";
+  --color-secondary: "#00d4ff";
+  --color-accent: "#ffed00";
+  --color-neutral: "#4a5568";
+  --color-info: "#0ea5e9";
+  --color-success: "#10b981";
+  --color-warning: "#f59e0b";
+  --color-error: "#ef4444";
+  --color-primary-content: "#ffffff";
+  --color-secondary-content: "#000000";
+  --color-accent-content: "#000000";
+  --color-secondary-focus: "#00a3cc";
+  --color-accent-focus: "#e6c700";
+  --color-primary-focus: "#cc5500";
+
+}

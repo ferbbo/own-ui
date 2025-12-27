@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>No Default Themes Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>No Default Themes E2E Test</h1>
+  <p>Valida que con themes: false, NO se generan temas light/dark predeterminados</p>
+
+  <!-- Test: NO debe tener variables de tema light -->
+  <div class="test-section">
+    <h2>❌ Sin Tema Light</h2>
+    <div id="no-light" class="bg-primary text-primary-content p-4 rounded">
+      Este elemento usa bg-primary, pero sin temas predeterminados
+    </div>
+    <p class="text-sm mt-2">
+      Las variables de rootColors deberían estar disponibles, pero NO las de temas específicos
+    </p>
+  </div>
+
+  <!-- Test: data-theme NO debe tener efecto -->
+  <div class="test-section" data-theme="dark">
+    <h2>❌ data-theme="dark" Sin Efecto</h2>
+    <div id="no-dark" class="bg-secondary text-secondary-content p-4 rounded">
+      data-theme="dark" NO debería tener efecto
+    </div>
+  </div>
+
+  <!-- Test: data-theme="light" tampoco debe funcionar -->
+  <div class="test-section" data-theme="light">
+    <h2>❌ data-theme="light" Sin Efecto</h2>
+    <div id="no-explicit-light" class="bg-accent text-accent-content p-4 rounded">
+      data-theme="light" NO debería tener efecto
+    </div>
+  </div>
+
+  <!-- Test: Solo rootColors disponibles -->
+  <div class="test-section">
+    <h2>✅ Solo Root Colors</h2>
+    <p>Las variables base (rootColors) deberían estar disponibles en :root</p>
+    <div id="root-colors-test" class="p-4 rounded border-2">
+      Variables de rootColors (radius, etc.)
+    </div>
+  </div>
+
+  <script>
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.hasLightThemeVars = () => {
+      const root = document.querySelector(':root');
+      const primary = getComputedStyle(root).getPropertyValue('--color-primary').trim();
+      return !!primary;
+    };
+
+    window.hasDarkThemeVars = () => {
+      const darkEl = document.querySelector('[data-theme="dark"]');
+      if (!darkEl) return false;
+      const primary = getComputedStyle(darkEl).getPropertyValue('--color-primary').trim();
+      return !!primary;
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Plugin con temas predeterminados deshabilitados */
+@plugin "@ownui/tw-theme" {
+  themes: false;
+} 

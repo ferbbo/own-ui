@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+/* Plugin con temas predeterminados para probar cambio dinámico */
+@plugin "@ownui/tw-theme";
+
+/* Tema custom adicional */
+@plugin "@ownui/tw-theme/theme" {
+  name: "ocean";
+  --color-primary: "#0ea5e9";
+  --color-secondary: "#06b6d4";
+  --color-accent: "#8b5cf6";
+  --color-neutral: "#64748b";
+  --color-info: "#3b82f6";
+  --color-success: "#14b8a6";
+  --color-warning: "#f59e0b";
+  --color-error: "#f43f5e";
+}

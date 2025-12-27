@@ -1,13 +1,13 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/theme.ts', 'src/variants/*.ts'],
-  format: ['esm'],
+  entry: ["src/index.ts", "src/theme.ts", "src/variants/*.ts"],
+  format: ["esm"],
   dts: true,
-  splitting: false, 
+  splitting: false,
   sourcemap: true,
   clean: true,
   minify: false,
-  skipNodeModulesBundle: true,       // no empacar Oxide
-  external: ['tailwindcss', '@tailwindcss/oxide'] 
+  skipNodeModulesBundle: true, // no empacar Oxide
+  external: ["tailwindcss", "@tailwindcss/oxide"],
 });

@@ -1,0 +1,13 @@
+# Archivos generados por la compilación de fixtures
+dist/
+
+# Reportes de Playwright
+playwright-report/
+test-results/
+
+# Screenshots y videos de Playwright
+screenshots/
+videos/
+
+# Archivos de cache de Playwright
+.cache/

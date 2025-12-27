@@ -46,5 +46,8 @@
     "typescript",
     "tailwind"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

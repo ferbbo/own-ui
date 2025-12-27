@@ -1,5 +1,5 @@
 // Import the plugin creator function
-import createPlugin from './plugin.ts';
+import createPlugin from "./plugin.ts";
 
 // Create the plugin
 const tailwindPlugin = createPlugin();
@@ -8,4 +8,4 @@ const tailwindPlugin = createPlugin();
 export default tailwindPlugin;
 
 // Re-export types
-export * from './types.ts';
+export * from "./types.ts";

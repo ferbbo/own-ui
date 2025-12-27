@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Theme Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Custom Theme E2E Test</h1>
+  <p>Valida que un tema custom con @plugin theme funciona correctamente</p>
+
+  <!-- Test: Tema custom con flag --default -->
+  <div class="test-section">
+    <h2>🎨 Brand Theme (Default)</h2>
+    <p>Con flag --default, el tema "brand" se aplica en :root</p>
+    <div id="brand-primary" class="bg-primary text-primary-content p-4 rounded mb-2">
+      Primary (#ff6b00 - Naranja)
+    </div>
+    <div id="brand-secondary" class="bg-secondary text-secondary-content p-4 rounded mb-2">
+      Secondary (#00d4ff - Cyan)
+    </div>
+    <div id="brand-accent" class="bg-accent text-accent-content p-4 rounded">
+      Accent (#ffed00 - Amarillo)
+    </div>
+  </div>
+
+  <!-- Test: Tema aplicado con data-theme -->
+  <div class="test-section" data-theme="brand">
+    <h2>🏷️ data-theme="brand"</h2>
+    <div id="data-theme-brand" class="bg-primary text-primary-content p-4 rounded">
+      También disponible con data-theme="brand"
+    </div>
+  </div>
+
+  <!-- Test: Todos los colores custom -->
+  <div class="test-section">
+    <h2>🎨 All Custom Colors</h2>
+    <div class="grid grid-cols-2 gap-2">
+      <div id="custom-primary" class="bg-primary text-primary-content p-2 rounded">Primary</div>
+      <div id="custom-secondary" class="bg-secondary text-secondary-content p-2 rounded">Secondary</div>
+      <div id="custom-accent" class="bg-accent text-accent-content p-2 rounded">Accent</div>
+      <div id="custom-neutral" class="bg-neutral text-neutral-content p-2 rounded">Neutral</div>
+      <div id="custom-info" class="bg-info text-info-content p-2 rounded">Info</div>
+      <div id="custom-success" class="bg-success text-success-content p-2 rounded">Success</div>
+      <div id="custom-warning" class="bg-warning text-warning-content p-2 rounded">Warning</div>
+      <div id="custom-error" class="bg-error text-error-content p-2 rounded">Error</div>
+    </div>
+  </div>
+
+  <!-- Test: Focus variants -->
+  <div class="test-section">
+    <h2>🎯 Focus Variants</h2>
+    <button id="focus-test" class="bg-primary hover:bg-primary-focus text-primary-content px-4 py-2 rounded">
+      Hover para ver primary-focus
+    </button>
+  </div>
+
+  <script>
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getAllThemeVars = (selector) => {
+      const el = document.querySelector(selector);
+      if (!el) return null;
+      
+      const style = getComputedStyle(el);
+      return {
+        primary: style.getPropertyValue('--color-primary').trim(),
+        secondary: style.getPropertyValue('--color-secondary').trim(),
+        accent: style.getPropertyValue('--color-accent').trim(),
+        neutral: style.getPropertyValue('--color-neutral').trim(),
+        info: style.getPropertyValue('--color-info').trim(),
+        success: style.getPropertyValue('--color-success').trim(),
+        warning: style.getPropertyValue('--color-warning').trim(),
+        error: style.getPropertyValue('--color-error').trim(),
+      };
+    };
+  </script>
+</body>
+</html>
