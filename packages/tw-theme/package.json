@@ -1,6 +1,6 @@
 {
   "name": "@ownui/tw-theme",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Tailwind CSS plugin for semantic theming with CSS custom properties",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,7 @@
       "import": "./dist/variants/index.js",
       "require": "./dist/variants/index.js"
     },
-     "./css": "./dist/css"
+    "./css": "./dist/css"
   },
   "type": "module",
   "scripts": {
