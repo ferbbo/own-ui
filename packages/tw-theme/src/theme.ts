@@ -37,7 +37,7 @@ const extractThemeVariablesFromOptions = ({
 const getThemeNameConfig = (theme: string): { name: string; flag: Flags } | null => {
   const [name, flag] = theme.trim().split(" ");
 
-  if (name && flag !== "string") {
+  if (name && (typeof flag !== "string" || flag === Flags.DEFAULT)) {
     return { name, flag: Flags.DEFAULT };
   }
 
@@ -74,9 +74,9 @@ const createSemanticThemePlugin = () => {
           // If the theme is light, add the root selector
           ...(nameCnf.flag === Flags.DEFAULT
             ? {
-                [`:where(${root}),${defaultSelector}`]: generateThemeProperties(customTheme.vars),
+                [defaultSelector]: generateThemeProperties(customTheme.vars),
               }
-            : { [defaultSelector]: generateThemeProperties(customTheme.vars) }),
+            : {}),
           // If the theme is prefers dark, add the dark media query
           ...(nameCnf.flag === Flags.PREFER_DARK
             ? {
