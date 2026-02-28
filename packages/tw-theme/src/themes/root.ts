@@ -22,6 +22,15 @@ const root: ThemeColors = {
   "--join-es": "var(--radius-field)",
   "--join-ee": "var(--radius-field)",
 
+  // State interaction depths (used by components for hover/active/disabled)
+  "--hover-depth": "7%",
+  "--active-depth": "5%",
+  "--disabled-bg-opacity": "60%",
+  "--disabled-fg-opacity": "35%",
+
+  // Transition
+  "--transition-duration": "0.2s",
+
   // Noise and effects
   "--noise": "0",
   "--fx-noise": "none",

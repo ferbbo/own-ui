@@ -2,29 +2,34 @@
 import { useMemo } from "react";
 import { useButton as useAriaButton } from "@react-aria/button";
 import { mergeProps } from "@react-aria/utils";
-import {useDOMRef }from "@ownui/dom-utils";
-import { button } from "@ownui/tw-theme/variants"
-import {
-  ButtonProps,
-  ButtonAsButtonProps,
-  ButtonAsAnchorProps,
-} from "./Button.types";
+import { useDOMRef } from "@ownui/dom-utils";
+import { button } from "@ownui/tw-theme/variants";
+import { ButtonProps, ButtonAsButtonProps, ButtonAsAnchorProps } from "./Button.types";
 
 export type ReactRef<T> = React.RefObject<T> | React.Ref<T>;
 
 export function useButton(
   props: ButtonProps,
   ref: ReactRef<HTMLButtonElement | HTMLAnchorElement | null>
-): { classNames: string; buttonProps: any, Comp: string } {
+): { classNames: string; buttonProps: any; Comp: string } {
   // Extraemos sin default 'as'
-  const { as: rawAs, theme="primary", variant = "", size = "md", className = "", disabled = false, onClick, children, ...restProps } =
-    props;
+  const {
+    as: rawAs,
+    theme = "primary",
+    variant = "",
+    size = "md",
+    className = "",
+    disabled = false,
+    onClick,
+    children,
+    ...restProps
+  } = props;
   // Si rawAs es undefined, asumimos "button"
   const as = rawAs ?? "button";
 
   // 1) Generar (y memoizar) cadena de clases CSS
   const classNames = useMemo(() => {
-    // Construir la cadena de clases  
+    // Construir la cadena de clases
     const base = "btn";
     const themeCls = button.theme[theme] || "";
     const variantCls = button.theme[variant] || "";
@@ -57,8 +62,7 @@ export function useButton(
     ...(as === "a" && { href: hrefAttr }),
   };
 
-const innerRef = useDOMRef(ref);
-
+  const innerRef = useDOMRef(ref);
 
   // 4) Obtener props accesibles de react-aria
   const { buttonProps: ariaButtonProps } = useAriaButton(ariaOptions, innerRef);
@@ -67,25 +71,12 @@ const innerRef = useDOMRef(ref);
   let buttonProps: any;
   if (as === "button") {
     // Extraemos `type` y `disabled` de restProps para no duplicar
-    const {
-      type,
-      disabled,
-      ...buttonRest
-    } = restProps as ButtonAsButtonProps;
-    buttonProps = mergeProps(
-      ariaButtonProps,
-      { type: typeAttr, disabled },
-      buttonRest
-    );
+    const { type, disabled, ...buttonRest } = restProps as ButtonAsButtonProps;
+    buttonProps = mergeProps(ariaButtonProps, { type: typeAttr, disabled }, buttonRest);
   } else {
     // as === "a"
-    const { href, type, ...anchorRest } =
-      restProps as ButtonAsAnchorProps;
-    buttonProps = mergeProps(
-      ariaButtonProps,
-      { href: hrefAttr },
-      anchorRest
-    );
+    const { href, type, ...anchorRest } = restProps as ButtonAsAnchorProps;
+    buttonProps = mergeProps(ariaButtonProps, { href: hrefAttr }, anchorRest);
   }
   // Component root
   const Comp = as || "button";
