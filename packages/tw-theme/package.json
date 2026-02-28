@@ -1,6 +1,6 @@
 {
   "name": "@ownui/tw-theme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tailwind CSS plugin for semantic theming with CSS custom properties",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,12 +19,13 @@
     "./variants": {
       "import": "./dist/variants/index.js",
       "require": "./dist/variants/index.js"
-    }
+    },
+    "./css": "./dist/css"
   },
   "type": "module",
   "scripts": {
     "build:lib": "tsup",
-    "build": "npm run build:lib",
+    "build": "rimraf dist && npm run build:lib && cp -R ./src/css dist/",
     "postbuild": "rimraf .tmp",
     "dev": "tsup --watch",
     "prepublishOnly": "pnpm run build",
