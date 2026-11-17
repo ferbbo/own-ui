@@ -182,6 +182,10 @@ El tema dark **no es una inversión**: aclara el relleno y oscurece el `-content
 lo que mantiene el contraste en superficies oscuras. Los valores son hex planos de la paleta
 Tailwind; el `-focus` de light es un paso más oscuro, y en dark es el valor de light.
 
+⚠️ **Esta tabla describe `main`. La rama `components` sustituye la paleta por una de marca
+(Piccolo `#4E46B4`, Hit `#40A69F`, Goku `#F5F5F5`, Beerus `#444444`…) y elimina los 8 tokens
+`-focus`, lo que rompe cosas que todavía dependen de ellos.** Ver §11 antes de tocar tokens.
+
 ### 4.4 Cómo se inyectan los temas — `src/plugin.ts`
 
 ```css
@@ -577,6 +581,10 @@ renderiza estilada fuera de Storybook.
 `src/build/components.js` con exports `{component}Styles`: **ese script y esa carpeta no
 existen.** `menu.css` está vacío.
 
+**Hay dos soluciones ya prototipadas en ramas sin mergear** (ver §11): `tw-theme/v1` añade
+`exports["./css"]` y copia `src/css` → `dist/css` en el build; `components` añade `@import` de
+los cuatro `.css` en el `tailwind.css` de Storybook. Ninguna está en `main`.
+
 ### 9.2 🔴 Los tests de componentes no se ejecutan
 `jest.config.js` → proyecto `components` → `testMatch: packages/components/**`. La ruta real es
 `packages/ui/src/*/__test__/`. Los tests de Dropdown y Loader (reales y útiles) **nunca
@@ -648,10 +656,100 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 - `@ownui/dom-utils` no tiene tests ni `tsconfig` de test; `license: ISC` mientras el resto es MIT.
 - `collectCoverage: true` global en Jest.
 - `packages/tw-theme/test-results/` está versionado (artefacto de Playwright).
+- `getThemeNameConfig` (`theme.ts`) compara `flag !== "string"` — comparación contra el
+  **literal** `"string"` donde se pretendía `typeof flag !== "string"`. La primera rama se
+  cumple casi siempre, así que `--prefersdark` se ignora y todo tema custom se registra como
+  `--default`. **Ya corregido en la rama `tw-theme/v1`** (§11).
+- `variants/button.ts` declara `ghost` **dos veces**: en `theme` y en `variant`. Es la razón
+  por la que `variant="ghost"` parece funcionar pese al bug de §9.4 (el lookup cae en `theme`
+  y encuentra la clave por coincidencia).
 - **Contraste sin verificar y probablemente fuera de norma**: el patrón `-content: #ffffff`
   uniforme en las 8 familias del tema light da ratios por debajo de WCAG AA (4.5:1) —
   medidos: `warning` 2.15:1, `success` 2.28:1, `primary` 3.68:1. Los rellenos claros necesitan
   `-content` oscuro. Ver lote 22.
+
+---
+
+## 11. Estado de ramas: trabajo no mergeado
+
+**`main` no es el estado más avanzado del repo.** Hay 15 ramas remotas y dos contienen trabajo
+real que se solapa con la deuda de §9. Leer esto antes de abrir cualquier lote, o se reimplementa
+algo que ya existe en una rama.
+
+| Rama | Ahead | Behind | Fecha | Contenido |
+|---|---|---|---|---|
+| `components` | **7** | **0** | 2026-02-27 | Rediseño de `button.css`, nueva paleta de marca, tokens de estado, skill de React |
+| `tw-theme/v1` | **4** | 9 | 2026-02-27 | **Publicación del CSS** (`exports["./css"]`), fix de `getThemeNameConfig`, v1.0.1 |
+| `copilot/update-tw-theme-readme` | 5 | 37 | 2025-12-12 | +375 ln de README documentando el sistema de componentes |
+| `changeset-release/main` | 1 | 0 | 2025-12-15 | Automática de Changesets (release de 6 paquetes) |
+| `copilot/update-react-to-19-0-3`, `…-versions-to-19-0-3` | 2 | 41/44 | 2025-12-12 | Bump React 19.0.3 (ya incluido en `components`) |
+| `copilot/update-copilot-instructions`, `copilot/delegate-to-cloud-agent` | 1 | 37/41 | 2025-12-12 | Obsoletas |
+| `feat/tw-theme`, `feat/v1`, `copilot/fix-*`, `copilot/update-react-version-19-0-1` | 0 | 33–49 | 2025-12 | **Sin aporte**: 0 commits ahead, mergeadas o abandonadas |
+
+### 11.1 `components` — 7 ahead, 0 behind (descendiente directo de `main`)
+
+Es la rama más reciente y la que **más afecta al sistema de diseño**. Aporta:
+
+- **`button.css` reescrito** (441 ln cambiadas) y claramente mejor que el de `main`:
+  introduce `--btn-focus-color` como fuente del color de interacción, tokens de estado por
+  componente con fallback al global (`--btn-hover-depth: var(--hover-depth, 7%)`,
+  `--btn-active-depth`, `--btn-disabled-bg-opacity`, `--btn-disabled-fg-opacity`,
+  `--btn-transition-duration`), fallbacks literales
+  (`var(--color-base-200, #f3f4f6)`, `var(--color-base-content, #111827)`) que mitigan §9.6,
+  y una escala de tamaños completa (`xs`=6, `sm`=8, `md`=10, `lg`=12, `xl`=14 × `--size-field`).
+- **`root.ts`**: 5 tokens globales nuevos — `--hover-depth`, `--active-depth`,
+  `--disabled-bg-opacity`, `--disabled-fg-opacity`, `--transition-duration`. Extiende el
+  sistema de §4.1 con una capa de **estados** que `main` no tiene.
+- **Paleta de marca** en `light.ts`/`dark.ts` con naming propio (Piccolo, Hit, Jireh, Goku,
+  Jiren, Beerus).
+- **`@import` de los 4 `.css`** en el `tailwind.css` de Storybook — workaround de §9.1, pero
+  apunta a `node_modules/@ownui/tw-theme/src/css/…`, ruta que **no existe en el paquete
+  publicado** (`files: ["dist"]`). Funciona en el monorepo por el symlink de pnpm y se rompe al
+  instalar desde npm. Es confirmación del bug, no su solución.
+- `.github/skills/react-best-practices/` — skill de ~2900 ln + 60 reglas de rendimiento React,
+  y `.github/agents/teacher-react.agent.md`. No colisiona con este `AGENTS.md` (está anidado).
+- Bump a React 19.0.3; borra un `.eslintrc.js` residual (`eslint.config.js` sigue en su sitio).
+
+**Tres regresiones que esta rama introduce y que hay que resolver antes de mergearla:**
+
+1. 🔴 **Elimina los 8 tokens `--color-*-focus`, pero el `button.css` de la misma rama depende
+   de ellos**: los roles hacen `--btn-focus-color: var(--color-primary-focus)`. Un `var()` a un
+   token inexistente produce un valor *guaranteed-invalid*, así que `--btn-focus-color` queda
+   definido-pero-inválido y el fallback de `var(--btn-focus-color, …)` **no se dispara** (se
+   aplica IACVT y la propiedad hereda o se desactiva). Hover y `outline` se rompen en silencio.
+2. 🔴 **`utilities/colors.ts` sigue con `semanticColorVariants = ["", "-content", "-focus"]`** y
+   la rama no lo toca ⇒ **40 utilidades `.bg-*-focus` / `.text-*-focus` / `.border-*-focus` /
+   `.ring-*-focus` / `.divide-*-focus` apuntando a tokens que ya no existen.**
+3. 🟠 **`--color-accent-content: #4E46B4` es idéntico a `--color-accent`** en el tema light ⇒
+   texto invisible sobre superficies accent (contraste 1:1).
+
+**El bug de §9.4 NO está arreglado aquí**: el diff de `useButton.tsx` (51 ln) es exclusivamente
+reformateo de Prettier; `button.theme[variant]` sigue intacto.
+
+### 11.2 `tw-theme/v1` — 4 ahead, 9 behind
+
+Más pequeña pero resuelve **el bug raíz del repo**, y justamente con la opción (B) del lote 1:
+
+```json
+"exports": { "./css": "./dist/css" },
+"build": "rimraf dist && npm run build:lib && cp -R ./src/css dist/"
+```
+
+Con `files: ["dist"]` el CSS **sí se publicaría**. Queda un detalle pendiente: `"./css"` apunta a
+un **directorio**, lo que Node no resuelve — hace falta `"./css/*": "./dist/css/*"` (y
+opcionalmente `"./css": "./dist/css/index.css"`).
+
+También corrige el bug de `getThemeNameConfig` (§9.10) y cambia la semántica de aplicación de
+temas custom: elimina `:where(${root})` de la rama `--default`, de modo que un tema custom
+*default* ya no pinta la raíz y sólo aplica con `[data-theme="<name>"]`. **Es un cambio de
+comportamiento observable**, no una limpieza: hay que decidir si es el deseado y cubrirlo con
+fixture e2e. Incluye además el versionado a 1.0.1 y los CHANGELOG de 5 paquetes.
+
+### 11.3 Consecuencia para el plan de trabajo
+
+Los lotes 1, 4 y 5 de [`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md) **se solapan con
+estas dos ramas**. Por eso el plan abre con un lote 0 de reconciliación: decidir qué se rescata,
+qué se descarta y qué se reimplementa, antes de escribir código nuevo.
 
 ---
 

@@ -29,12 +29,17 @@
 - **Tests reales.** Nunca stubs de `console.log` (ver `Button.test.tsx` como antipatrón).
 - **Cambio en el plugin ⇒ fixture e2e.**
 
-**Secuenciación.** Los lotes 1–3 son **bloqueantes**: desbloquean la verificabilidad de todo lo
-demás. No empieces un componente nuevo antes de cerrarlos.
+**Secuenciación.** El lote **0 va primero y sin excepción**: `main` no es el estado más
+avanzado del repo, y las ramas `components` (7 commits ahead, 0 behind) y `tw-theme/v1`
+(4 ahead) contienen trabajo que se solapa con los lotes 1, 4 y 5. Abrir esos lotes sin
+reconciliar antes significa reimplementar algo que ya existe, o pisarlo.
+Después, los lotes 1–3 son **bloqueantes**: desbloquean la verificabilidad de todo lo demás.
+No empieces un componente nuevo antes de cerrarlos.
 
 ```
 FASE 0 — CIMIENTOS (secuencial, bloqueante)
-  L1  Publicar el CSS de componentes          ← bug raíz
+  L0  Reconciliar las ramas sin mergear       ← PRIMERO: hay trabajo que se solapa
+  L1  Publicar el CSS de componentes          ← bug raíz (ya prototipado en tw-theme/v1)
   L2  Arreglar la ejecución de tests
   L3  Arreglar build y release
 
@@ -66,6 +71,83 @@ FASE 4 — MADUREZ
 
 # FASE 0 — Cimientos
 
+## L0 🔴 Reconciliar las ramas sin mergear
+
+**Problema.** `main` está por detrás del trabajo real. Inventario completo en `AGENTS.md` §11;
+lo que importa para el plan:
+
+- **`components`** (7 ahead, **0 behind** — descendiente directo de `main`, 2026-02-27) trae un
+  `button.css` rediseñado, 5 tokens globales de estado nuevos (`--hover-depth`, `--active-depth`,
+  `--disabled-bg-opacity`, `--disabled-fg-opacity`, `--transition-duration`) y una paleta de
+  marca. **Se solapa con los lotes 4 y 5.**
+- **`tw-theme/v1`** (4 ahead, 9 behind) **ya resuelve el bug raíz del lote 1** con la opción (B):
+  `exports["./css"]` + `cp -R ./src/css dist/` en el build. Y corrige el bug de
+  `getThemeNameConfig`. **Se solapa con los lotes 1 y 21.**
+- `copilot/update-tw-theme-readme` (5 ahead, 37 behind) aporta +375 ln de README documentando el
+  sistema de componentes — material reutilizable para el lote 9.
+- Siete ramas con **0 commits ahead** (`feat/tw-theme`, `feat/v1`, `copilot/fix-*`,
+  `copilot/update-react-version-19-0-1`) no aportan nada: candidatas a borrar.
+
+**El trabajo de este lote es decidir, no programar.** Para cada rama: rescatar (cherry-pick o
+merge), reimplementar (tomar la idea, escribir el código de nuevo sobre `main`) o descartar
+(y borrar la rama). La decisión se documenta en el PR.
+
+**Alcance**
+
+1. **`tw-theme/v1` → rescatar.** Es pequeña y resuelve el bug raíz. Opciones: mergearla (está 9
+   behind, requiere resolver conflictos) o cherry-pick de los 2 commits útiles
+   (`1457676` fix de `getThemeNameConfig` + el cambio de `package.json`), descartando los de
+   versionado/release que Changesets regenerará. **Recomendado: cherry-pick**, y que el lote 1
+   parta de ahí en vez de desde cero.
+   Corregir al integrarlo: `"./css": "./dist/css"` apunta a un directorio y Node no lo resuelve
+   → `"./css/*": "./dist/css/*"`.
+   Decidir aparte el cambio de semántica que trae: elimina `:where(${root})` de la rama
+   `--default`, con lo que un tema custom *default* deja de pintar la raíz. **Es un cambio
+   observable**: o se acepta con fixture e2e que lo fije, o se deja fuera del cherry-pick.
+2. **`components` → rescatar parcialmente, con tres arreglos previos.** El `button.css` y los
+   tokens de estado son una mejora clara del sistema; la paleta es una decisión de producto que
+   no me toca tomar. Pero la rama **no es mergeable tal cual**:
+
+   | # | Regresión | Arreglo |
+   |---|---|---|
+   | 1 | Elimina los 8 `--color-*-focus`, pero su propio `button.css` hace `--btn-focus-color: var(--color-primary-focus)`. Un `var()` a token inexistente da valor *guaranteed-invalid*: `--btn-focus-color` queda definido-pero-inválido y el fallback **no se dispara** (IACVT) ⇒ hover y `outline` roto en silencio. | O se reponen los `-focus`, o `button.css` deja de depender de ellos y deriva el color de interacción con `color-mix` sobre `--btn-color`. |
+   | 2 | `utilities/colors.ts` sigue con `semanticColorVariants = ["", "-content", "-focus"]` ⇒ **40 utilidades `*-focus` apuntando a tokens inexistentes.** | Coherente con la decisión de (1): o se quita `-focus` de la lista, o se reponen los tokens. |
+   | 3 | `--color-accent-content: #4E46B4` es **idéntico** a `--color-accent` en light ⇒ texto invisible (contraste 1:1). | Corregir el `-content`. |
+
+   Y ojo: **el bug de `Button.variant` (§9.4) no está arreglado ahí.** El diff de `useButton.tsx`
+   es sólo reformateo de Prettier; `button.theme[variant]` sigue intacto. El lote 5 sigue en pie.
+3. **`copilot/update-tw-theme-readme` → extraer contenido, descartar rama.** Está 37 behind; no
+   vale mergearla. Guardar el README como insumo del lote 9. Corrobora dos cosas de §9:
+   que `menu.css` no está implementado y que `ghost` está duplicado en `theme` y `variant`.
+4. **Ramas con 0 ahead → borrar** tras confirmar que su trabajo está en `main`.
+5. **`changeset-release/main`** se regenera sola; dejarla en paz o borrarla.
+6. Decidir si `main` adopta React 19.0.3 (viene en `components` y en dos ramas copilot).
+7. **Actualizar `AGENTS.md` §4.1/§4.3** con los tokens y la paleta que finalmente queden. El
+   documento describe hoy `main`; si entra `components`, esas dos tablas cambian.
+
+**Criterios de aceptación**
+- [ ] Cada una de las 14 ramas tiene una decisión escrita: rescatar / reimplementar / descartar.
+- [ ] `tw-theme/v1` integrado o su contenido explícitamente trasladado al lote 1.
+- [ ] Si entra `components`: ninguna clase ni token referencia un `--color-*-focus` inexistente.
+      Verificar con `grep -rn "focus" packages/tw-theme/src/` cruzado contra `themes/*.ts`.
+- [ ] Si entra `components`: ningún par `-content` igual a su color base.
+- [ ] `git ls-remote --heads origin` sin ramas muertas (0 ahead).
+- [ ] `AGENTS.md` §4 y §11 reflejan el estado posterior a la reconciliación.
+
+**Comandos**
+```bash
+git fetch origin
+for b in $(git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||'); do
+  [ "$b" = main ] && continue
+  echo "$(git rev-list --left-right --count origin/main...origin/$b)  $b"
+done
+```
+```bash
+git diff origin/main...origin/components -- packages/tw-theme/src/
+```
+
+---
+
 ## L1 🔴 Publicar el CSS de componentes
 
 **Problema.** `packages/tw-theme/src/css/*.css` no se importa en ningún lugar del repo
@@ -88,6 +170,14 @@ librería no renderiza estilada fuera de Storybook.**
 **Recomendación: (B) primero** — desbloquea la librería en un lote y es reversible; (A) puede
 venir después como azúcar. Si eliges (A), elimina del repo la alternativa para no dejar dos
 sistemas declarados (el error que ya ocurrió con Changesets vs semantic-release).
+
+> **La rama `tw-theme/v1` ya implementa (B)**: `exports["./css"]` + `cp -R ./src/css dist/` en el
+> script de build, con `files: ["dist"]` ya en su sitio. **Parte de ahí, no de cero** (lote 0).
+> Le falta corregir `"./css": "./dist/css"` → `"./css/*": "./dist/css/*"`, porque Node no
+> resuelve un export que apunta a un directorio.
+> La rama `components` tomó otro camino — `@import` de los 4 `.css` en el `tailwind.css` de
+> Storybook, apuntando a `node_modules/@ownui/tw-theme/src/css/…`. Eso arregla Storybook y **no**
+> el paquete publicado (`src/` no se publica): sirve como confirmación del bug, no como solución.
 
 **Alcance**
 - Crear `packages/tw-theme/src/css/index.css` que importe los 4 componentes.
@@ -553,6 +643,7 @@ habría cazado). Integrar los tres en `ci.yml`.
 
 | Lote | Impacto | Esfuerzo | Bloquea |
 |---|---|---|---|
+| L0 Reconciliar ramas | 🔴 crítico | S (decidir, no programar) | L1, L4, L5, L21 |
 | L1 CSS publicado | 🔴 crítico | M | todo lo visual |
 | L2 Tests | 🔴 crítico | S | toda verificación |
 | L3 Build/release | 🔴 crítico | S | toda publicación |
@@ -583,6 +674,12 @@ Formato: `fecha · lote · hallazgo · ¿nuevo lote?`
   resto es MIT. → alinear en L3.
 - `2026-11-17` · análisis inicial · `menu.css` existe con 0 líneas; no hay componente Menu.
   → resolver en L1 (escribirlo o borrarlo).
+- `2026-11-17` · L0 · `variants/button.ts` declara `ghost` **dos veces**: en `theme` (ln 11) y
+  en `variant` (ln 17). Explica por qué `variant="ghost"` parece funcionar pese al bug de §9.4:
+  el lookup erróneo cae en `theme` y encuentra la clave por coincidencia. → arreglar en L5.
+- `2026-11-17` · L0 · `getThemeNameConfig` compara `flag !== "string"` contra el literal
+  `"string"` donde se quería `typeof flag !== "string"` ⇒ `--prefersdark` se ignora y todo tema
+  custom se registra como `--default`. Ya corregido en `tw-theme/v1`. → rescatar en L0.
 - `2026-11-17` · análisis inicial · el bloque comentado en `generateColorUtilities` intentaba
   derivar utilidades de tokens arbitrarios (p. ej. `--color-brand` de la story `onion`).
   Hoy un token custom se inyecta pero no genera utilidades. → decidir en L21.
