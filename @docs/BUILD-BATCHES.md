@@ -146,6 +146,26 @@ done
 git diff origin/main...origin/components -- packages/tw-theme/src/
 ```
 
+**Resultado (ejecutado).** Ver [`specs/lote-0.md`](../specs/lote-0.md) para el inventario
+completo, la decisión por rama y las 11 decisiones registradas. Resumen:
+
+- **Rescatado de `tw-theme/v1`:** el fix de `getThemeNameConfig` (con tests). El mecanismo de
+  publicación de CSS se traslada al lote 1 (ver abajo); el cambio de semántica `:where(root)`
+  queda fuera, pendiente de decisión y de fixture e2e.
+- **Rescatado de `components`:** los 5 tokens globales de estado y el `button.css` rediseñado.
+  **La paleta de marca NO se adopta** (decisión de producto, no técnica). Esa elección disuelve
+  las tres regresiones de §11.1 en lugar de parchearlas: los 8 `--color-*-focus` siguen
+  existiendo, así que ni el CSS ni las 40 utilidades de `colors.ts` quedan huérfanas, y ningún
+  `-content` colisiona con su base.
+- **Rescatado a `@docs/salvage/`:** el README del sistema de componentes (insumo del lote 9) y
+  un fixture React + Vite que no existía en `develop` (insumo del lote 1).
+- **React 19.0.3 NO se adopta:** la línea publicada va por 19.3.1 y hoy los tests de
+  componentes no se ejecutan (§9.2). Merece lote propio.
+- **Borrado de ramas:** NO ejecutado. Es destructivo y no revisable en una PR, así que se
+  entrega como `scripts/cleanup-dead-branches.sh` (dry-run por defecto) para ejecución manual
+  tras aprobar la PR. `components` y `tw-theme/v1` se conservan a propósito: aún guardan la
+  paleta y el cambio de semántica, pendientes de decisión.
+
 ---
 
 ## L1 🔴 Publicar el CSS de componentes
@@ -178,6 +198,40 @@ sistemas declarados (el error que ya ocurrió con Changesets vs semantic-release
 > La rama `components` tomó otro camino — `@import` de los 4 `.css` en el `tailwind.css` de
 > Storybook, apuntando a `node_modules/@ownui/tw-theme/src/css/…`. Eso arregla Storybook y **no**
 > el paquete publicado (`src/` no se publica): sirve como confirmación del bug, no como solución.
+
+> **Trasladado del lote 0 (AC2).** `tw-theme/v1` se descartó como rama, pero su aporte a este
+> lote queda aquí literal, ya corregido. En `packages/tw-theme/package.json`:
+>
+> ```json
+> "files": ["dist"],
+> "exports": {
+>   "./css/*": "./dist/css/*",
+>   "./css": "./dist/css/index.css"
+> },
+> "scripts": {
+>   "build": "rimraf dist && npm run build:lib && cp -R ./src/css dist/"
+> }
+> ```
+>
+> Dos avisos sobre ese snippet:
+> 1. El original escribía `"./css": "./dist/css"`, que apunta a un **directorio**: Node no lo
+>    resuelve. De ahí `"./css/*"` y que `"./css"` apunte al agregador `index.css` — que hay que
+>    crear en este lote, o el export queda roto.
+> 2. `cp -R` no está en Windows. Si importa, usar `cpy-cli`/`shx` o un plugin de tsup.
+>
+> Lo que **no** se trasladó: la rama también eliminaba `:where(${root})` de la rama `--default`,
+> de modo que un tema custom *default* deja de pintar la raíz. Es un cambio de comportamiento
+> observable y una decisión de producto (¿"mi tema es el tema del sitio" o "mi tema existe pero
+> hay que activarlo"?). El lote 0 lo dejó fuera a propósito y lo registró como pregunta abierta
+> P-01. Si se adopta aquí, va con fixture e2e que lo fije.
+>
+> **Insumo disponible:** `@docs/salvage/e2e-fixture-react-components/` trae un fixture React +
+> Vite que monta `@ownui/button` con un tema custom y un conmutador de temas. Es el punto de
+> partida del fixture `component-styles/` que piden los criterios de aceptación de abajo.
+>
+> **Ojo con el `@apply`:** el `button.css` que dejó el lote 0 **ya no usa `@apply`** (el rescate
+> de `components` lo sustituyó por custom properties puras). `loader.css` y `dropdown.css` sí
+> siguen usándolo, así que la verificación del pipeline de `@apply` sigue en pie para ellos.
 
 **Alcance**
 - Crear `packages/tw-theme/src/css/index.css` que importe los 4 componentes.
