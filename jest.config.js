@@ -1,7 +1,25 @@
 /** @type {import('jest').Config} */
+
+// Mapeo de los paquetes del workspace a su código fuente.
+// Los `exports` de cada package.json apuntan a `dist/`, que no existe hasta
+// construir: resolverlos a `src/` permite que los tests unitarios corran sin
+// build previo y que la cobertura se atribuya al fuente, no al bundle.
+const workspaceModuleMapper = {
+  "^@ownui/tw-theme/variants$": "<rootDir>/packages/tw-theme/src/variants/index.ts",
+  "^@ownui/tw-theme/theme$": "<rootDir>/packages/tw-theme/src/theme.ts",
+  "^@ownui/tw-theme$": "<rootDir>/packages/tw-theme/src/index.ts",
+  "^@ownui/dom-utils$": "<rootDir>/packages/utils/dom-utils/src/index.ts",
+  "^@ownui/button$": "<rootDir>/packages/ui/src/Button/src/index.ts",
+  "^@ownui/dropdown$": "<rootDir>/packages/ui/src/Dropdown/src/index.ts",
+  "^@ownui/loader$": "<rootDir>/packages/ui/src/Loader/src/index.ts",
+  "^@ownui/ui$": "<rootDir>/packages/ui/src/index.ts",
+};
+
 module.exports = {
   projects: [
-    // Configuration for React components (Button, Dropdown, etc.)
+    // Componentes React (Button, Dropdown, Loader) y utilidades de DOM.
+    // Los componentes viven en packages/ui/src/<Name>/ y las utilidades en
+    // packages/utils/<util>/ — no en packages/components/, que no existe.
     {
       displayName: "components",
       preset: "ts-jest/presets/default-esm",
@@ -9,11 +27,15 @@ module.exports = {
       extensionsToTreatAsEsm: [".ts", ".tsx"],
       setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
       testMatch: [
-        "<rootDir>/packages/components/**/__test__/**/*.{test,spec}.{ts,tsx}",
-        "<rootDir>/packages/components/**/*.{test,spec}.{ts,tsx}",
+        "<rootDir>/packages/ui/**/__test__/**/*.{test,spec}.{ts,tsx}",
+        "<rootDir>/packages/ui/**/*.{test,spec}.{ts,tsx}",
+        "<rootDir>/packages/utils/**/__test__/**/*.{test,spec}.{ts,tsx}",
+        "<rootDir>/packages/utils/**/*.{test,spec}.{ts,tsx}",
       ],
+      testPathIgnorePatterns: ["/node_modules/", "/dist/"],
       moduleNameMapper: {
         "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+        ...workspaceModuleMapper,
         "^(\\.{1,2}/.*)\\.js$": "$1",
       },
       transform: {
@@ -21,23 +43,18 @@ module.exports = {
           "ts-jest",
           {
             useESM: true,
-            tsconfig: {
-              jsx: "react-jsx",
-              esModuleInterop: true,
-              allowSyntheticDefaultImports: true,
-              moduleResolution: "bundler",
-              target: "es2020",
-              module: "esnext",
-            },
+            tsconfig: "<rootDir>/tsconfig.jest.json",
           },
         ],
       },
       moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
       collectCoverageFrom: [
-        "packages/components/**/src/**/*.{ts,tsx}",
-        "!packages/components/**/src/**/*.stories.{ts,tsx}",
-        "!packages/components/**/src/**/index.ts",
-        "!packages/components/**/src/**/*.d.ts",
+        "packages/ui/src/**/src/**/*.{ts,tsx}",
+        "packages/utils/**/src/**/*.{ts,tsx}",
+        "!packages/**/*.stories.{ts,tsx}",
+        "!packages/**/src/**/index.ts",
+        "!packages/**/*.d.ts",
+        "!packages/**/*.types.ts",
       ],
     },
 
@@ -76,7 +93,8 @@ module.exports = {
   ],
 
   // Global configuration
-  collectCoverage: true,
+  // `collectCoverage` NO va aquí: encarece cada corrida de `pnpm test`.
+  // La cobertura se pide explícitamente con `pnpm test:coverage`.
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html", "json"],
   testTimeout: 10000,

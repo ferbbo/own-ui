@@ -1,0 +1,36 @@
+{
+  // tsconfig usado por ts-jest en el proyecto "components".
+  // No extiende tsconfig.base.json a propósito: la base está orientada a emitir
+  // declaraciones (`emitDeclarationOnly`) y activa `noUnusedLocals`, dos cosas
+  // que no aplican a una corrida de tests.
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "target": "es2020",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["jest", "@testing-library/jest-dom", "node"],
+    "strict": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    // Mismos alias que `moduleNameMapper` de jest.config.js: el mapper resuelve
+    // en runtime y estos `paths` resuelven los tipos. Deben moverse juntos.
+    "paths": {
+      "@ownui/tw-theme": ["packages/tw-theme/src/index.ts"],
+      "@ownui/tw-theme/variants": ["packages/tw-theme/src/variants/index.ts"],
+      "@ownui/tw-theme/theme": ["packages/tw-theme/src/theme.ts"],
+      "@ownui/dom-utils": ["packages/utils/dom-utils/src/index.ts"],
+      "@ownui/button": ["packages/ui/src/Button/src/index.ts"],
+      "@ownui/dropdown": ["packages/ui/src/Dropdown/src/index.ts"],
+      "@ownui/loader": ["packages/ui/src/Loader/src/index.ts"],
+      "@ownui/ui": ["packages/ui/src/index.ts"]
+    }
+  }
+}
