@@ -19,7 +19,9 @@
     "./variants": {
       "import": "./dist/variants/index.js",
       "require": "./dist/variants/index.js"
-    }
+    },
+    "./css": "./dist/css/index.css",
+    "./css/*": "./dist/css/*"
   },
   "type": "module",
   "scripts": {
