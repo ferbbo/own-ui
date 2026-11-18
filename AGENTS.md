@@ -448,10 +448,10 @@ distintos coexistiendo**; conviene unificar (ver lote 5 del plan).
 
 | Paquete | Patrón | Props públicas | Tests | Stories | Estado |
 |---|---|---|---|---|---|
-| `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ⚠️ stub falso | 337 ln | **parcial**: `variant` roto, `loading` tapa children, `icon`/`startIcon`/`endIcon` declarados y no implementados |
+| `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ✅ 30 reales (L2) | 337 ln | **parcial**: `variant` roto, `loading` tapa children, `icon`/`startIcon`/`endIcon` declarados y no implementados |
 | `@ownui/dropdown` | Provider | `variant`(8), `size`(5), `styleVariant`(3), `open`/`defaultOpen`/`onOpenChange` + `.Trigger`/`.Menu`/`.Item` | ✅ reales | 296 ln | **parcial**: sin CSS para menu/trigger, sin navegación por teclado, fuga de props al DOM |
 | `@ownui/loader` | Composición | `as`, `color`(8), `size`(5), `aria-label`, `id` | ✅ reales | 121 ln | **el más sano**; `Loader.variants.ts` vacío |
-| `@ownui/dom-utils` | — | `useDOMRef` | ❌ | — | ok |
+| `@ownui/dom-utils` | — | `useDOMRef` | ✅ 6 reales (L2) | — | ok |
 | `@ownui/tw-theme` | — | ver §4 | ✅ 3 suites + 6 fixtures e2e | — | **maduro** |
 
 ---
@@ -467,9 +467,10 @@ pnpm build                         # ⚠️ turbo build --filter='@ownui/tw-them
 pnpm --filter @ownui/ui build      # construir el agregador
 pnpm --filter @ownui/button build  # construir un componente
 
-pnpm test                          # Jest, ambos proyectos (coverage siempre activo)
+pnpm test                          # Jest, ambos proyectos — 8 suites / 89 tests (sin coverage)
+pnpm test:coverage                 # lo mismo + informe de cobertura
 pnpm test:tw-theme                 # sólo el plugin
-pnpm test:components               # ⚠️ 0 tests: el testMatch apunta a una ruta inexistente (§9.2)
+pnpm test:components               # componentes de packages/ui + utils de packages/utils
 
 pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (~88 tests)
 
@@ -495,11 +496,23 @@ sostener los subpath exports `.`, `./theme`, `./variants`.
 
 | Proyecto | Entorno | testMatch |
 |---|---|---|
-| `components` | jsdom | `packages/components/**/__test__/**` ⚠️ **ruta inexistente** |
+| `components` | jsdom | `packages/ui/**/__test__/**` + `packages/utils/**/__test__/**` ✅ |
 | `tw-theme` | node | `packages/tw-theme/src/**/*.{test,spec}.{ts,tsx}` ✅ |
 
-Preset `ts-jest/presets/default-esm`; CSS mapeado a `identity-obj-proxy`; `maxWorkers: "50%"`;
-`collectCoverage: true` global (ralentiza toda corrida).
+Preset `ts-jest/presets/default-esm`; CSS mapeado a `identity-obj-proxy`; `maxWorkers: "50%"`.
+La cobertura **no** es global: se pide con `pnpm test:coverage` (corregido en el lote 2).
+
+El proyecto `components` resuelve los paquetes del workspace **a su código fuente**, no a
+`dist/`, en dos sitios que hay que mover juntos:
+
+- `moduleNameMapper` de `jest.config.js` → resolución en runtime.
+- `paths` de `tsconfig.jest.json` → resolución de tipos para ts-jest.
+
+Así las suites corren en un clon limpio sin `pnpm build` previo (los `exports` de cada paquete
+apuntan a `dist/`, que no existe hasta construir) y la cobertura se atribuye al fuente.
+Convención de los marcadores de defecto: un bug conocido que pertenece a otro lote se deja
+documentado con `test.failing(... "(lote N)")`; cuando ese lote lo arregle, el marcador pasará
+a fallar y habrá que convertirlo en `test` normal.
 
 ### 6.4 E2E del plugin — el patrón más valioso del repo
 
@@ -626,12 +639,20 @@ existen.** `menu.css` está vacío.
 `exports["./css"]` y copia `src/css` → `dist/css` en el build; `components` añade `@import` de
 los cuatro `.css` en el `tailwind.css` de Storybook. Ninguna está en `main`.
 
-### 9.2 🔴 Los tests de componentes no se ejecutan
-`jest.config.js` → proyecto `components` → `testMatch: packages/components/**`. La ruta real es
-`packages/ui/src/*/__test__/`. Los tests de Dropdown y Loader (reales y útiles) **nunca
-corren**. Mismo error en `collectCoverageFrom`. `pnpm test` global sale **en verde** porque el
-proyecto `tw-theme` sí encuentra tests, y `ci.yml` ejecuta el paso por paquete como
-`pnpm test:$pkg || echo "No tests for $pkg"`, que **se traga el fallo** ⇒ falsa señal verde.
+### 9.2 ✅ Los tests de componentes no se ejecutaban — *corregido en el lote 2*
+`jest.config.js` → proyecto `components` → `testMatch: packages/components/**`, ruta que no
+existe (la real es `packages/ui/src/*/__test__/`). Los tests de Dropdown y Loader nunca
+corrieron, `Button.test.tsx` era un stub con `console.log` y `pnpm test` salía en verde con
+0 tests de componentes.
+
+Hoy: `testMatch` y `collectCoverageFrom` apuntan a `packages/ui/**` y `packages/utils/**`,
+`Button.test.tsx` está reescrito con RTL + `user-event`, `useDOMRef` tiene suite propia, y
+`pnpm test` corre **8 suites / 89 tests**. Ver `specs/lote-2.md`.
+
+**Queda pendiente la parte de CI**: `ci.yml` sigue ejecutando el paso por paquete como
+`pnpm test:$pkg || echo "No tests for $pkg"`, que **se traga el fallo** ⇒ un test roto no
+tumba el pipeline. El lote 2 no lo tocó por la regla de no modificar CI sin autorización
+explícita; está registrado como gap en `specs/lote-2.md` (G-04).
 
 ### 9.3 🔴 `pnpm build` no construye la librería
 `"build": "turbo build --filter='@ownui/tw-theme'"`. `@ownui/ui`, `@ownui/button`,
@@ -694,8 +715,21 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
   reimplementado literal dentro de `plugin.ts`.
 - `splitStyles.ts` está testeado pero no lo usa nadie (restos del pipeline PostCSS planeado).
 - `formatAndCleanPluginConfig` corrompe nombres de tema con mayúsculas/dígitos sin avisar.
-- `@ownui/dom-utils` no tiene tests ni `tsconfig` de test; `license: ISC` mientras el resto es MIT.
-- `collectCoverage: true` global en Jest.
+- ~~`@ownui/dom-utils` no tiene tests~~ **Corregido en el lote 2** (6 tests de `useDOMRef` en
+  `packages/utils/dom-utils/__test__/`). Sigue sin `tsconfig` propio de test — usa el
+  `tsconfig.jest.json` de la raíz — y con `license: ISC` mientras el resto es MIT.
+- ~~`collectCoverage: true` global en Jest.~~ **Corregido en el lote 2**: sólo en
+  `pnpm test:coverage`.
+- ~~El ref de `Button` nunca llegaba al consumidor~~ **Corregido en el lote 2**: `Button.tsx`
+  montaba en el DOM el ref del consumidor mientras `useDOMRef` reflejaba en él su `innerRef`
+  vacío, así que `ref.current` quedaba en `null` y React Aria tampoco veía el nodo. Ahora
+  `useButton` devuelve `domRef` y el componente monta ese.
+- `useButton` **no saca `loading` de `restProps`**, así que llega al DOM y React protesta
+  (`Received \`true\` for a non-boolean attribute \`loading\``). Detectado en el lote 2;
+  arreglo en el lote 5 junto al resto del comportamiento de `loading`.
+- Con `as="a"`, React Aria fuerza `role="button"` sobre el ancla: el nodo tiene `href` pero
+  **no** expone el rol `link`. Decidir en el lote 5 si un Button-enlace debe pasar por
+  `useLink` en lugar de `useButton`.
 - `packages/tw-theme/test-results/` está versionado (artefacto de Playwright).
 - ~~`getThemeNameConfig` (`theme.ts`) compara `flag !== "string"`…~~ **Corregido en el lote 0.**
   Era una comparación contra el literal `"string"` donde se pretendía `typeof`, así que
