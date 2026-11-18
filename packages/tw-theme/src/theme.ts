@@ -35,13 +35,17 @@ const extractThemeVariablesFromOptions = ({
  * @returns An object with the theme name and flag, or null if invalid.
  */
 const getThemeNameConfig = (theme: string): { name: string; flag: Flags } | null => {
-  const [name, flag] = theme.trim().split(" ");
+  const [name, flag] = theme.trim().split(/\s+/);
 
-  if (name && flag !== "string") {
+  // Sin flag explicito: el tema se registra como tema por defecto.
+  if (name && typeof flag !== "string") {
     return { name, flag: Flags.DEFAULT };
   }
 
-  if (name && Object.values(Flags).includes(flag as Flags) && theme.includes(flag)) {
+  // Con flag: solo se acepta si es uno de los flags conocidos (--default, --prefersdark).
+  // Un flag desconocido devuelve null y aborta el registro del tema, en vez de
+  // degradarse silenciosamente a --default.
+  if (name && Object.values(Flags).includes(flag as Flags)) {
     return { name, flag: flag as Flags };
   }
 
