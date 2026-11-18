@@ -137,9 +137,19 @@ Compartidos por todos los temas, inyectados en `:root`:
 | `--border` | `1px` | ancho de borde |
 | `--depth` | `1` | **multiplicador de profundidad**: escala sombras, bordes y text-shadow |
 | `--join-ss` / `-se` / `-es` / `-ee` | `var(--radius-field)` | radios por esquina (para `join`/grupos) |
+| `--hover-depth` | `7%` | cuánto oscurece el hover (vía `color-mix`) |
+| `--active-depth` | `5%` | cuánto oscurece el `:active` |
+| `--disabled-bg-opacity` | `60%` | opacidad del relleno deshabilitado |
+| `--disabled-fg-opacity` | `35%` | opacidad del texto deshabilitado |
+| `--transition-duration` | `0.2s` | duración de las transiciones de color |
 | `--noise` | `0` | opacidad de la textura de ruido |
 | `--fx-noise` | `none` | imagen de ruido |
 | `--btn-noise` | `var(--fx-noise)` | alias por componente |
+
+Los cinco tokens de **estado** (`--hover-depth` … `--transition-duration`) entraron en el
+lote 0, rescatados de la rama `components`. Son la capa que permite ajustar la intensidad de
+las interacciones desde el tema: el CSS de componente los consume con alias propio y fallback
+(`--btn-hover-depth: var(--hover-depth, 7%)`), nunca directamente.
 
 El patrón `--depth` es el más idiosincrático del sistema: en lugar de tokens de sombra
 discretos, las sombras se **calculan** con `color-mix` sobre el color de fondo, escalado por
@@ -182,9 +192,18 @@ El tema dark **no es una inversión**: aclara el relleno y oscurece el `-content
 lo que mantiene el contraste en superficies oscuras. Los valores son hex planos de la paleta
 Tailwind; el `-focus` de light es un paso más oscuro, y en dark es el valor de light.
 
-⚠️ **Esta tabla describe `main`. La rama `components` sustituye la paleta por una de marca
-(Piccolo `#4E46B4`, Hit `#40A69F`, Goku `#F5F5F5`, Beerus `#444444`…) y elimina los 8 tokens
-`-focus`, lo que rompe cosas que todavía dependen de ellos.** Ver §11 antes de tocar tokens.
+✅ **Esta tabla describe el estado actual de `develop`, y es la paleta vigente.** El lote 0
+decidió **no** adoptar la paleta de marca que proponía la rama `components` (Piccolo
+`#4E46B4`, Hit `#40A69F`, Goku `#F5F5F5`, Beerus `#444444`…): es una decisión de producto, y
+tal como venía era además defectuosa (`--color-accent` idéntico a `--color-primary`, y
+`--color-accent-content` idéntico a `--color-accent`, o sea texto invisible).
+
+Consecuencia importante: **los 8 tokens `--color-*-focus` siguen siendo parte del contrato.**
+La rama `components` los eliminaba, y de ahí salían sus tres regresiones. Si algún día se
+cambia la paleta, hay que mantenerlos o retirar a la vez sus tres consumidores:
+`css/button.css`, las 40 utilidades que genera `utilities/colors.ts` (`semanticColorVariants`
+incluye `-focus`) y los temas custom de los consumidores. Ver `specs/lote-0.md` D-03/D-07 y
+la pregunta abierta P-02.
 
 ### 4.4 Cómo se inyectan los temas — `src/plugin.ts`
 
@@ -302,12 +321,20 @@ Reglas duras de este patrón:
 - Todas las mezclas en espacio `oklab`/`oklch`, nunca sRGB.
 - Siempre fallback: `var(--btn-color, var(--color-base-200))`.
 - Anidamiento CSS nativo (`&:hover`) — requiere `postcss-nesting` en el pipeline.
+- **El orden importa tanto como la especificidad.** `.btn:where(:disabled, …)` y `.btn-primary`
+  tienen la misma especificidad (0,1,0), así que un estado final como `:disabled` tiene que
+  declararse **después** de los roles y los tratamientos o éstos le sobreescriben el color.
+  `button.css` lo documenta en su propia sección 4.
+
+`button.css` se reescribió en el lote 0 (rescate de la rama `components`) y **ya no usa
+`@apply`**: resuelve todo con custom properties puras, lo que elimina la dependencia del
+pipeline de `@apply` para ese archivo. `dropdown.css` y `loader.css` sí lo siguen usando.
 
 Clases existentes hoy:
 
 | Archivo | Selectores |
 |---|---|
-| `button.css` (315 ln) | `.btn`, `.btn-active`, 8 semánticos, `.btn-ghost`, `.btn-link`, `.btn-outline`, `.btn-dash`, `.btn-soft`, `.btn-{xs..xl}`, `.btn-square`, `.btn-circle`, `.btn-wide`, `.btn-block` |
+| `button.css` (306 ln) | `.btn`, `.btn-active`, 8 semánticos, `.btn-ghost`, `.btn-link`, `.btn-outline`, `.btn-dash`, `.btn-soft`, `.btn-{xs..xl}`, `.btn-square`, `.btn-circle`, `.btn-wide`, `.btn-block` |
 | `dropdown.css` (224 ln) | `.dropdown`, `.dropdown-item` (+ selected/disabled), `.dropdown-{primary,secondary,accent,neutral}`, `.dropdown-{xs..xl}`, `.dropdown-{ghost,bordered,compact}`, `.dropdown-item-text` |
 | `loader.css` (110 ln) | `.loader`, `.loader-spinner`, `@keyframes loader-spin`, `.loader-{2xs..lg}`, 8 colores, soporte `prefers-reduced-motion` |
 | `menu.css` | **vacío (0 líneas)** |
@@ -502,6 +529,20 @@ fixture.** Es el único mecanismo que detecta regresiones reales del plugin.
 - `.releaserc` (semantic-release) está huérfano: no lo invoca ningún workflow. Conviven dos
   sistemas de release declarados y sólo Changesets está en uso.
 
+**Modelo de ramas** (vigente desde el lote 0):
+
+| Rama | Rol |
+|---|---|
+| `main` | Release y publicación. **No se commitea, pushea ni mergea directamente.** |
+| `develop` | Integración. Base de todos los lotes y destino de sus PRs. |
+| `claude/lote-<N>` | Rama de trabajo de un lote, creada desde la última `develop`. Un lote = una PR. |
+
+- 🔴 **`ci.yml` se dispara sólo en PRs hacia `main`** (`on: pull_request: branches: [main]`).
+  Con `develop` como rama de integración, **las PRs de lote no ejecutan CI**: la ausencia de
+  checks en una PR hacia `develop` no significa que esté verde, significa que nadie la miró.
+  Hasta que se añada `develop` a ese trigger, la verificación de un lote es la que su autor
+  haya corrido en local y documentado en su spec.
+
 ### 6.6 Convenciones de código
 
 Conventional commits (`feat:`, `fix:`, `chore:`, `docs:`). Prettier: `printWidth: 100`,
@@ -656,10 +697,10 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 - `@ownui/dom-utils` no tiene tests ni `tsconfig` de test; `license: ISC` mientras el resto es MIT.
 - `collectCoverage: true` global en Jest.
 - `packages/tw-theme/test-results/` está versionado (artefacto de Playwright).
-- `getThemeNameConfig` (`theme.ts`) compara `flag !== "string"` — comparación contra el
-  **literal** `"string"` donde se pretendía `typeof flag !== "string"`. La primera rama se
-  cumple casi siempre, así que `--prefersdark` se ignora y todo tema custom se registra como
-  `--default`. **Ya corregido en la rama `tw-theme/v1`** (§11).
+- ~~`getThemeNameConfig` (`theme.ts`) compara `flag !== "string"`…~~ **Corregido en el lote 0.**
+  Era una comparación contra el literal `"string"` donde se pretendía `typeof`, así que
+  `--prefersdark` se ignoraba y todo tema custom se registraba como `--default`. Cubierto con
+  10 tests en `src/__tests__/theme.test.ts`.
 - `variants/button.ts` declara `ghost` **dos veces**: en `theme` y en `variant`. Es la razón
   por la que `variant="ghost"` parece funcionar pese al bug de §9.4 (el lookup cae en `theme`
   y encuentra la clave por coincidencia).
@@ -689,21 +730,42 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 
 ## 11. Estado de ramas: trabajo no mergeado
 
-**`main` no es el estado más avanzado del repo.** Hay 15 ramas remotas y dos contienen trabajo
-real que se solapa con la deuda de §9. Leer esto antes de abrir cualquier lote, o se reimplementa
-algo que ya existe en una rama.
+> **Reconciliado en el lote 0** (2026-11-18). El inventario completo, con la decisión tomada
+> para cada una de las 14 ramas y las decisiones de diseño asociadas, está en
+> [`specs/lote-0.md`](./specs/lote-0.md). Esta sección queda como resumen.
 
-| Rama | Ahead | Behind | Fecha | Contenido |
-|---|---|---|---|---|
-| `components` | **7** | **0** | 2026-02-27 | Rediseño de `button.css`, nueva paleta de marca, tokens de estado, skill de React |
-| `tw-theme/v1` | **4** | 9 | 2026-02-27 | **Publicación del CSS** (`exports["./css"]`), fix de `getThemeNameConfig`, v1.0.1 |
-| `copilot/update-tw-theme-readme` | 5 | 37 | 2025-12-12 | +375 ln de README documentando el sistema de componentes |
-| `changeset-release/main` | 1 | 0 | 2025-12-15 | Automática de Changesets (release de 6 paquetes) |
-| `copilot/update-react-to-19-0-3`, `…-versions-to-19-0-3` | 2 | 41/44 | 2025-12-12 | Bump React 19.0.3 (ya incluido en `components`) |
-| `copilot/update-copilot-instructions`, `copilot/delegate-to-cloud-agent` | 1 | 37/41 | 2025-12-12 | Obsoletas |
-| `feat/tw-theme`, `feat/v1`, `copilot/fix-*`, `copilot/update-react-version-19-0-1` | 0 | 33–49 | 2025-12 | **Sin aporte**: 0 commits ahead, mergeadas o abandonadas |
+**Qué cambió.** `develop` es la rama de integración y ya incorpora lo que valía la pena de las
+dos ramas con trabajo real: el fix de `getThemeNameConfig` de `tw-theme/v1` y, de `components`,
+los 5 tokens de estado y el `button.css` rediseñado. Lo que quedó fuera lo hizo a propósito.
 
-### 11.1 `components` — 7 ahead, 0 behind (descendiente directo de `main`)
+**No se borró ninguna rama.** El borrado es destructivo y no se puede revisar en una PR, así
+que el lote 0 lo dejó empaquetado en `scripts/cleanup-dead-branches.sh` (dry-run por defecto)
+para ejecución manual. Hasta que alguien lo corra, las 14 ramas siguen ahí.
+
+Ahead/behind medidos contra `origin/develop` el 2026-11-18. **No los fijes a mano en este
+documento: caducan en el siguiente merge** — recalcúlalos con el bucle de
+`@docs/BUILD-BATCHES.md` §L0.
+
+| Rama | A/B | Decisión del lote 0 | Estado |
+|---|---|---|---|
+| `components` | 7/1 | Rescate parcial: entran los tokens de estado y `button.css`. **Fuera**: paleta de marca (decisión de producto, P-02), bump de React (D-08), skill de React (fuera de alcance) | **Conservar** hasta decidir P-02 |
+| `tw-theme/v1` | 4/10 | Rescate parcial: entra el fix de `getThemeNameConfig`. La publicación de CSS se trasladó al lote 1; el cambio de `:where(root)` queda pendiente (P-01) | **Conservar** hasta cerrar P-01 |
+| `copilot/update-tw-theme-readme` | 5/38 | README extraído a `@docs/salvage/` (insumo del lote 9) | Borrable |
+| `copilot/update-react-to-19-0-3` | 2/42 | Fixture React extraído a `@docs/salvage/` (insumo de los lotes 1 y 9); el bump se descarta | Borrable |
+| `copilot/update-react-versions-to-19-0-3` | 2/45 | El mismo bump, sin contenido único | Borrable |
+| `claude/great-archimedes-5f008a` | 3/1 | Redundante: su árbol es idéntico a `develop` (mergeada con squash en la PR #24) | Borrable |
+| `copilot/update-copilot-instructions`, `copilot/delegate-to-cloud-agent` | 1/38, 1/42 | Un commit "Initial plan" cada una, **sin ningún cambio** | Borrable |
+| `feat/tw-theme`, `feat/v1`, `copilot/fix-release-workflow-error`, `copilot/fix-uncommitted-changes-detected`, `copilot/update-react-version-19-0-1` | 0/9–50 | Sin aporte: 0 commits ahead | Borrable |
+| `changeset-release/main` | 1/0 | La regenera Changesets sola | No tocar a mano |
+
+### 11.1 `components` — 7 ahead, 1 behind
+
+> **Resuelto parcialmente en el lote 0.** Ya están en `develop` los 5 tokens de estado y el
+> `button.css` rediseñado. **Las tres regresiones de abajo ya no aplican**: existían porque la
+> rama borraba la paleta con sus `--color-*-focus`, y al no adoptarse la paleta (D-07) dejaron
+> de tener objeto — no hubo que parchear nada. Lo que sigue vivo de esta rama es la paleta de
+> marca (pendiente de P-02) y el skill de React, fuera de alcance. El análisis se conserva como
+> registro de por qué se decidió así.
 
 Es la rama más reciente y la que **más afecta al sistema de diseño**. Aporta:
 
@@ -743,7 +805,12 @@ Es la rama más reciente y la que **más afecta al sistema de diseño**. Aporta:
 **El bug de §9.4 NO está arreglado aquí**: el diff de `useButton.tsx` (51 ln) es exclusivamente
 reformateo de Prettier; `button.theme[variant]` sigue intacto.
 
-### 11.2 `tw-theme/v1` — 4 ahead, 9 behind
+### 11.2 `tw-theme/v1` — 4 ahead, 10 behind
+
+> **Resuelto parcialmente en el lote 0.** El fix de `getThemeNameConfig` ya está en `develop`
+> con 10 tests. El mecanismo de publicación de CSS se trasladó literal (y corregido) a la ficha
+> del lote 1. El cambio de semántica de `:where(root)` **no** se adoptó: es una decisión de
+> producto que necesita fixture e2e (P-01).
 
 Más pequeña pero resuelve **el bug raíz del repo**, y justamente con la opción (B) del lote 1:
 
@@ -764,6 +831,16 @@ fixture e2e. Incluye además el versionado a 1.0.1 y los CHANGELOG de 5 paquetes
 
 ### 11.3 Consecuencia para el plan de trabajo
 
-Los lotes 1, 4 y 5 de [`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md) **se solapan con
-estas dos ramas**. Por eso el plan abre con un lote 0 de reconciliación: decidir qué se rescata,
-qué se descarta y qué se reimplementa, antes de escribir código nuevo.
+El lote 0 ya cerró el solape que tenían los lotes 1, 4 y 5 con estas dos ramas. Lo que queda
+pendiente para quien siga:
+
+- **Lote 1** parte del snippet ya corregido que le dejó el lote 0 en su ficha, más el fixture
+  React de `@docs/salvage/`. No hace falta volver a `tw-theme/v1`.
+- **Lote 4** (escala `base-100/200/300`) se vuelve más urgente de lo que parecía:
+  `rootColors.ts` define `--color-base-200: #000000`, y el `button.css` que entró en el lote 0
+  lo usa como relleno del botón neutro por defecto, así que ese botón sale negro en tema claro.
+- **Lote 5** sigue intacto: el bug de `Button.variant` (§9.4) no estaba arreglado en ninguna
+  rama, y el lote 0 no tocó el contrato de clases (el conjunto de selectores de `button.css`
+  es idéntico al anterior).
+- **Decisiones de producto abiertas**: la paleta de marca (P-02) y la semántica de los temas
+  custom `--default` (P-01). Ambas en `specs/lote-0.md` §9.

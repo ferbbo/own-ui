@@ -56,3 +56,6 @@ Thumbs.db
 
 # Temporary build directories
 .tmp/
+# Artefactos de recuperación del lote 0 (ver specs/lote-0.md B-03). Borrar tras publicar.
+/lote-0.bundle
+/lote-0.patch
