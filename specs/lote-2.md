@@ -229,6 +229,8 @@ B-03; esta sesión sí tiene permiso).
 | G-05 | **El lote 5 debe conservar `domRef`** en el retorno de `useButton` al reescribir el hook, o el forwarding de ref volverá a romperse (ahora hay test que lo cubre). | L5 |
 | G-06 | `@ownui/dom-utils` sigue con `license: ISC` mientras el resto del monorepo es MIT, y sin `tsconfig` propio de test (usa el `tsconfig.jest.json` de la raíz). | L3 |
 | G-07 | `Button.stories.tsx` tiene ~40 warnings de Prettier preexistentes (`pnpm lint` los reporta como warning, no error). No se tocó para no mezclar ruido de formato con el diff de tests. | L5 |
+| G-09 | **`pnpm lint` ya salía con 5 errores antes de este lote** y ninguno está en los archivos tocados aquí: `jest.setup.js` (1, `require()` prohibido por `@typescript-eslint/no-require-imports`) y `Dropdown.stories.tsx` (4, `useState` dentro de las funciones `render` de las stories, que violan `react-hooks/rules-of-hooks`). Con `pnpm lint` en rojo de base, nadie puede usarlo como puerta de calidad. | L3 (lint) / L6 (stories) |
+| G-10 | **`pnpm --filter @ownui/button build` falla en un clon limpio** con `TS2307: Cannot find module '@ownui/loader'`: los `exports` apuntan a `dist/` y nada construye las dependencias antes. Construyendo a mano `dom-utils → loader → button` funciona. Es la confirmación empírica de §9.3: falta `dependsOn: ["^build"]` en `turbo.json`. | L3 |
 | G-08 | `AGENTS.md` no pasa `prettier --check` (ya era así antes de este lote). Reformatearlo generaría un diff de miles de líneas; conviene hacerlo en un commit de formato aparte. | L9 |
 
 ---
@@ -284,6 +286,22 @@ All files              |      98 |    83.51 |   94.59 |   98.43
   Button.tsx           |     100 |      100 |     100 |     100
   useButton.tsx        |     100 |    89.65 |     100 |     100
 ```
+
+### Lint y build (fase final)
+
+```
+$ npx eslint .   → 5 errores, todos preexistentes y fuera de los archivos del lote
+  1  jest.setup.js
+  4  packages/ui/src/Dropdown/src/Dropdown.stories.tsx
+
+$ pnpm build                              → @ownui/tw-theme OK
+$ pnpm --filter @ownui/button build       → falla: TS2307 '@ownui/loader' (gap G-10, §9.3)
+$ pnpm --filter @ownui/dom-utils build && pnpm --filter @ownui/loader build \
+    && pnpm --filter @ownui/button build  → CJS/ESM/DTS OK
+```
+
+El arreglo del ref compila sin problemas en cuanto las dependencias están construidas: el
+fallo del build es el orden topológico que arregla el lote 3, no este cambio.
 
 ### AC4 — `pnpm test`
 
