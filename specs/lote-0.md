@@ -7,7 +7,7 @@
 | Lote            | **L0** — Reconciliar las ramas sin mergear (`@docs/BUILD-BATCHES.md` §L0) |
 | Rama base       | `develop` (en `70d1d22`)                                                  |
 | Rama de trabajo | `claude/lote-0`                                                           |
-| Estado general  | EN CURSO                                                                  |
+| Estado general  | **CERRADO** — listo para revisión humana                                  |
 | Fecha           | 2026-11-18                                                                |
 
 > **Nota sobre el número de lote.** El prompt programado llegó con el marcador `{{N}}`
@@ -40,38 +40,38 @@ producen decisiones documentadas y rescates quirúrgicos, no funcionalidad nueva
 
 ## 3. Tabla de SLICES
 
-| ID  | Descripción                                                                                  | Criterios (IDs) | Archivos afectados                              | Depende de  | Estado    |
-| --- | -------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------- | ----------- | --------- |
-| S01 | Inventario de las 14 ramas remotas con ahead/behind reales vs `develop`                      | AC1             | `specs/lote-0.md`                               | —           | HECHO     |
-| S02 | Decisión escrita por rama: rescatar / reimplementar / descartar                              | AC1             | `specs/lote-0.md`, `AGENTS.md` §11              | S01         | HECHO     |
-| S03 | Rescate del fix de `getThemeNameConfig` (comparación contra literal `"string"`)              | AC2             | `packages/tw-theme/src/theme.ts`                | S02         | PENDIENTE |
-| S04 | Tests unitarios reales del parseo de nombre+flag de tema                                     | AC2             | `packages/tw-theme/src/__tests__/theme.test.ts` | S03         | PENDIENTE |
-| S05 | Decisión sobre el cambio de semántica `:where(root)` de `tw-theme/v1`                        | AC2             | `specs/lote-0.md`, `@docs/BUILD-BATCHES.md`     | S02         | PENDIENTE |
-| S06 | Traslado explícito del contenido de publicación de CSS de `tw-theme/v1` al lote 1            | AC2             | `@docs/BUILD-BATCHES.md` §L1                    | S05         | PENDIENTE |
-| S07 | Rescate de los 5 tokens globales de estado de `components` en `root.ts`                      | AC6             | `packages/tw-theme/src/themes/root.ts`          | S02         | PENDIENTE |
-| S08 | Rescate del `button.css` rediseñado de `components`, reconciliado con la paleta de `develop` | AC3             | `packages/tw-theme/src/css/button.css`          | S07         | PENDIENTE |
-| S09 | Verificación: 0 referencias a `--color-*-focus` inexistentes                                 | AC3             | — (verificación)                                | S08         | PENDIENTE |
-| S10 | Verificación: ningún `-content` idéntico a su color base                                     | AC4             | — (verificación)                                | S08         | PENDIENTE |
-| S11 | Paleta de marca de `components` → NO adoptada (decisión de producto)                         | AC1             | `specs/lote-0.md`                               | S02         | PENDIENTE |
-| S12 | Rescate del README y del fixture React como insumos de los lotes 1 y 9                       | AC1             | `@docs/salvage/**`                              | S02         | PENDIENTE |
-| S13 | Decisión sobre adoptar React 19.0.3                                                          | AC1             | `specs/lote-0.md`                               | S02         | PENDIENTE |
-| S14 | Script de limpieza de ramas muertas (ejecución bajo gate humano)                             | AC5             | `scripts/cleanup-dead-branches.sh`              | S02         | PENDIENTE |
-| S15 | `AGENTS.md` §4.1/§4.3/§9/§11 reflejan el estado posterior a la reconciliación                | AC6             | `AGENTS.md`                                     | S03,S07,S08 | PENDIENTE |
-| S16 | `CLAUDE.md` apuntando a `AGENTS.md`, sin duplicar contenido                                  | — (prompt)      | `CLAUDE.md`                                     | —           | HECHO     |
+| ID  | Descripción                                                                                  | Criterios (IDs) | Archivos afectados                              | Depende de  | Estado             |
+| --- | -------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------- | ----------- | ------------------ |
+| S01 | Inventario de las 14 ramas remotas con ahead/behind reales vs `develop`                      | AC1             | `specs/lote-0.md`                               | —           | HECHO              |
+| S02 | Decisión escrita por rama: rescatar / reimplementar / descartar                              | AC1             | `specs/lote-0.md`, `AGENTS.md` §11              | S01         | HECHO              |
+| S03 | Rescate del fix de `getThemeNameConfig` (comparación contra literal `"string"`)              | AC2             | `packages/tw-theme/src/theme.ts`                | S02         | HECHO              |
+| S04 | Tests unitarios reales del parseo de nombre+flag de tema                                     | AC2             | `packages/tw-theme/src/__tests__/theme.test.ts` | S03         | HECHO              |
+| S05 | Decisión sobre el cambio de semántica `:where(root)` de `tw-theme/v1`                        | AC2             | `specs/lote-0.md`, `@docs/BUILD-BATCHES.md`     | S02         | HECHO              |
+| S06 | Traslado explícito del contenido de publicación de CSS de `tw-theme/v1` al lote 1            | AC2             | `@docs/BUILD-BATCHES.md` §L1                    | S05         | HECHO              |
+| S07 | Rescate de los 5 tokens globales de estado de `components` en `root.ts`                      | AC6             | `packages/tw-theme/src/themes/root.ts`          | S02         | HECHO              |
+| S08 | Rescate del `button.css` rediseñado de `components`, reconciliado con la paleta de `develop` | AC3             | `packages/tw-theme/src/css/button.css`          | S07         | HECHO              |
+| S09 | Verificación: 0 referencias a `--color-*-focus` inexistentes                                 | AC3             | — (verificación)                                | S08         | HECHO              |
+| S10 | Verificación: ningún `-content` idéntico a su color base                                     | AC4             | — (verificación)                                | S08         | HECHO              |
+| S11 | Paleta de marca de `components` → NO adoptada (decisión de producto)                         | AC1             | `specs/lote-0.md`                               | S02         | HECHO              |
+| S12 | Rescate del README y del fixture React como insumos de los lotes 1 y 9                       | AC1             | `@docs/salvage/**`                              | S02         | HECHO              |
+| S13 | Decisión sobre adoptar React 19.0.3                                                          | AC1             | `specs/lote-0.md`                               | S02         | HECHO              |
+| S14 | Script de limpieza de ramas muertas (ejecución bajo gate humano)                             | AC5             | `scripts/cleanup-dead-branches.sh`              | S02         | **PARCIAL** (D-09) |
+| S15 | `AGENTS.md` §4.1/§4.3/§9/§11 reflejan el estado posterior a la reconciliación                | AC6             | `AGENTS.md`                                     | S03,S07,S08 | HECHO              |
+| S16 | `CLAUDE.md` apuntando a `AGENTS.md`, sin duplicar contenido                                  | — (prompt)      | `CLAUDE.md`                                     | —           | HECHO              |
 
 ---
 
 ## 4. Tabla de TASKS
 
-| ID  | Slices                  | Predecesora(s) | Modo + justificación                                                                                                                                                                                                                    | Commit        | Estado    |
-| --- | ----------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | --------- |
-| T1  | S16, S01, S02           | —              | SECUENCIAL — primera task; crea el artefacto (`specs/lote-0.md`) que todas las demás actualizan                                                                                                                                         | `_pendiente_` | EN CURSO  |
-| T2  | S03, S04, S05           | T1             | SECUENCIAL — depende de las decisiones D-04/D-05 registradas en T1                                                                                                                                                                      | `_pendiente_` | PENDIENTE |
-| T3  | S07                     | T2             | SECUENCIAL por elección — no comparte archivos con T2 (`themes/root.ts` vs `theme.ts`), luego sería paralelizable; se ejecuta en serie porque el coste de orquestar worktrees/subagentes supera el beneficio en una edición de 9 líneas | `_pendiente_` | PENDIENTE |
-| T4  | S08, S09, S10           | T3             | SECUENCIAL **obligatorio** — `button.css` consume los tokens `--hover-depth`/`--active-depth`/`--disabled-*-opacity`/`--transition-duration` que introduce T3; sin ellos los fallbacks cambian de significado                           | `_pendiente_` | PENDIENTE |
-| T5  | S06, S11, S12, S13, S14 | T4             | SECUENCIAL por elección — sólo toca documentación y `scripts/`, sin solape con T2–T4; paralelizable en teoría, serie por el mismo motivo de coste que T3                                                                                | `_pendiente_` | PENDIENTE |
-| T6  | S15                     | T2, T3, T4     | SECUENCIAL **obligatorio** — `AGENTS.md` §4/§9/§11 describe el estado final del código, que sólo existe una vez commiteadas T2–T4                                                                                                       | `_pendiente_` | PENDIENTE |
-| T7  | cierre                  | T6             | SECUENCIAL — spec final con hashes, evidencia y changeset                                                                                                                                                                               | `_pendiente_` | PENDIENTE |
+| ID  | Slices                  | Predecesora(s) | Modo + justificación                                                                                                                                                                                                                    | Commit    | Estado |
+| --- | ----------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------ |
+| T1  | S16, S01, S02           | —              | SECUENCIAL — primera task; crea el artefacto (`specs/lote-0.md`) que todas las demás actualizan                                                                                                                                         | `ae94ea4` | HECHO  |
+| T2  | S03, S04, S05           | T1             | SECUENCIAL — depende de las decisiones D-04/D-05 registradas en T1                                                                                                                                                                      | `41796fd` | HECHO  |
+| T3  | S07                     | T2             | SECUENCIAL por elección — no comparte archivos con T2 (`themes/root.ts` vs `theme.ts`), luego sería paralelizable; se ejecuta en serie porque el coste de orquestar worktrees/subagentes supera el beneficio en una edición de 9 líneas | `aecdf17` | HECHO  |
+| T4  | S08, S09, S10           | T3             | SECUENCIAL **obligatorio** — `button.css` consume los tokens `--hover-depth`/`--active-depth`/`--disabled-*-opacity`/`--transition-duration` que introduce T3; sin ellos los fallbacks cambian de significado                           | `2f6e5fd` | HECHO  |
+| T5  | S06, S11, S12, S13, S14 | T4             | SECUENCIAL por elección — sólo toca documentación y `scripts/`, sin solape con T2–T4; paralelizable en teoría, serie por el mismo motivo de coste que T3                                                                                | `e54ad83` | HECHO  |
+| T6  | S15                     | T2, T3, T4     | SECUENCIAL **obligatorio** — `AGENTS.md` §4/§9/§11 describe el estado final del código, que sólo existe una vez commiteadas T2–T4                                                                                                       | `5317df7` | HECHO  |
+| T7  | cierre                  | T6             | SECUENCIAL — spec final con hashes, evidencia y changeset                                                                                                                                                                               | `ddaaa15` | HECHO  |
 
 Los commits se hacen siempre de uno en uno.
 
@@ -79,18 +79,52 @@ Los commits se hacen siempre de uno en uno.
 
 ## 5. Checklist de criterios de aceptación
 
-Criterios tomados literalmente de `@docs/BUILD-BATCHES.md` §L0.
+Criterios tomados literalmente de `@docs/BUILD-BATCHES.md` §L0. Cada evidencia es un comando
+que se ejecutó, no una afirmación.
 
-| ID  | Criterio                                                                                   | Estado    | Evidencia       |
-| --- | ------------------------------------------------------------------------------------------ | --------- | --------------- |
-| AC1 | Cada una de las 14 ramas tiene una decisión escrita (rescatar / reimplementar / descartar) | PENDIENTE | §6 de esta spec |
-| AC2 | `tw-theme/v1` integrado, o su contenido explícitamente trasladado al lote 1                | PENDIENTE | —               |
-| AC3 | Si entra `components`: ninguna clase ni token referencia un `--color-*-focus` inexistente  | PENDIENTE | —               |
-| AC4 | Si entra `components`: ningún par `-content` igual a su color base                         | PENDIENTE | —               |
-| AC5 | `git ls-remote --heads origin` sin ramas muertas (0 ahead)                                 | PENDIENTE | —               |
-| AC6 | `AGENTS.md` §4 y §11 reflejan el estado posterior a la reconciliación                      | PENDIENTE | —               |
+| ID  | Criterio                                                              | Veredicto                       | Evidencia                                                                                                                                                                                                                                                                                                  |
+| --- | --------------------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1 | Cada una de las 14 ramas tiene una decisión escrita                   | ✅ **CUMPLIDO**                 | §6 de esta spec: 14 filas, 14 decisiones. Commit `ae94ea4`. Resumen también en `AGENTS.md` §11 (`5317df7`). Los ahead/behind se re-midieron con `git rev-list --left-right --count origin/develop...origin/<rama>`                                                                                         |
+| AC2 | `tw-theme/v1` integrado, o su contenido trasladado al lote 1          | ✅ **CUMPLIDO**                 | Integrado el fix de `getThemeNameConfig` en `41796fd` con 10 tests (`src/__tests__/theme.test.ts`); **5 de los 10 fallan contra el código sin arreglar**, comprobado haciendo `git stash` del fix. El mecanismo de publicación de CSS se trasladó literal y corregido a la ficha del lote 1 en `e54ad83`   |
+| AC3 | Ninguna clase ni token referencia un `--color-*-focus` inexistente    | ✅ **CUMPLIDO**                 | `comm -23` entre los `-focus` referenciados en `src/css` + `src/variants` + `src/utilities` (8) y los definidos en `src/themes/*.ts` (8) → **conjunto vacío**. Además los 8 roles de `button.css` caen al color base si el tema omite el token, así que un tema de consumidor tampoco puede romperlo       |
+| AC4 | Ningún par `-content` igual a su color base                           | ✅ **CUMPLIDO**                 | Script sobre `themes/light.ts` y `dark.ts`: 8 familias × 2 temas = 16 pares comprobados, 0 colisiones. Salida completa en §11. Se cumple porque **no** se adoptó la paleta de `components`, que sí colisionaba                                                                                             |
+| AC5 | `git ls-remote --heads origin` sin ramas muertas (0 ahead)            | ❌ **NO CUMPLIDO** (deliberado) | Las 14 ramas siguen en el remoto. Borrarlas es destructivo y ocurriría **antes** del único gate acordado, la revisión de la PR, sin poder revisarse en ella. Se entrega `scripts/cleanup-dead-branches.sh` (`e54ad83`), verificado en dry-run, que borra 11 ramas re-comprobando cada una. Ver D-09 y B-01 |
+| AC6 | `AGENTS.md` §4 y §11 reflejan el estado posterior a la reconciliación | ✅ **CUMPLIDO**                 | `5317df7`: §4.1 (5 tokens de estado), §4.3 (paleta vigente + los `-focus` como contrato), §4.8 (`button.css` sin `@apply` + regla de orden en cascada), §6.5 (modelo de ramas + agujero de CI), §9.10 (bug corregido), §11 reescrita con tabla de decisión y notas en §11.1–§11.3                          |
 
----
+**5 de 6 cumplidos.** El no cumplido lo es por decisión registrada, no por omisión, y queda una
+orden de distancia: `./scripts/cleanup-dead-branches.sh --execute`.
+
+### Verificación global (fase final)
+
+| Comprobación                        | Resultado                                                                                                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm test`                         | ✅ 4 suites, **35 tests**, todos en verde (eran 3 suites / 25 antes del lote)                                                                                                                                      |
+| e2e sobre CSS compilado en Chromium | ✅ **80/80** (`pnpm e2e:build` + Playwright)                                                                                                                                                                       |
+| `pnpm build`                        | ✅ `@ownui/tw-theme` construye. `dist/` **sigue sin `css/`**: es el bug §9.1, que resuelve el lote 1 — esperado, no regresión                                                                                      |
+| `tsc --noEmit` de `@ownui/tw-theme` | ✅ limpio (`-p packages/tw-theme/tsconfig.json`)                                                                                                                                                                   |
+| `pnpm lint`                         | ⚠️ falla, **exactamente igual que en `develop`**: 5 errores y 307 warnings, todos preexistentes y fuera de alcance (B-02/G-01). Verificado que el lote no añade ni uno: los archivos que toca pasan eslint limpios |
+| `tsc` de Button/Dropdown            | ⚠️ errores `TS2307` preexistentes (§9.10). El lote **no toca `packages/ui/`**: `git diff --name-only origin/develop...HEAD \| grep '^packages/ui/'` → vacío                                                        |
+| Rebase sobre `develop`              | ✅ sin conflictos: `develop` no avanzó durante el lote (sigue en `70d1d22`)                                                                                                                                        |
+
+### Verificación extra: el CSS rescatado pinta de verdad
+
+`button.css` no se publica ni se importa todavía (§9.1), así que ningún test del repo lo cubre.
+Para no rescatarlo a ciegas se compiló con Tailwind v4 en un fixture temporal y se leyeron los
+estilos **computados** en Chromium. El fixture no se commitea: construirlo en condiciones es el
+criterio de aceptación del lote 1.
+
+| Caso                        | `background-color`                                      | `height`        | `border-radius` | `outline-color`                            |
+| --------------------------- | ------------------------------------------------------- | --------------- | --------------- | ------------------------------------------ |
+| `.btn .btn-primary .btn-md` | `rgb(59,130,246)` = `--color-primary`                   | `40px` (2.5rem) | `6px`           | `rgb(37,99,235)` = `--color-primary-focus` |
+| `+ .btn-outline`            | `rgba(0,0,0,0)` con texto `rgb(59,130,246)`             | `40px`          | `6px`           | idem                                       |
+| `.btn-lg`                   | primary                                                 | `48px`          | `6px`           | idem                                       |
+| `[data-theme="dark"]`       | `rgb(96,165,250)` = primary dark, texto `rgb(30,41,59)` | `40px`          | `6px`           | `rgb(59,130,246)`                          |
+| `:disabled`                 | `oklab(0 0 0 / 0.6)` con texto al 35%                   | `40px`          | `6px`           | —                                          |
+
+Lo relevante: `outline-color` resuelve al token `-focus`. **Ese es exactamente el valor que la
+rama `components` rompía** al borrar la paleta, y es la prueba de que la reconciliación funciona.
+La fila `:disabled` sólo pinta así tras mover el bloque al final de la cascada: antes de ese
+arreglo el computed daba texto blanco opaco, porque `.btn-primary` le ganaba por orden.
 
 ## 6. Inventario de ramas y decisión por rama
 
@@ -200,12 +234,36 @@ Formato: Contexto | Opciones | Decisión | Razón | Reversibilidad.
 
 ---
 
+### D-10 — Los 8 roles de `button.css` caen al color base si falta su `-focus`
+
+- **Contexto:** el `button.css` rescatado hacía `--btn-focus-color: var(--color-primary-focus)` sin fallback en 6 de los 8 roles (sólo `warning` y `error` lo traían). Si el token no existe, la declaración queda inválida en tiempo de cómputo y el color de interacción se pierde en silencio: es la trampa descrita en `AGENTS.md` §11.1.
+- **Opciones:** (a) dejarlo como venía, dado que en `develop` los 8 tokens existen; (b) poner fallback al color base en los 8.
+- **Decisión:** **(b)**.
+- **Razón:** en el repo los tokens existen, pero **un tema custom de un consumidor puede omitirlos** — el plugin acepta cualquier subconjunto de variables. Con fallback, el peor caso es un hover sin color curado; sin fallback, es un botón con el `outline` roto y sin pista de por qué. El coste son 6 caracteres por línea. Hace AC3 verdadero por construcción y no sólo para los temas del repo.
+- **Reversibilidad:** total.
+
+### D-11 — El bloque `:disabled` se mueve al final de la cascada
+
+- **Contexto:** el `button.css` rescatado declaraba `:disabled` **antes** de los roles y los tratamientos, con el comentario "estado FINAL, gana a todo". Pero `.btn:where(:disabled, …)` tiene especificidad (0,1,0), la misma que `.btn-primary`, así que decidía el orden de aparición: el rol le sobreescribía `--btn-fg`. Detectado leyendo los estilos computados en Chromium, no el código: un `.btn-primary:disabled` daba texto blanco opaco en vez del 35% previsto.
+- **Opciones:** (a) dejarlo (defecto heredado de la rama); (b) subir la especificidad con un selector más pesado; (c) moverlo al final de la cascada.
+- **Decisión:** **(c)**, con el porqué escrito en el propio CSS.
+- **Razón:** (a) publica un estado deshabilitado roto en el archivo que este lote introduce. (b) funciona pero rompe el patrón de §4.8, donde todos los selectores viven en (0,1,0) a propósito. (c) es un cambio de orden, cero especificidad añadida, y es lo que el comentario original ya decía querer.
+- **Reversibilidad:** total.
+
+### D-12 — El material rescatado se guarda como Markdown, no como archivos fuente
+
+- **Contexto:** el fixture React rescatado se guardó primero como `.tsx`/`.ts` reales en `@docs/salvage/`. Eslint los recoge y añadían 69 warnings de Prettier.
+- **Opciones:** (a) dejarlos y asumir el ruido; (b) añadirlos a la configuración de ignore de eslint/prettier; (c) transcribirlos a un `.md` con bloques de código.
+- **Decisión:** **(c)**.
+- **Razón:** (a) degrada la señal del lint para todo el mundo. (b) toca configuración global, que el lote tiene prohibido. (c) además es más honesto: es material de referencia de una rama descartada, no código del proyecto — así no se lintea, no se typechequea y no se puede importar por accidente.
+- **Reversibilidad:** total; el contenido está íntegro.
+
 ## 8. Bloqueantes
 
-| ID   | Severidad     | Descripción                                                                                                                                                                                                                                                                                                                                                   | Estado                           |
-| ---- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| B-01 | 🟠 No crítico | **AC5 no se puede cumplir dentro del gate.** El borrado de 12 ramas remotas es destructivo y no revisable en la PR (D-09). Se entrega `scripts/cleanup-dead-branches.sh` para ejecución manual tras la aprobación.                                                                                                                                            | ABIERTO — requiere acción humana |
-| B-02 | 🟠 No crítico | **`pnpm lint` falla en `develop` antes de este lote**: 5 errores (1 en `jest.setup.js`, 4 en `Dropdown.stories.tsx`) y 307 warnings de Prettier. Son preexistentes y están **fuera del alcance de L0** (`jest.setup.js` → lote 2; `Dropdown.stories.tsx` → lotes 6/7). No se tocan. Se verifica en cambio que los archivos que toca este lote queden limpios. | ABIERTO — pasa a gaps            |
+| ID   | Severidad                                                   | Descripción                                                                                                                                                                                                                                                                                                                                                   | Estado                           |
+| ---- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| B-01 | 🟠 No crítico                                               | **AC5 no se puede cumplir dentro del gate.** El borrado de 12 ramas remotas es destructivo y no revisable en la PR (D-09). Se entrega `scripts/cleanup-dead-branches.sh` para ejecución manual tras la aprobación.                                                                                                                                            | ABIERTO — requiere acción humana |
+| B-02 | 🟠 No crítico (verificado al cierre: el lote no lo empeora) | **`pnpm lint` falla en `develop` antes de este lote**: 5 errores (1 en `jest.setup.js`, 4 en `Dropdown.stories.tsx`) y 307 warnings de Prettier. Son preexistentes y están **fuera del alcance de L0** (`jest.setup.js` → lote 2; `Dropdown.stories.tsx` → lotes 6/7). No se tocan. Se verifica en cambio que los archivos que toca este lote queden limpios. | ABIERTO — pasa a gaps            |
 
 **Ningún bloqueante crítico.** El repo es accesible, `develop` existe, el entorno funciona
 (`pnpm install --frozen-lockfile` en verde, 25 tests pasando).
@@ -261,13 +319,61 @@ Formato: Contexto | Opciones | Decisión | Razón | Reversibilidad.
 
 ## 10. Log cronológico
 
-| #   | Hecho                                                                                                                                              |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Repo clonado; `gh repo clone` falla por GraphQL bloqueado → `git clone` directo.                                                                   |
-| 2   | `develop` confirmada (existe, en `70d1d22`, idéntica a `main`). Rama `claude/lote-0` creada desde ella.                                            |
-| 3   | `{{N}}` sin sustituir en el prompt → resuelto a 0 (D-01).                                                                                          |
-| 4   | `pnpm install --frozen-lockfile` en verde. Baseline: `pnpm test` 3 suites / 25 tests OK; `pnpm lint` **falla** con 5 errores preexistentes (B-02). |
-| 5   | Inventario de las 14 ramas remotas re-medido; `AGENTS.md` §11 desactualizado (O-01).                                                               |
-| 6   | `claude/great-archimedes-5f008a` verificada como redundante (diff vacío contra `develop`).                                                         |
-| 7   | Hallazgo: fixture e2e `react-components/` rescatable (G-03).                                                                                       |
-| 8   | T1 ejecutada: `CLAUDE.md` + esta spec.                                                                                                             |
+| #   | Hecho                                                                                                                                                                                                                                                                                                                        |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Repo clonado; `gh repo clone` falla porque GraphQL está bloqueado en estas sesiones → `git clone` directo.                                                                                                                                                                                                                   |
+| 2   | `develop` confirmada (existe, en `70d1d22`, idéntica a `main`). Rama `claude/lote-0` creada desde ella.                                                                                                                                                                                                                      |
+| 3   | `{{N}}` sin sustituir en el prompt → resuelto a 0 (D-01).                                                                                                                                                                                                                                                                    |
+| 4   | `pnpm install --frozen-lockfile` en verde. Baseline: `pnpm test` 3 suites / 25 tests OK; `pnpm lint` **falla** con 5 errores preexistentes (B-02).                                                                                                                                                                           |
+| 5   | Inventario de las 14 ramas remotas re-medido; `AGENTS.md` §11 estaba desactualizado (O-01).                                                                                                                                                                                                                                  |
+| 6   | `claude/great-archimedes-5f008a` verificada como redundante: su árbol es idéntico a `develop`.                                                                                                                                                                                                                               |
+| 7   | Hallazgo: fixture e2e `react-components/` rescatable, no documentado en §11 (G-03).                                                                                                                                                                                                                                          |
+| 8   | **T1** `ae94ea4`: `CLAUDE.md` + spec con inventario y decisiones.                                                                                                                                                                                                                                                            |
+| 9   | **T2** `41796fd`: fix de `getThemeNameConfig` + 10 tests. Comprobado con `git stash` que 5 de ellos fallan contra el código sin arreglar — no son tests de adorno.                                                                                                                                                           |
+| 10  | **T3** `aecdf17`: 5 tokens de estado. Se montó el runner e2e (el entorno no traía el build de Chromium que pide el repo; se resolvió con un config temporal fuera del repo y un servidor estático propio, sin tocar `e2e/playwright.config.ts`). 80/80 e2e en verde.                                                         |
+| 11  | **T4** `2f6e5fd`: `button.css` reconciliado. Verificado con estilos computados en Chromium; así se encontró y arregló el orden del bloque `:disabled` (D-11).                                                                                                                                                                |
+| 12  | **T5** `e54ad83`: insumos rescatados, ficha del L0 cerrada, contenido trasladado al L1, script de limpieza. El propio script, en dry-run, **destapó un error mío**: usaba un diff de dos puntos para decidir si una rama aporta algo, que da falso positivo en ramas muy atrasadas. Corregido a dos pruebas complementarias. |
+| 13  | **T6** `5317df7`: `AGENTS.md` §4.1/§4.3/§4.8/§6.5/§9.10/§11 al día.                                                                                                                                                                                                                                                          |
+| 14  | **T7** `ddaaa15`: el fixture rescatado pasa a Markdown al detectar que añadía 69 warnings de lint (D-12); changeset del lote.                                                                                                                                                                                                |
+| 15  | Fase final: rebase sobre `develop` (sin conflictos, no había avanzado), suite completa, verificación de los 6 criterios y cierre de esta spec.                                                                                                                                                                               |
+
+---
+
+## 11. Anexo: salida de las verificaciones
+
+### AC3 — referencias a `--color-*-focus`
+
+```
+tokens -focus definidos en themes/:     8
+tokens -focus referenciados en src/:    8
+referenciados y NO definidos:          (vacío)
+```
+
+### AC4 — pares `-content` frente a su color base
+
+```
+tema light:                                           tema dark:
+  primary    #3b82f6  content #ffffff  focus #2563eb    primary    #60a5fa  content #1e293b  focus #3b82f6
+  secondary  #10b981  content #ffffff  focus #059669    secondary  #34d399  content #1e293b  focus #10b981
+  accent     #8b5cf6  content #ffffff  focus #7c3aed    accent     #a78bfa  content #1e293b  focus #8b5cf6
+  neutral    #6b7280  content #ffffff  focus #4b5563    neutral    #9ca3af  content #1e293b  focus #6b7280
+  info       #0ea5e9  content #ffffff  focus #0284c7    info       #38bdf8  content #1e293b  focus #0ea5e9
+  success    #22c55e  content #ffffff  focus #16a34a    success    #4ade80  content #1e293b  focus #22c55e
+  warning    #f59e0b  content #ffffff  focus #d97706    warning    #fbbf24  content #1e293b  focus #f59e0b
+  error      #ef4444  content #ffffff  focus #dc2626    error      #f87171  content #1e293b  focus #ef4444
+=> 16 pares comprobados, 0 colisiones
+```
+
+Nota para el lote 22: que ningún `-content` **colisione** no significa que contraste. El patrón
+`-content: #ffffff` uniforme del tema light sigue dando ratios por debajo de WCAG AA
+(`warning` 2.15:1, `success` 2.28:1, `primary` 3.68:1, ya medidos en §9.10 de `AGENTS.md`).
+AC4 pregunta por colisiones, y de eso no hay ninguna.
+
+### Tests
+
+```
+Test Suites: 4 passed, 4 total
+Tests:       35 passed, 35 total      (antes del lote: 3 suites, 25 tests)
+
+e2e (Chromium, CSS compilado):  80 passed
+```
