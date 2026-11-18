@@ -22,6 +22,16 @@ const root: ThemeColors = {
   "--join-es": "var(--radius-field)",
   "--join-ee": "var(--radius-field)",
 
+  // Profundidades de interaccion de estado, consumidas por el CSS de componente
+  // para derivar hover/active/disabled con color-mix sobre el color del rol.
+  "--hover-depth": "7%",
+  "--active-depth": "5%",
+  "--disabled-bg-opacity": "60%",
+  "--disabled-fg-opacity": "35%",
+
+  // Transiciones
+  "--transition-duration": "0.2s",
+
   // Noise and effects
   "--noise": "0",
   "--fx-noise": "none",
