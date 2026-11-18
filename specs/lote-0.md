@@ -7,7 +7,7 @@
 | Lote            | **L0** — Reconciliar las ramas sin mergear (`@docs/BUILD-BATCHES.md` §L0) |
 | Rama base       | `develop` (en `70d1d22`)                                                  |
 | Rama de trabajo | `claude/lote-0`                                                           |
-| Estado general  | **CERRADO** — listo para revisión humana                                  |
+| Estado general  | **TRABAJO COMPLETO, SIN PUBLICAR** — ver bloqueante B-03                  |
 | Fecha           | 2026-11-18                                                                |
 
 > **Nota sobre el número de lote.** El prompt programado llegó con el marcador `{{N}}`
@@ -260,13 +260,41 @@ Formato: Contexto | Opciones | Decisión | Razón | Reversibilidad.
 
 ## 8. Bloqueantes
 
-| ID   | Severidad                                                   | Descripción                                                                                                                                                                                                                                                                                                                                                   | Estado                           |
-| ---- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| B-01 | 🟠 No crítico                                               | **AC5 no se puede cumplir dentro del gate.** El borrado de 12 ramas remotas es destructivo y no revisable en la PR (D-09). Se entrega `scripts/cleanup-dead-branches.sh` para ejecución manual tras la aprobación.                                                                                                                                            | ABIERTO — requiere acción humana |
-| B-02 | 🟠 No crítico (verificado al cierre: el lote no lo empeora) | **`pnpm lint` falla en `develop` antes de este lote**: 5 errores (1 en `jest.setup.js`, 4 en `Dropdown.stories.tsx`) y 307 warnings de Prettier. Son preexistentes y están **fuera del alcance de L0** (`jest.setup.js` → lote 2; `Dropdown.stories.tsx` → lotes 6/7). No se tocan. Se verifica en cambio que los archivos que toca este lote queden limpios. | ABIERTO — pasa a gaps            |
+| ID   | Severidad                                                   | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Estado                           |
+| ---- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| B-01 | 🟠 No crítico                                               | **AC5 no se puede cumplir dentro del gate.** El borrado de 12 ramas remotas es destructivo y no revisable en la PR (D-09). Se entrega `scripts/cleanup-dead-branches.sh` para ejecución manual tras la aprobación.                                                                                                                                                                                                                                                                                | ABIERTO — requiere acción humana |
+| B-03 | 🔴 **CRÍTICO**                                              | **No se pudo hacer `push` ni abrir la PR.** El proxy git de la sesión rechaza la escritura: _"ferbbo/own-ui is not in this session's authorized repository set"_ (HTTP 403), y el token de `gh` tampoco es válido. La sesión tiene acceso de **lectura** (el clon funcionó) pero no de escritura, y no existe en este entorno ninguna herramienta para añadir el repositorio al conjunto autorizado. **No es un fallo del lote**: los 8 commits están completos y verificados. Falta publicarlos. | ABIERTO — requiere acción humana |
+| B-02 | 🟠 No crítico (verificado al cierre: el lote no lo empeora) | **`pnpm lint` falla en `develop` antes de este lote**: 5 errores (1 en `jest.setup.js`, 4 en `Dropdown.stories.tsx`) y 307 warnings de Prettier. Son preexistentes y están **fuera del alcance de L0** (`jest.setup.js` → lote 2; `Dropdown.stories.tsx` → lotes 6/7). No se tocan. Se verifica en cambio que los archivos que toca este lote queden limpios.                                                                                                                                     | ABIERTO — pasa a gaps            |
 
-**Ningún bloqueante crítico.** El repo es accesible, `develop` existe, el entorno funciona
-(`pnpm install --frozen-lockfile` en verde, 25 tests pasando).
+### Cómo recuperar el trabajo (B-03)
+
+El contenedor de esta sesión es efímero, así que el lote se empaquetó en dos formatos, ambos
+en la raíz del repo:
+
+| Archivo         | Uso                                                             |
+| --------------- | --------------------------------------------------------------- |
+| `lote-0.bundle` | `git bundle`, conserva los 8 commits con sus mensajes y autoría |
+| `lote-0.patch`  | los 8 commits como serie de parches (`git format-patch`)        |
+
+```bash
+# Opción A — bundle (recomendada: preserva los commits tal cual)
+git fetch ./lote-0.bundle claude/lote-0:claude/lote-0
+git push -u origin claude/lote-0
+
+# Opción B — serie de parches
+git checkout -b claude/lote-0 develop
+git am lote-0.patch
+git push -u origin claude/lote-0
+```
+
+Después, abrir la PR `claude/lote-0` → `develop`. El cuerpo sugerido está más abajo, en §12.
+
+Para que una sesión futura pueda publicar sola, hay que añadir `ferbbo/own-ui` a las _sources_
+del entorno con acceso de escritura.
+
+**Un bloqueante crítico, y es de permisos, no de código** (B-03). El repo se pudo leer,
+`develop` existe y el entorno funciona (`pnpm install --frozen-lockfile` en verde); lo único
+que falló fue la escritura al remoto, en el último paso.
 
 ---
 
@@ -377,3 +405,132 @@ Tests:       35 passed, 35 total      (antes del lote: 3 suites, 25 tests)
 
 e2e (Chromium, CSS compilado):  80 passed
 ```
+
+---
+
+## 12. Cuerpo de la PR (no se pudo abrir: ver B-03)
+
+> Destino: `claude/lote-0` → **`develop`** (nunca `main`). Lista para revisión, no borrador.
+> Título sugerido: `feat(lote-0): reconciliar las ramas sin mergear`
+
+### Resumen
+
+Primer lote del plan de construcción, y el que `@docs/BUILD-BATCHES.md` exige antes que
+cualquier otro: `main` no era el estado más avanzado del repo y había dos ramas con trabajo
+real que se solapaba con los lotes 1, 4 y 5. Este lote decide qué se rescata de cada una de las
+14 ramas remotas, rescata lo que vale y documenta el resto.
+
+**La decisión que lo articula todo:** la rama `components` traía dos mejoras claras (tokens de
+estado y un `button.css` mucho mejor) y tres regresiones. Al separar la paleta de marca —que es
+una decisión de producto, no técnica— del resto, **las tres regresiones desaparecen solas**:
+existían porque esa rama borraba los 8 tokens `--color-*-focus` de los que su propio CSS
+dependía. No hubo que parchear nada, sólo no adoptar la paleta.
+
+8 commits, una task cada uno. Ningún cambio en `packages/ui/`.
+
+### Criterios de aceptación
+
+| ID  | Criterio                                            | Veredicto                      | Evidencia                                                                                                                                                 |
+| --- | --------------------------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1 | Decisión escrita para cada una de las 14 ramas      | ✅                             | `specs/lote-0.md` §6 y `AGENTS.md` §11                                                                                                                    |
+| AC2 | `tw-theme/v1` integrado o trasladado al lote 1      | ✅                             | Fix de `getThemeNameConfig` + 10 tests; **5 fallan sin el fix** (comprobado). Publicación de CSS trasladada a la ficha del L1, con el export corregido    |
+| AC3 | Ningún `--color-*-focus` referenciado e inexistente | ✅                             | 8 referenciados = 8 definidos; `comm -23` vacío                                                                                                           |
+| AC4 | Ningún `-content` igual a su color base             | ✅                             | 16 pares comprobados, 0 colisiones                                                                                                                        |
+| AC5 | Remoto sin ramas muertas                            | ❌ **NO CUMPLIDO, deliberado** | Borrar ramas es destructivo y pasaría por delante del único gate acordado. Se entrega `scripts/cleanup-dead-branches.sh`, verificado en dry-run. Ver D-09 |
+| AC6 | `AGENTS.md` §4 y §11 al día                         | ✅                             | §4.1, §4.3, §4.8, §6.5, §9.10 y §11 reescritas                                                                                                            |
+
+Suite completa: **35 tests** unitarios (eran 25) y **80/80 e2e** sobre CSS compilado en
+Chromium, build en verde, `tsc` de `tw-theme` limpio. `pnpm lint` sigue fallando **exactamente
+igual que en `develop`** (5 errores preexistentes, fuera de alcance): el lote no añade ni un
+warning.
+
+### Decisiones clave
+
+Las 12 están en `specs/lote-0.md` §7, con contexto, opciones, razón y reversibilidad. Las que
+cambian el producto:
+
+- **D-07 — la paleta de marca no se adopta.** Es una decisión de producto, y tal como venía era
+  defectuosa: `--color-accent` idéntico a `--color-primary`, y `--color-accent-content` idéntico
+  a `--color-accent` (contraste 1:1, texto invisible).
+- **D-04 — el cambio de semántica `:where(root)` no se adopta.** Un tema custom `--default`
+  sigue pintando la raíz. Cambiarlo es observable y pide fixture e2e.
+- **D-08 — React 19.0.3 no se adopta.** La línea publicada va por 19.3.1, y hoy los tests de
+  componentes no se ejecutan (§9.2): subir React sin tests sería a ciegas.
+- **D-09 — no se borra ninguna rama.** Se entrega el script.
+- **D-11 — el bloque `:disabled` de `button.css` se mueve al final de la cascada.** Tenía la
+  misma especificidad que `.btn-primary`, así que el rol le ganaba por orden y el botón
+  deshabilitado seguía pintado. Se encontró leyendo estilos computados, no el código.
+
+### Bloqueantes, preguntas abiertas y gaps
+
+Detalle en `specs/lote-0.md` §8 y §9.
+
+**Necesitan tu decisión:**
+
+1. **P-02 — ¿cuál es la paleta de marca definitiva?** Hace falta la paleta real con sus
+   `-content` y `-focus`. Mientras no esté, `components` no se puede borrar.
+2. **P-01 — ¿un tema custom `--default` debe pintar la raíz?** Define si un tema custom es "el
+   tema del sitio" o "un tema que hay que activar".
+3. **P-03 — ¿se ejecuta el borrado de las 11 ramas muertas?** Una orden:
+   `./scripts/cleanup-dead-branches.sh --execute`.
+
+**Gaps fuera de alcance** (G-01…G-05), de los que destaco dos:
+
+- **G-02 — `ci.yml` sólo se dispara en PRs hacia `main`.** Con `develop` como rama de
+  integración, **esta PR no ejecutará CI**: la ausencia de checks no significa verde. No se tocó
+  porque el lote tiene prohibido tocar CI.
+- **G-05 — `--color-base-200` es `#000000`** en ambos temas, y el `button.css` rescatado lo usa
+  como relleno del botón neutro, así que ese botón sale negro en tema claro. No es regresión
+  (ya pasaba), pero hace el lote 4 más urgente de lo que parecía.
+
+### Impacto de versión
+
+**minor** para `@ownui/tw-theme` (changeset `lote-0-reconciliacion.md`). Trae dos cambios de
+comportamiento, ambos derivados del fix del flag de tema:
+
+1. Un tema con `--prefersdark` **cambia de sitio**: antes pintaba la raíz (por el bug), ahora va
+   dentro de `@media (prefers-color-scheme: dark)`, que es lo que declaraba.
+2. Un flag desconocido ahora **aborta el build** con `Invalid theme name configuration` en vez
+   de degradarse en silencio a `--default`.
+
+Si consideras que (2) rompe compatibilidad, el changeset debería subirse a **major** antes de
+publicar. `css/button.css` **no** afecta al paquete publicado: sigue sin incluirse en `dist/`
+(es el bug §9.1, que resuelve el lote 1).
+
+### Cómo verificarlo en local
+
+```bash
+git checkout claude/lote-0
+pnpm install --frozen-lockfile
+
+pnpm test                                   # 4 suites, 35 tests
+pnpm build                                  # @ownui/tw-theme
+npx tsc --noEmit -p packages/tw-theme/tsconfig.json
+
+cd packages/tw-theme && pnpm e2e            # 80 tests en Chromium
+```
+
+Para comprobar que los tests del fix no son de adorno, quítalo y vuelve a correrlos: 5 de los
+10 deben fallar.
+
+```bash
+git stash push packages/tw-theme/src/theme.ts
+npx jest --selectProjects tw-theme --coverage=false packages/tw-theme/src/__tests__/theme.test.ts
+git stash pop
+```
+
+AC3 y AC4, que son los que se cumplen "por construcción", se verifican así:
+
+```bash
+# AC3: todo --color-*-focus referenciado debe existir en themes/
+diff <(grep -rhoE '\-\-color-[a-z]+-focus' packages/tw-theme/src/{css,variants,utilities} | sort -u) \
+     <(grep -rhoE '"--color-[a-z]+-focus"' packages/tw-theme/src/themes/ | tr -d '"' | sort -u)
+```
+
+> `pnpm lint` falla también en `develop`: 5 errores preexistentes en `jest.setup.js` y
+> `Dropdown.stories.tsx`, fuera del alcance de este lote.
+
+### Próximo paso
+
+**No mergear sin decidir P-01 y P-02.** El lote siguiente es el **L1** (publicar el CSS de
+componentes), que ya tiene en su ficha el snippet corregido y el fixture rescatado.
