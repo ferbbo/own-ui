@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* Plugin principal: inyecta los tokens (--color-*, --depth, --size-field...) */
+@plugin "@ownui/tw-theme";
+
+/* CSS de componentes publicado por el paquete (lote 1).
+   Esta linea es el objeto del test: si el subpath export o la copia a
+   dist/css fallan, la compilacion de este fixture falla y las clases
+   .btn / .loader quedan sin definir. */
+@import "@ownui/tw-theme/css";

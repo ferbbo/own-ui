@@ -36,6 +36,14 @@ declare global {
     getCSSVariable(selector: string, varName: string): string | null;
 
     /**
+     * Obtiene cualquier propiedad computada de un elemento por su ID
+     * @param id - ID del elemento
+     * @param prop - Propiedad CSS (ej: "height", "border-radius", "display")
+     * @returns Valor computado o null si el elemento no existe
+     */
+    getComputedProp(id: string, prop: string): string | null;
+
+    /**
      * Establece el tema actual usando data-theme
      */
     setTheme(theme: string | null): void;
