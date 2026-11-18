@@ -7,8 +7,8 @@
    --color-base-* existen en themes/rootColors.ts) y con fallback
    explicito al color base en los 8 roles.
 
-   OJO: este archivo todavia NO se publica ni se importa en ningun sitio
-   (deuda tecnica §9.1). Lo resuelve el lote 1.
+   Se publica desde el lote 1 como `@ownui/tw-theme/css/button.css`
+   (y agregado en `@ownui/tw-theme/css`). Ver `src/css/index.css`.
    ========================================================= */
 
 /* =========================================================
