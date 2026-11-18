@@ -225,7 +225,7 @@ sistemas declarados (el error que ya ocurrió con Changesets vs semantic-release
 > hay que activarlo"?). El lote 0 lo dejó fuera a propósito y lo registró como pregunta abierta
 > P-01. Si se adopta aquí, va con fixture e2e que lo fije.
 >
-> **Insumo disponible:** `@docs/salvage/e2e-fixture-react-components/` trae un fixture React +
+> **Insumo disponible:** `@docs/salvage/e2e-fixture-react-components.md` trae un fixture React +
 > Vite que monta `@ownui/button` con un tema custom y un conmutador de temas. Es el punto de
 > partida del fixture `component-styles/` que piden los criterios de aceptación de abajo.
 >
