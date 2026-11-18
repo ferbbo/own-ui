@@ -670,6 +670,23 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 
 ---
 
+## 10. Dónde mirar primero
+
+| Pregunta | Archivo |
+|---|---|
+| ¿Qué tokens existen? | `packages/tw-theme/src/themes/{root,rootColors,light,dark}.ts` |
+| ¿Cómo se inyecta un tema? | `packages/tw-theme/src/plugin.ts`, `src/theme.ts` |
+| ¿Qué clases genera el plugin? | `packages/tw-theme/src/utilities/colors.ts` |
+| ¿Qué prop → qué clase? | `packages/tw-theme/src/variants/*.ts` |
+| ¿Cómo se escribe CSS de componente? | `packages/tw-theme/src/css/button.css` + `.github/instructions/components-css.instructions.md` |
+| ¿Cómo se escribe un componente? | `packages/ui/src/Button/src/useButton.tsx` + `.github/instructions/components-react.instructions.md` |
+| ¿Cómo se hace un compound? | `packages/ui/src/Dropdown/src/{Dropdown.tsx,DropdownContext.tsx}` |
+| ¿Cómo se testea el plugin de verdad? | `packages/tw-theme/e2e/` |
+| ¿Las 3 formas de configurar el plugin? | `packages/storybook/.storybook/styles/tailwind.css` |
+| ¿Qué construir y qué publicar? | `turbo.json`, `.github/workflows/release.yml` |
+
+---
+
 ## 11. Estado de ramas: trabajo no mergeado
 
 **`main` no es el estado más avanzado del repo.** Hay 15 ramas remotas y dos contienen trabajo
@@ -750,20 +767,3 @@ fixture e2e. Incluye además el versionado a 1.0.1 y los CHANGELOG de 5 paquetes
 Los lotes 1, 4 y 5 de [`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md) **se solapan con
 estas dos ramas**. Por eso el plan abre con un lote 0 de reconciliación: decidir qué se rescata,
 qué se descarta y qué se reimplementa, antes de escribir código nuevo.
-
----
-
-## 10. Dónde mirar primero
-
-| Pregunta | Archivo |
-|---|---|
-| ¿Qué tokens existen? | `packages/tw-theme/src/themes/{root,rootColors,light,dark}.ts` |
-| ¿Cómo se inyecta un tema? | `packages/tw-theme/src/plugin.ts`, `src/theme.ts` |
-| ¿Qué clases genera el plugin? | `packages/tw-theme/src/utilities/colors.ts` |
-| ¿Qué prop → qué clase? | `packages/tw-theme/src/variants/*.ts` |
-| ¿Cómo se escribe CSS de componente? | `packages/tw-theme/src/css/button.css` + `.github/instructions/components-css.instructions.md` |
-| ¿Cómo se escribe un componente? | `packages/ui/src/Button/src/useButton.tsx` + `.github/instructions/components-react.instructions.md` |
-| ¿Cómo se hace un compound? | `packages/ui/src/Dropdown/src/{Dropdown.tsx,DropdownContext.tsx}` |
-| ¿Cómo se testea el plugin de verdad? | `packages/tw-theme/e2e/` |
-| ¿Las 3 formas de configurar el plugin? | `packages/storybook/.storybook/styles/tailwind.css` |
-| ¿Qué construir y qué publicar? | `turbo.json`, `.github/workflows/release.yml` |
