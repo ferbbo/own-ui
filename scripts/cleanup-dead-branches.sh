@@ -22,7 +22,7 @@ EXECUTE=false
 # Ramas sin aporte: 0 commits ahead de develop, o commits sin contenido (diff vacío).
 # Se espera de ellas exactamente 0 commits propios.
 DEAD_EMPTY=(
-  "claude/great-archimedes-5f008a"          # 3 ahead pero diff vacío vs develop (merge squash PR #24)
+  "claude/lote-0"                           # 0 ahead: mergeada en develop por la PR #25
   "copilot/delegate-to-cloud-agent"         # 1 commit "Initial plan", diff vacío
   "copilot/update-copilot-instructions"     # 1 commit "Initial plan", diff vacío
   "copilot/fix-release-workflow-error"      # 0 ahead
@@ -38,6 +38,15 @@ DEAD_SALVAGED=(
   "copilot/update-tw-theme-readme"          # README rescatado a @docs/salvage/
   "copilot/update-react-to-19-0-3"          # fixture rescatado a @docs/salvage/; bump descartado (D-08)
   "copilot/update-react-versions-to-19-0-3" # mismo bump, sin contenido único
+)
+
+# Ramas squash-mergeadas: no son ancestros de develop, así que el conteo de "ahead" las
+# marca como aportadoras, pero su CONTENIDO ya entró por una PR squash. La comprobación
+# correcta no es el ahead/behind, sino comparar el árbol de la rama contra el commit de
+# squash: si el diff es vacío, la rama no aporta nada.
+# Formato: "rama commit-de-squash".
+DEAD_SQUASH_MERGED=(
+  "claude/great-archimedes-5f008a 70d1d22"  # contenido idéntico al squash de la PR #24
 )
 
 # NO se borran, a propósito:
@@ -93,6 +102,26 @@ for branch in "${DEAD_EMPTY[@]}"; do
   else
     echo "   ¡OJO! $ahead commit(s) ahead que SI aportan cambios. SE SALTA."
     echo "   Revisar a mano: git diff $BASE...origin/$branch"
+  fi
+done
+
+for entry in "${DEAD_SQUASH_MERGED[@]}"; do
+  read -r branch squash <<<"$entry"
+  echo "[$branch]"
+  if ! remote_has "$branch"; then
+    echo "   ya no existe en origin — nada que hacer"
+    continue
+  fi
+  if ! git rev-parse --verify --quiet "$squash^{commit}" >/dev/null; then
+    echo "   ¡OJO! no encuentro el commit de squash $squash. SE SALTA."
+    continue
+  fi
+  if [[ -z "$(git diff --name-only "$squash" "origin/$branch")" ]]; then
+    echo "   árbol idéntico al squash $squash (PR ya mergeada)"
+    delete_branch "$branch"
+  else
+    echo "   ¡OJO! el árbol difiere del squash $squash. SE SALTA."
+    echo "   Revisar a mano: git diff $squash origin/$branch"
   fi
 done
 
