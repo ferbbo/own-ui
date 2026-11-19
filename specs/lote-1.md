@@ -226,21 +226,32 @@ y fue ahí donde apareció el fallo de peer dependency de D-16 — invisible des
 ### Preguntas abiertas
 
 - **P-01 → RESUELTA** en D-20: se conserva la semántica actual, ya cubierta por e2e.
-- **P-02 — ¿Cuál es la paleta de marca definitiva?** Sigue abierta y sigue necesitando al dueño
-  del producto. La de la rama `components` no es adoptable (`--color-accent` ==
-  `--color-primary`; `--color-accent-content` == `--color-accent`, contraste 1:1).
-  **Nota nueva:** ahora el fixture `component-styles` cruza el estilo computado contra el token
-  (`--color-primary`), así que un cambio de paleta rompe 3 asserts con valores hex literales
-  (`LIGHT_PRIMARY`, `DARK_PRIMARY`, `LIGHT_SUCCESS`) y nada más: el coste de adoptarla bajó.
-- **P-03 — ¿Se borran las ramas muertas?** Sigue abierta: es destructivo y no revisable en la
-  PR (D-09 del lote 0). `scripts/cleanup-dead-branches.sh` está listo. Candidatas nuevas tras
-  el merge del lote 0: `claude/lote-0` y `claude/great-archimedes-5f008a`.
-- **P-04 — ¿`minor` o `major`?** Estrechar el peer de Tailwind es _breaking_ en semver estricto,
-  aunque no rompa ninguna instalación que hoy funcione (D-19). El changeset dice `minor`.
-- **P-05 — ¿Hace falta un flag "tema registrado pero no por defecto"?** Hoy un tema custom sin
-  flag y uno con `--default` se comportan igual, así que no hay forma de declarar un tema que
-  exista sólo bajo `[data-theme]`. Era la mitad útil de la propuesta de `tw-theme/v1`, y se
-  puede dar **sin romper nada** como flag nuevo (p. ej. `--opt-in`) en el lote 21.
+  **Las cuatro vivas se respondieron y el dueño las aprobó el 2026-11-19.** Registradas en
+  `@docs/BUILD-BATCHES.md` (L21, L22 y el protocolo de lote) y en `AGENTS.md` §4.3/§11 por la
+  rama `claude/decisiones-lotes-0-1`. Se dejan aquí con su resolución para que no se reabran.
+
+- **P-01 → RESUELTA** en D-20: se conserva la semántica actual, ya cubierta por e2e.
+- **P-02 — ¿paleta de marca definitiva? → la neutra se queda como tema built-in por defecto; la
+  de marca se publicará como tema con nombre** (`@plugin "@ownui/tw-theme/theme" { name: "ownui
+--default"; … }`), en el lote 21 y en el mismo movimiento que la auditoría de contraste del 22.
+  Razón: un tema por defecto de marca obliga a cada consumidor a sobreescribir 24 tokens antes
+  de usar la librería. **Lo que falta ya no es una decisión sino un dato**: los hex definitivos,
+  con `-content` que pasen WCAG AA y los 8 `-focus`. La rama `components` se conserva por ser su
+  única copia.
+- **P-03 — ¿se borran las ramas muertas? → SÍ, aprobado**, y el script se amplió a 12 ramas
+  (`claude/lote-0` incluida) con detección por contenido para las squash-mergeadas. **No se pudo
+  ejecutar**: `git push origin --delete` devuelve 403 desde el proxy git de la sesión en las 12
+  (ver B-04 en `specs/lote-0.md`). No es falta de permiso del dueño: el mismo remoto acepta
+  `git push` de commits nuevos. Queda una orden para el dueño.
+- **P-04 — ¿`minor` o `major`? → `minor`, sin cambios.** El tramo de peer retirado
+  (`3.4.17`–`4.0.x`) nunca funcionó con este plugin, así que no se rompe ninguna instalación que
+  hoy funcione, y gastar el `2.0.0` en corregir un metadato no compra nada. El changeset de este
+  lote ya dice `minor`: **no hay nada que cambiar en esta PR**.
+- **P-05 — ¿flag "tema registrado pero no por defecto"? → SÍ, como flag nuevo y aditivo
+  `--opt-in`, en el lote 21.** Hoy `--default` es decorativo (un tema sin flag se comporta
+  igual), así que ese caso de uso no tiene forma de expresarse. Aditivo ⇒ no rompe a nadie, al
+  contrario del cambio de semántica que P-01 rechaza. Coste: un valor en el enum `Flags`, una
+  rama en `theme.ts` y un fixture e2e. Nombre aprobado: `--opt-in`.
 
 ### Objeciones
 
