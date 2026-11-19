@@ -320,7 +320,10 @@ resolución en vez de borrarlas, para que no se reabran.
   `@docs/BUILD-BATCHES.md` §L21. Todos los pares alcanzan AA 4.5:1 en reposo **y** en
   interacción. Sólo se movieron dos rellenos de marca (el teal Hit en claro, que con blanco da
   2.93:1, y el rojo de error un 4.5 % de L); la tinta oscura `#211F43` ya era color de marca, así
-  que el único hex nuevo del sistema es `accent #6865D6`. Implementación: slice del lote 21.
+  que el único hex nuevo del sistema es `accent` (Jireh), que **no existía en la marca y se
+  diseñó**: `#9E3A91` en claro y `#DA72CB` en oscuro, en el tono 333° — el centro exacto del
+  único hueco libre de la rueda, a 52° tanto de Piccolo como de error. De paso se corrige que
+  `accent` y `secondary` cambiaban de tono entre temas. Implementación: slice del lote 21.
   Evidencia reproducible: `node scripts/check-contrast.mjs`.
 - **P-03 — ¿Se borran las ramas muertas? → SÍ, aprobado.** Script re-verificado y ampliado
   (12 ramas, antes 11: se añade `claude/lote-0`, ya mergeada, y se corrige la detección de

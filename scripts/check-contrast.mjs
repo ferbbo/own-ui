@@ -20,6 +20,7 @@
  *   node scripts/check-contrast.mjs                 # todos los temas
  *   node scripts/check-contrast.mjs --theme light   # uno
  *   node scripts/check-contrast.mjs --threshold 3   # sólo el umbral de componente
+ *   node scripts/check-contrast.mjs --dir ./ruta    # auditar una paleta candidata
  *
  * Sale con código 1 si algún par suspende, para poder usarlo como gate.
  *
@@ -36,7 +37,10 @@ import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const THEMES_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../packages/tw-theme/src/themes");
+const DEFAULT_THEMES_DIR = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../packages/tw-theme/src/themes"
+);
 
 const FAMILIES = ["primary", "secondary", "accent", "neutral", "info", "success", "warning", "error"];
 
@@ -77,11 +81,11 @@ const parseTheme = (source) => {
   return tokens;
 };
 
-const loadThemes = () => {
+const loadThemes = (dir) => {
   const themes = [];
-  for (const file of readdirSync(THEMES_DIR).sort()) {
+  for (const file of readdirSync(dir).sort()) {
     if (!file.endsWith(".ts") || file === "index.ts") continue;
-    const tokens = parseTheme(readFileSync(join(THEMES_DIR, file), "utf8"));
+    const tokens = parseTheme(readFileSync(join(dir, file), "utf8"));
     // Un tema de color es el que define al menos una familia semántica.
     if (!FAMILIES.some((f) => tokens[`--color-${f}`])) continue;
     themes.push({ name: file.replace(/\.ts$/, ""), file, tokens });
@@ -94,8 +98,12 @@ const loadThemes = () => {
 const args = process.argv.slice(2);
 const only = args.includes("--theme") ? args[args.indexOf("--theme") + 1] : null;
 const threshold = args.includes("--threshold") ? Number(args[args.indexOf("--threshold") + 1]) : 4.5;
+// `--dir` permite auditar una paleta candidata antes de meterla en el paquete.
+const THEMES_DIR = args.includes("--dir")
+  ? resolve(args[args.indexOf("--dir") + 1])
+  : DEFAULT_THEMES_DIR;
 
-const themes = loadThemes().filter((t) => !only || t.name === only);
+const themes = loadThemes(THEMES_DIR).filter((t) => !only || t.name === only);
 
 if (themes.length === 0) {
   console.error(

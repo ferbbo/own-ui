@@ -743,7 +743,7 @@ se olvida, porque `button.css` recalcula el relleno en `:hover`. Verificable con
 | --------- | ------------------- | -------------------------------- | ---------- | --------- | -------------------------- |
 | primary   | `#4E46B4` (Piccolo) | no                               | `#FFFFFF`  | `#3F33A0` | 7.35 / 9.58                |
 | secondary | `#0C847E`           | **sí**: Hit oscurecido 11 % de L | `#FFFFFF`  | `#00726D` | 4.55 / 5.79                |
-| accent    | `#6865D6`           | **nuevo**: Piccolo +10 % de L    | `#FFFFFF`  | `#5853C2` | 4.75 / 6.12                |
+| accent    | `#9E3A91` (Jireh)   | **nuevo**: ver abajo             | `#FFFFFF`  | `#8B267F` | 6.06 / 7.83                |
 | neutral   | `#F5F5F5` (Goku)    | no                               | `#211F43`  | `#E1E1E1` | 14.36 / 11.97              |
 | info      | `#0EA5E9`           | no                               | `#211F43`  | `#0092D5` | 5.65 / 4.53                |
 | success   | `#22C55E`           | no                               | `#211F43`  | `#00B14B` | 6.87 / 5.51                |
@@ -755,13 +755,85 @@ se olvida, porque `button.css` recalcula el relleno en `:hover`. Verificable con
 | Familia   | Relleno             | ¿Cambia frente a `components`? | `-content` | `-focus`  | Ratio reposo / interacción |
 | --------- | ------------------- | ------------------------------ | ---------- | --------- | -------------------------- |
 | primary   | `#4E46B4` (Piccolo) | no                             | `#FFFFFF`  | `#5D58C8` | 7.35 / 5.68                |
-| secondary | `#211F43`           | no                             | `#FFFFFF`  | `#2F2E54` | 15.65 / 12.81              |
-| accent    | `#40A69F` (Hit)     | no                             | `#211F43`  | `#55B9B2` | 5.35 / 6.68                |
+| secondary | `#40A69F` (Hit)     | **sí**: antes era el navy      | `#211F43`  | `#55B9B2` | 5.35 / 6.68                |
+| accent    | `#DA72CB` (Jireh)   | **sí**: antes era Hit          | `#211F43`  | `#EF85DF` | 5.40 / 6.78                |
 | neutral   | `#444444` (Beerus)  | no                             | `#FFFFFF`  | `#545454` | 9.74 / 7.57                |
 | info      | `#38BDF8`           | no                             | `#211F43`  | `#51D1FF` | 7.31 / 8.88                |
 | success   | `#4ADE80`           | no                             | `#211F43`  | `#62F293` | 8.98 / 10.91               |
 | warning   | `#FBBF24`           | no                             | `#211F43`  | `#FFD343` | 9.38 / 10.92               |
 | error     | `#F87171`           | no                             | `#211F43`  | `#FF8483` | 5.66 / 6.62                |
+
+#### Implementación lista para copiar
+
+Los dos temas, con los 24 tokens cada uno. El lote 21 los coloca en
+`packages/tw-theme/src/themes/`, los registra en `builtInThemes` y añade el fixture e2e; aquí
+están para que la auditoría sea reproducible sin teclear 48 hex.
+
+```ts
+// ownui.ts — tema de marca, claro
+export const ownuiTheme: ThemeColors = {
+  "--color-primary": "#4E46B4",
+  "--color-primary-content": "#FFFFFF",
+  "--color-primary-focus": "#3F33A0",
+  "--color-secondary": "#0C847E",
+  "--color-secondary-content": "#FFFFFF",
+  "--color-secondary-focus": "#00726D",
+  "--color-accent": "#9E3A91",
+  "--color-accent-content": "#FFFFFF",
+  "--color-accent-focus": "#8B267F",
+  "--color-neutral": "#F5F5F5",
+  "--color-neutral-content": "#211F43",
+  "--color-neutral-focus": "#E1E1E1",
+  "--color-info": "#0EA5E9",
+  "--color-info-content": "#211F43",
+  "--color-info-focus": "#0092D5",
+  "--color-success": "#22C55E",
+  "--color-success-content": "#211F43",
+  "--color-success-focus": "#00B14B",
+  "--color-warning": "#F59E0B",
+  "--color-warning-content": "#211F43",
+  "--color-warning-focus": "#E18B00",
+  "--color-error": "#DF3236",
+  "--color-error-content": "#FFFFFF",
+  "--color-error-focus": "#C91223",
+};
+
+// ownui-dark.ts — tema de marca, oscuro
+export const ownuiDarkTheme: ThemeColors = {
+  "--color-primary": "#4E46B4",
+  "--color-primary-content": "#FFFFFF",
+  "--color-primary-focus": "#5D58C8",
+  "--color-secondary": "#40A69F",
+  "--color-secondary-content": "#211F43",
+  "--color-secondary-focus": "#55B9B2",
+  "--color-accent": "#DA72CB",
+  "--color-accent-content": "#211F43",
+  "--color-accent-focus": "#EF85DF",
+  "--color-neutral": "#444444",
+  "--color-neutral-content": "#FFFFFF",
+  "--color-neutral-focus": "#545454",
+  "--color-info": "#38BDF8",
+  "--color-info-content": "#211F43",
+  "--color-info-focus": "#51D1FF",
+  "--color-success": "#4ADE80",
+  "--color-success-content": "#211F43",
+  "--color-success-focus": "#62F293",
+  "--color-warning": "#FBBF24",
+  "--color-warning-content": "#211F43",
+  "--color-warning-focus": "#FFD343",
+  "--color-error": "#F87171",
+  "--color-error-content": "#211F43",
+  "--color-error-focus": "#FF8483",
+};
+```
+
+Auditados con la herramienta del lote 22, no a mano:
+
+```bash
+mkdir -p /tmp/ownui && cd /tmp/ownui   # pegar los dos bloques como ownui.ts y ownui-dark.ts
+node scripts/check-contrast.mjs --dir /tmp/ownui
+# → 32/32 pares en AA 4.5:1, salida 0
+```
 
 Cómo se construyó, para que sea reproducible y no una elección de gusto:
 
@@ -773,9 +845,23 @@ Cómo se construyó, para que sea reproducible y no una elección de gusto:
 - **Los 16 `-focus` se derivan, no se eligen**: ∓6 % de luminosidad en OKLab (−6 % en claro,
   +6 % en oscuro, porque sobre fondo oscuro la interacción aclara), y cada uno se verifica
   contra su propio `-content`.
-- **Dos decisiones de producto, aprobadas por el dueño:** `accent #6865D6` (mismo tono que
-  Piccolo, 10 % más claro, para que se distinga del primary sin traer un color ajeno) y
-  `secondary #0C847E`. Si "Jireh" tiene un hex propio, sustituirlo es una línea.
+- **Jireh (`accent`) se diseña, porque la marca no tiene hex para él.** No se deriva de Piccolo:
+  un accent del mismo tono que el primary no acentúa nada. Se elige por hueco en la rueda de
+  tonos. Medidos en OKLCH, los tonos ya ocupados son error 25°, warning 70°, success 150°,
+  Hit 189°, info 237° y Piccolo 281°: **el único sector libre va de 281° a 25°**, y su centro
+  exacto es **333°**. Ahí se coloca Jireh, con la croma de Piccolo (`C = 0.168`) para que pese
+  lo mismo que el primary. Resultado: **52.1° de separación de Piccolo y 52.4° de error** —
+  equidistante de sus dos vecinos por construcción, no por tanteo. La luminosidad se resuelve
+  después, como en el resto: la mínima que aprueba AA con blanco en reposo y en `:hover`.
+- **Cada rol conserva su tono entre temas.** Fijar Jireh deja a la vista una incoherencia de la
+  paleta de `components`: allí `accent` era Jireh en claro pero **Hit** en oscuro, y `secondary`
+  era Hit en claro pero el **navy** en oscuro, con lo que las dos familias cambiaban de color al
+  cambiar de tema. Se corrige sin coste de contraste: `secondary` es teal (189°) en ambos y
+  `accent` es magenta (333°) en ambos; sólo varía la luminosidad, que es lo que debe variar.
+  El navy `#211F43` vuelve a ser lo que es —tinta y superficie oscura—, y como superficie
+  pertenece a la escala `base-100/200/300` del lote 4, no a una familia semántica.
+- **`secondary #0C847E` en claro, aprobado por el dueño:** el Hit original no puede llevar texto
+  encima (2.93:1 con blanco).
 - Los 8 `-focus` **siguen siendo parte del contrato**: los consumen `css/button.css` y las 40
   utilidades de `utilities/colors.ts`. Esta paleta los aporta; no se eliminan.
 
