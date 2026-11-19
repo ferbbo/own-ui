@@ -27,6 +27,10 @@
     "react-dom": ">=18.0.0"
   },
   "dependencies": {
+    "@ownui/button": "workspace:*",
+    "@ownui/dom-utils": "workspace:*",
+    "@ownui/dropdown": "workspace:*",
+    "@ownui/loader": "workspace:*",
     "@ownui/tw-theme": "workspace:*",
     "@react-aria/button": "^3.10.0",
     "@react-aria/utils": "^3.26.0"
