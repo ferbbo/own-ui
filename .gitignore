@@ -7,6 +7,8 @@ storybook-static/
 
 # Testing
 coverage/
+packages/*/test-results/
+packages/*/playwright-report/
 
 # Logs
 logs
