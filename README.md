@@ -198,15 +198,24 @@ export default {
 
 ### Available Scripts
 
-- `pnpm dev` - Start development server
-- `pnpm build` - Build the library
-- `pnpm test` - Run tests
+- `pnpm build` - Build every package, in topological order
+- `pnpm test` - Run tests (8 suites / 89 tests)
 - `pnpm test:watch` - Run tests in watch mode
+- `pnpm test:coverage` - Run tests with a coverage report
 - `pnpm lint` - Lint the code
 - `pnpm lint:fix` - Lint and fix the code
 - `pnpm format` - Format the code with Prettier
-- `pnpm storybook` - Start Storybook
+- `pnpm storybook` - Start Storybook on :6006
 - `pnpm build-storybook` - Build Storybook
+- `pnpm changeset` - Record a changeset before opening a PR
+
+To build one package together with its dependencies, ask for them explicitly:
+`pnpm --filter "@ownui/ui..." build` (note the trailing `...`) or
+`turbo build --filter=@ownui/ui`. A plain `pnpm --filter @ownui/ui build` runs only that
+package's own script and will fail on a clean checkout.
+
+> There is no root `pnpm dev` script. Component packages expose their own
+> (`pnpm --filter @ownui/button dev`), and the visual workspace is Storybook.
 
 ## Release Process
 
