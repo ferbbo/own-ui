@@ -711,10 +711,14 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 - `variants/button.ts` declara `ghost` **dos veces**: en `theme` y en `variant`. Es la razón
   por la que `variant="ghost"` parece funcionar pese al bug de §9.4 (el lookup cae en `theme`
   y encuentra la clave por coincidencia).
-- **Contraste sin verificar y probablemente fuera de norma**: el patrón `-content: #ffffff`
-  uniforme en las 8 familias del tema light da ratios por debajo de WCAG AA (4.5:1) —
-  medidos: `warning` 2.15:1, `success` 2.28:1, `primary` 3.68:1. Los rellenos claros necesitan
-  `-content` oscuro. Ver lote 22.
+- **Contraste fuera de norma, ya medido**: `node scripts/check-contrast.mjs` audita los dos
+  temas y **15 de los 32 pares relleno/`-content` suspenden AA (4.5:1)**. En el tema claro
+  fallan 11, por el patrón `-content: #ffffff` uniforme sobre rellenos claros (`warning`
+  2.15:1, `success` 2.28:1, `primary` 3.68:1). En el oscuro fallan 4, y todos son el estado de
+  **interacción**: los `-focus` de `primary` (3.98), `accent` (3.45), `neutral` (3.03) y `error`
+  (3.89) suspenden aunque su estado de reposo apruebe — ese estado no se había medido nunca.
+  La paleta correcta está calculada y aprobada en `@docs/BUILD-BATCHES.md` §L21; la corrección
+  de los temas built-in es el lote 22.
 
 ---
 

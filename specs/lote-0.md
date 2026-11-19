@@ -312,14 +312,16 @@ resolución en vez de borrarlas, para que no se reabran.
   `tw-theme/v1` se descarta por _breaking_; su mitad útil —poder declarar un tema que exista
   sólo bajo `[data-theme]`— entra como **flag nuevo y aditivo `--opt-in`** en el lote 21
   (P-05 del lote 1). Cerrada en `specs/lote-1.md` D-20.
-- **P-02 — ¿Cuál es la paleta de marca definitiva? → la neutra se queda como tema por defecto;
-  la de marca se publicará como tema con nombre.** Una librería cuyo tema por defecto es la
-  marca de su autor obliga a cada consumidor a sobreescribir 24 tokens. La marca se registrará
-  con `@plugin "@ownui/tw-theme/theme" { name: "ownui --default"; … }` en el lote 21, junto con
-  la auditoría de contraste del 22 (para no auditar dos veces). **Sigue faltando un dato, no
-  una decisión**: los hex definitivos, con `-content` que pasen WCAG AA y los 8 `-focus`. Los de
-  `components` no sirven tal cual (`--color-accent` == `--color-primary`;
-  `--color-accent-content` == `--color-accent`, contraste 1:1).
+- **P-02 — ¿Cuál es la paleta de marca definitiva? → CERRADA.** Dos partes: (a) la paleta
+  neutra actual se queda como tema built-in **por defecto** y la de marca se publica como **par
+  de temas opcionales** (`ownui` / `ownui-dark`), activables con `themes: "ownui"`; (b) los
+  valores, que eran lo único que faltaba, **están calculados, verificados y aprobados** el
+  2026-11-19: las dos tablas completas (24 tokens por tema, con sus 8 `-focus`) están en
+  `@docs/BUILD-BATCHES.md` §L21. Todos los pares alcanzan AA 4.5:1 en reposo **y** en
+  interacción. Sólo se movieron dos rellenos de marca (el teal Hit en claro, que con blanco da
+  2.93:1, y el rojo de error un 4.5 % de L); la tinta oscura `#211F43` ya era color de marca, así
+  que el único hex nuevo del sistema es `accent #6865D6`. Implementación: slice del lote 21.
+  Evidencia reproducible: `node scripts/check-contrast.mjs`.
 - **P-03 — ¿Se borran las ramas muertas? → SÍ, aprobado.** Script re-verificado y ampliado
   (12 ramas, antes 11: se añade `claude/lote-0`, ya mergeada, y se corrige la detección de
   `claude/great-archimedes-5f008a`). **La ejecución falla por política del entorno, no por falta

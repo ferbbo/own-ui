@@ -723,11 +723,61 @@ mayúsculas o dígitos: debe **fallar con mensaje**, no sanear.
    cuyo tema por defecto es la marca de su autor obliga a cada consumidor a sobreescribir 24
    tokens antes de usarla. La marca se registra con
    `@plugin "@ownui/tw-theme/theme" { name: "ownui --default"; … }`, que el plugin ya soporta.
-   Antes de publicarla hacen falta los hex definitivos del dueño y tres correcciones sobre la
-   paleta de la rama `components`: `--color-accent` ≠ `--color-primary`,
-   `--color-accent-content` ≠ `--color-accent` (hoy contraste 1:1, texto invisible) y los 8
-   `-focus` (o derivarlos con `color-mix`). Mientras no lleguen esos valores, la rama
-   `components` se conserva como referencia y **no se borra**.
+   Los hex definitivos y las tres correcciones que necesitaba la paleta de la rama `components`
+   (`--color-accent` ≠ `--color-primary`, `--color-accent-content` ≠ `--color-accent` —hoy
+   contraste 1:1, texto invisible— y los 8 `-focus`) **ya están calculados y aprobados: ver la
+   tabla de abajo.** La rama `components` se conserva como referencia histórica de los hex
+   originales.
+
+### L21 · Paleta de marca `ownui` — decidida y verificada (2026-11-19)
+
+Se publica como **par de temas built-in opcionales** (`ownui` claro / `ownui-dark`), que el
+consumidor activa con `themes: "ownui"`; **no** sustituye al tema por defecto. Cada par
+relleno/`-content` alcanza **AA 4.5:1 en reposo y en interacción** — el segundo estado es el que
+se olvida, porque `button.css` recalcula el relleno en `:hover`. Verificable con
+`node scripts/check-contrast.mjs --theme ownui`.
+
+**Tema claro**
+
+| Familia   | Relleno             | ¿Cambia frente a `components`?   | `-content` | `-focus`  | Ratio reposo / interacción |
+| --------- | ------------------- | -------------------------------- | ---------- | --------- | -------------------------- |
+| primary   | `#4E46B4` (Piccolo) | no                               | `#FFFFFF`  | `#3F33A0` | 7.35 / 9.58                |
+| secondary | `#0C847E`           | **sí**: Hit oscurecido 11 % de L | `#FFFFFF`  | `#00726D` | 4.55 / 5.79                |
+| accent    | `#6865D6`           | **nuevo**: Piccolo +10 % de L    | `#FFFFFF`  | `#5853C2` | 4.75 / 6.12                |
+| neutral   | `#F5F5F5` (Goku)    | no                               | `#211F43`  | `#E1E1E1` | 14.36 / 11.97              |
+| info      | `#0EA5E9`           | no                               | `#211F43`  | `#0092D5` | 5.65 / 4.53                |
+| success   | `#22C55E`           | no                               | `#211F43`  | `#00B14B` | 6.87 / 5.51                |
+| warning   | `#F59E0B`           | no                               | `#211F43`  | `#E18B00` | 7.29 / 5.88                |
+| error     | `#DF3236`           | sí: 4.5 % de L, imperceptible    | `#FFFFFF`  | `#C91223` | 4.52 / 5.84                |
+
+**Tema oscuro**
+
+| Familia   | Relleno             | ¿Cambia frente a `components`? | `-content` | `-focus`  | Ratio reposo / interacción |
+| --------- | ------------------- | ------------------------------ | ---------- | --------- | -------------------------- |
+| primary   | `#4E46B4` (Piccolo) | no                             | `#FFFFFF`  | `#5D58C8` | 7.35 / 5.68                |
+| secondary | `#211F43`           | no                             | `#FFFFFF`  | `#2F2E54` | 15.65 / 12.81              |
+| accent    | `#40A69F` (Hit)     | no                             | `#211F43`  | `#55B9B2` | 5.35 / 6.68                |
+| neutral   | `#444444` (Beerus)  | no                             | `#FFFFFF`  | `#545454` | 9.74 / 7.57                |
+| info      | `#38BDF8`           | no                             | `#211F43`  | `#51D1FF` | 7.31 / 8.88                |
+| success   | `#4ADE80`           | no                             | `#211F43`  | `#62F293` | 8.98 / 10.91               |
+| warning   | `#FBBF24`           | no                             | `#211F43`  | `#FFD343` | 9.38 / 10.92               |
+| error     | `#F87171`           | no                             | `#211F43`  | `#FF8483` | 5.66 / 6.62                |
+
+Cómo se construyó, para que sea reproducible y no una elección de gusto:
+
+- **Los rellenos de marca se tocan lo mínimo.** Piccolo, Goku, Beerus y el navy `#211F43`
+  quedan intactos. Sólo se mueven dos: el teal Hit en claro (con blanco da **2.93:1**, y con
+  tinta oscura aprueba en reposo pero suspende en `:hover`) y el rojo de error (4.5 % de L).
+- **La tinta oscura no es inventada**: `#211F43` ya es color de marca — es el `secondary` del
+  tema oscuro de `components`. Así el único hex nuevo de todo el sistema es el `accent`.
+- **Los 16 `-focus` se derivan, no se eligen**: ∓6 % de luminosidad en OKLab (−6 % en claro,
+  +6 % en oscuro, porque sobre fondo oscuro la interacción aclara), y cada uno se verifica
+  contra su propio `-content`.
+- **Dos decisiones de producto, aprobadas por el dueño:** `accent #6865D6` (mismo tono que
+  Piccolo, 10 % más claro, para que se distinga del primary sin traer un color ajeno) y
+  `secondary #0C847E`. Si "Jireh" tiene un hex propio, sustituirlo es una línea.
+- Los 8 `-focus` **siguen siendo parte del contrato**: los consumen `css/button.css` y las 40
+  utilidades de `utilities/colors.ts`. Esta paleta los aporta; no se eliminan.
 
 ## L22 Auditoría de contraste WCAG AA
 
@@ -747,6 +797,19 @@ temas, no parchear uno.
 Alcance: script `scripts/check-contrast.mjs` que calcule el ratio de cada par en cada tema y
 falle bajo 4.5:1 (texto normal) / 3:1 (texto grande y componentes); corregir los `-content` que
 no pasen; integrar en CI.
+
+**El script ya existe: `scripts/check-contrast.mjs`.** Sin dependencias: lee todos los temas de
+`packages/tw-theme/src/themes/`, mide el par relleno/`-content` en reposo **y** en interacción
+(`-focus`) y sale con código 1 por debajo del umbral. Hoy, sobre `develop`, **sale en rojo a
+propósito**: ésa es la deuda que paga este lote. **No está enganchado a CI** todavía, porque
+hacerlo antes de corregir los tokens dejaría el pipeline rojo de forma permanente — el lote 22
+corrige primero y engancha después.
+
+⚠️ **La tabla de arriba se queda corta.** Medido con el script: **15 de los 32 pares fallan**,
+no 3. La diferencia es el estado de **interacción**, que nunca se había medido: en el tema
+oscuro los `-focus` de `primary` (3.98), `accent` (3.45), `neutral` (3.03) y `error` (3.89)
+suspenden aunque sus estados de reposo aprueben. El problema no son sólo los rellenos claros con
+`-content` blanco: es que **el `-focus` nunca entró en la auditoría**.
 
 **Decidido (aprobado por el dueño, 2026-11-19):** esta corrección y la paleta de marca de L21
 se hacen **en el mismo movimiento**. Recalcular los `-content` del tema neutro y, por separado,
