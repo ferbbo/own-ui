@@ -237,7 +237,9 @@ y fue ahí donde apareció el fallo de peer dependency de D-16 — invisible des
   faltaba, ya están calculados, verificados y aprobados**: las dos tablas (24 tokens por tema,
   con sus 8 `-focus`, todos en AA 4.5:1 en reposo **y** en interacción) están en
   `@docs/BUILD-BATCHES.md` §L21, y `scripts/check-contrast.mjs` las reproduce. Único hex nuevo
-  del sistema: `accent #6865D6`. Implementación: slice del lote 21.
+  del sistema: `accent` (Jireh), que no existía en la marca y **se diseñó**: `#9E3A91` en claro
+  y `#DA72CB` en oscuro, tono 333° — el centro exacto del único hueco libre de la rueda, a 52°
+  tanto de Piccolo como de error. Implementación: slice del lote 21.
 - **P-03 — ¿se borran las ramas muertas? → SÍ, aprobado**, y el script se amplió a 12 ramas
   (`claude/lote-0` incluida) con detección por contenido para las squash-mergeadas. **No se pudo
   ejecutar**: `git push origin --delete` devuelve 403 desde el proxy git de la sesión en las 12
