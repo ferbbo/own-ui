@@ -202,8 +202,15 @@ Consecuencia importante: **los 8 tokens `--color-*-focus` siguen siendo parte de
 La rama `components` los eliminaba, y de ahí salían sus tres regresiones. Si algún día se
 cambia la paleta, hay que mantenerlos o retirar a la vez sus tres consumidores:
 `css/button.css`, las 40 utilidades que genera `utilities/colors.ts` (`semanticColorVariants`
-incluye `-focus`) y los temas custom de los consumidores. Ver `specs/lote-0.md` D-03/D-07 y
-la pregunta abierta P-02.
+incluye `-focus`) y los temas custom de los consumidores. Ver `specs/lote-0.md` D-03/D-07.
+
+**P-02 decidida (aprobada por el dueño, 2026-11-19): esta paleta neutra se queda como tema
+built-in por defecto, y la paleta de marca se publicará como tema con nombre**, con
+`@plugin "@ownui/tw-theme/theme" { name: "ownui --default"; … }`. El motivo: una librería de
+componentes cuyo tema por defecto es la marca de su autor obliga a cada consumidor a
+sobreescribir 24 tokens antes de usarla. La marca entra en el lote 21 junto con la auditoría
+de contraste del 22, en cuanto el dueño fije los hex definitivos (con sus `-content` que pasen
+WCAG AA y sus 8 `-focus`). Ver `@docs/BUILD-BATCHES.md` L21.
 
 ### 4.4 Cómo se inyectan los temas — `src/plugin.ts`
 
@@ -761,10 +768,14 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 - `variants/button.ts` declara `ghost` **dos veces**: en `theme` y en `variant`. Es la razón
   por la que `variant="ghost"` parece funcionar pese al bug de §9.4 (el lookup cae en `theme`
   y encuentra la clave por coincidencia).
-- **Contraste sin verificar y probablemente fuera de norma**: el patrón `-content: #ffffff`
-  uniforme en las 8 familias del tema light da ratios por debajo de WCAG AA (4.5:1) —
-  medidos: `warning` 2.15:1, `success` 2.28:1, `primary` 3.68:1. Los rellenos claros necesitan
-  `-content` oscuro. Ver lote 22.
+- **Contraste fuera de norma, ya medido**: `node scripts/check-contrast.mjs` audita los dos
+  temas y **15 de los 32 pares relleno/`-content` suspenden AA (4.5:1)**. En el tema claro
+  fallan 11, por el patrón `-content: #ffffff` uniforme sobre rellenos claros (`warning`
+  2.15:1, `success` 2.28:1, `primary` 3.68:1). En el oscuro fallan 4, y todos son el estado de
+  **interacción**: los `-focus` de `primary` (3.98), `accent` (3.45), `neutral` (3.03) y `error`
+  (3.89) suspenden aunque su estado de reposo apruebe — ese estado no se había medido nunca.
+  La paleta correcta está calculada y aprobada en `@docs/BUILD-BATCHES.md` §L21; la corrección
+  de los temas built-in es el lote 22.
 
 ---
 
@@ -805,12 +816,12 @@ documento: caducan en el siguiente merge** — recalcúlalos con el bucle de
 
 | Rama | A/B | Decisión del lote 0 | Estado |
 |---|---|---|---|
-| `components` | 7/1 | Rescate parcial: entran los tokens de estado y `button.css`. **Fuera**: paleta de marca (decisión de producto, P-02), bump de React (D-08), skill de React (fuera de alcance) | **Conservar** hasta decidir P-02 |
-| `tw-theme/v1` | 4/10 | Rescate parcial: entra el fix de `getThemeNameConfig`. La publicación de CSS se trasladó al lote 1; el cambio de `:where(root)` queda pendiente (P-01) | **Conservar** hasta cerrar P-01 |
+| `components` | 7/1 | Rescate parcial: entran los tokens de estado y `button.css`. **Fuera**: paleta de marca, bump de React (D-08), skill de React (fuera de alcance) | **Conservar**: es la única copia de los hex de marca, y P-02 decidió publicarlos como tema con nombre en el lote 21 |
+| `tw-theme/v1` | 4/10 | Rescate parcial: entra el fix de `getThemeNameConfig`. La publicación de CSS la resolvió el lote 1 (§9.1) | **Borrable**: P-01 se cerró conservando la semántica actual, así que su cambio de `:where(root)` se descarta; su mitad útil entra como flag `--opt-in` en el lote 21 |
 | `copilot/update-tw-theme-readme` | 5/38 | README extraído a `@docs/salvage/` (insumo del lote 9) | Borrable |
 | `copilot/update-react-to-19-0-3` | 2/42 | Fixture React extraído a `@docs/salvage/` (insumo de los lotes 1 y 9); el bump se descarta | Borrable |
 | `copilot/update-react-versions-to-19-0-3` | 2/45 | El mismo bump, sin contenido único | Borrable |
-| `claude/great-archimedes-5f008a` | 3/1 | Redundante: su árbol es idéntico a `develop` (mergeada con squash en la PR #24) | Borrable |
+| `claude/great-archimedes-5f008a` | 3/1 | Redundante: su árbol es idéntico al commit de squash de la PR #24 (`70d1d22`), ya en `develop`. El conteo de *ahead* no lo ve porque el lote 0 editó después esos archivos; la comprobación correcta es `git diff 70d1d22 origin/claude/great-archimedes-5f008a` → vacío | Borrable |
 | `copilot/update-copilot-instructions`, `copilot/delegate-to-cloud-agent` | 1/38, 1/42 | Un commit "Initial plan" cada una, **sin ningún cambio** | Borrable |
 | `feat/tw-theme`, `feat/v1`, `copilot/fix-release-workflow-error`, `copilot/fix-uncommitted-changes-detected`, `copilot/update-react-version-19-0-1` | 0/9–50 | Sin aporte: 0 commits ahead | Borrable |
 | `changeset-release/main` | 1/0 | La regenera Changesets sola | No tocar a mano |

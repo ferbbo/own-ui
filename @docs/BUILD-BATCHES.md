@@ -17,6 +17,11 @@
 3. Implementar **sólo** lo que está en el alcance del lote. Lo que descubras fuera de alcance
    va a §"Hallazgos" al final, no al diff.
 4. Verificar con los comandos de la ficha. Si un criterio no se cumple, no cerrar el lote.
+   **Si el lote toca empaquetado** (`package.json`, `exports`, `files`, build), la verificación
+   no vale desde el monorepo: hay que instalar el tarball de `npm pack` en un proyecto limpio
+   **fuera** del repo. Dentro del paquete, un `@import "@ownui/<pkg>/…"` resuelve por
+   _self-reference_ de Node y da falso positivo — así se colaron en el lote 1 un `exports` a un
+   directorio (que Node no resuelve) y un rango de peer que hacía fallar `npm install`.
 5. `pnpm changeset` (si toca un paquete publicable) → commit conventional → PR.
 6. Un lote = un PR. No mezclar lotes.
 
@@ -102,20 +107,21 @@ merge), reimplementar (tomar la idea, escribir el código de nuevo sobre `main`)
    Corregir al integrarlo: `"./css": "./dist/css"` apunta a un directorio y Node no lo resuelve
    → `"./css/*": "./dist/css/*"`.
    Decidir aparte el cambio de semántica que trae: elimina `:where(${root})` de la rama
-   `--default`, con lo que un tema custom *default* deja de pintar la raíz. **Es un cambio
+   `--default`, con lo que un tema custom _default_ deja de pintar la raíz. **Es un cambio
    observable**: o se acepta con fixture e2e que lo fije, o se deja fuera del cherry-pick.
 2. **`components` → rescatar parcialmente, con tres arreglos previos.** El `button.css` y los
    tokens de estado son una mejora clara del sistema; la paleta es una decisión de producto que
    no me toca tomar. Pero la rama **no es mergeable tal cual**:
 
-   | # | Regresión | Arreglo |
-   |---|---|---|
-   | 1 | Elimina los 8 `--color-*-focus`, pero su propio `button.css` hace `--btn-focus-color: var(--color-primary-focus)`. Un `var()` a token inexistente da valor *guaranteed-invalid*: `--btn-focus-color` queda definido-pero-inválido y el fallback **no se dispara** (IACVT) ⇒ hover y `outline` roto en silencio. | O se reponen los `-focus`, o `button.css` deja de depender de ellos y deriva el color de interacción con `color-mix` sobre `--btn-color`. |
-   | 2 | `utilities/colors.ts` sigue con `semanticColorVariants = ["", "-content", "-focus"]` ⇒ **40 utilidades `*-focus` apuntando a tokens inexistentes.** | Coherente con la decisión de (1): o se quita `-focus` de la lista, o se reponen los tokens. |
-   | 3 | `--color-accent-content: #4E46B4` es **idéntico** a `--color-accent` en light ⇒ texto invisible (contraste 1:1). | Corregir el `-content`. |
+   | #   | Regresión                                                                                                                                                                                                                                                                                                       | Arreglo                                                                                                                                   |
+   | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+   | 1   | Elimina los 8 `--color-*-focus`, pero su propio `button.css` hace `--btn-focus-color: var(--color-primary-focus)`. Un `var()` a token inexistente da valor _guaranteed-invalid_: `--btn-focus-color` queda definido-pero-inválido y el fallback **no se dispara** (IACVT) ⇒ hover y `outline` roto en silencio. | O se reponen los `-focus`, o `button.css` deja de depender de ellos y deriva el color de interacción con `color-mix` sobre `--btn-color`. |
+   | 2   | `utilities/colors.ts` sigue con `semanticColorVariants = ["", "-content", "-focus"]` ⇒ **40 utilidades `*-focus` apuntando a tokens inexistentes.**                                                                                                                                                             | Coherente con la decisión de (1): o se quita `-focus` de la lista, o se reponen los tokens.                                               |
+   | 3   | `--color-accent-content: #4E46B4` es **idéntico** a `--color-accent` en light ⇒ texto invisible (contraste 1:1).                                                                                                                                                                                                | Corregir el `-content`.                                                                                                                   |
 
    Y ojo: **el bug de `Button.variant` (§9.4) no está arreglado ahí.** El diff de `useButton.tsx`
    es sólo reformateo de Prettier; `button.theme[variant]` sigue intacto. El lote 5 sigue en pie.
+
 3. **`copilot/update-tw-theme-readme` → extraer contenido, descartar rama.** Está 37 behind; no
    vale mergearla. Guardar el README como insumo del lote 9. Corrobora dos cosas de §9:
    que `menu.css` no está implementado y que `ghost` está duplicado en `theme` y `variant`.
@@ -126,6 +132,7 @@ merge), reimplementar (tomar la idea, escribir el código de nuevo sobre `main`)
    documento describe hoy `main`; si entra `components`, esas dos tablas cambian.
 
 **Criterios de aceptación**
+
 - [ ] Cada una de las 14 ramas tiene una decisión escrita: rescatar / reimplementar / descartar.
 - [ ] `tw-theme/v1` integrado o su contenido explícitamente trasladado al lote 1.
 - [ ] Si entra `components`: ninguna clase ni token referencia un `--color-*-focus` inexistente.
@@ -135,6 +142,7 @@ merge), reimplementar (tomar la idea, escribir el código de nuevo sobre `main`)
 - [ ] `AGENTS.md` §4 y §11 reflejan el estado posterior a la reconciliación.
 
 **Comandos**
+
 ```bash
 git fetch origin
 for b in $(git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||'); do
@@ -142,6 +150,7 @@ for b in $(git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/|
   echo "$(git rev-list --left-right --count origin/main...origin/$b)  $b"
 done
 ```
+
 ```bash
 git diff origin/main...origin/components -- packages/tw-theme/src/
 ```
@@ -214,13 +223,14 @@ sistemas declarados (el error que ya ocurrió con Changesets vs semantic-release
 > ```
 >
 > Dos avisos sobre ese snippet:
+>
 > 1. El original escribía `"./css": "./dist/css"`, que apunta a un **directorio**: Node no lo
 >    resuelve. De ahí `"./css/*"` y que `"./css"` apunte al agregador `index.css` — que hay que
 >    crear en este lote, o el export queda roto.
 > 2. `cp -R` no está en Windows. Si importa, usar `cpy-cli`/`shx` o un plugin de tsup.
 >
 > Lo que **no** se trasladó: la rama también eliminaba `:where(${root})` de la rama `--default`,
-> de modo que un tema custom *default* deja de pintar la raíz. Es un cambio de comportamiento
+> de modo que un tema custom _default_ deja de pintar la raíz. Es un cambio de comportamiento
 > observable y una decisión de producto (¿"mi tema es el tema del sitio" o "mi tema existe pero
 > hay que activarlo"?). El lote 0 lo dejó fuera a propósito y lo registró como pregunta abierta
 > P-01. Si se adopta aquí, va con fixture e2e que lo fije.
@@ -234,6 +244,7 @@ sistemas declarados (el error que ya ocurrió con Changesets vs semantic-release
 > siguen usándolo, así que la verificación del pipeline de `@apply` sigue en pie para ellos.
 
 **Alcance**
+
 - Crear `packages/tw-theme/src/css/index.css` que importe los 4 componentes.
 - Escribir `menu.css` (hoy 0 líneas) o eliminarlo del repo y del agregador. No dejarlo vacío.
 - `package.json`: añadir `"src/css"` (o `"dist/css"`) a `files`; añadir exports
@@ -245,6 +256,7 @@ sistemas declarados (el error que ya ocurrió con Changesets vs semantic-release
 - Documentar la instalación real en `README.md` y `packages/tw-theme/README.md`.
 
 **Criterios de aceptación**
+
 - [ ] Nuevo fixture e2e `component-styles/` con un `<button class="btn btn-primary btn-md">`.
 - [ ] El spec verifica, sobre CSS compilado en Chromium: `background-color` resuelto al valor
       de `--color-primary` (no `transparent`), `height` ≈ `2.5rem`, `border-radius` ≠ `0px`.
@@ -254,6 +266,7 @@ sistemas declarados (el error que ya ocurrió con Changesets vs semantic-release
 - [ ] README muestra los pasos de instalación **ejecutados y verificados**, no inventados.
 
 **Comandos**
+
 ```bash
 pnpm --filter @ownui/tw-theme build
 pnpm --filter @ownui/tw-theme e2e
@@ -276,6 +289,7 @@ Además `packages/ui/src/Button/__test__/Button.test.tsx` **no es un test**: red
 Hay que reescribirlo completo con RTL.
 
 **Alcance**
+
 - Corregir `testMatch` y `collectCoverageFrom` a `packages/ui/src/**`.
 - Reescribir `Button.test.tsx` con `@testing-library/react` real: render por defecto, clases de
   `theme`, clases de `size`, estado `disabled`, click (con `userEvent`), polimorfismo `as="a"`
@@ -289,6 +303,7 @@ Hay que reescribirlo completo con RTL.
   que puede saltárselo).
 
 **Criterios de aceptación**
+
 - [ ] `pnpm test:components` ejecuta **>0 suites** y las tres pasan.
 - [ ] `grep -rn "const describe\|const expect\|const render" packages/ui` → sin resultados.
 - [ ] Cobertura de `packages/ui/src/**` reportada (no 0%); Button ≥90% de líneas.
@@ -304,6 +319,7 @@ Hay que reescribirlo completo con RTL.
 `@ownui/loader` y `@ownui/dom-utils` (vía `Button`) sin declararlos en sus `dependencies`.
 
 **Alcance**
+
 - `"build": "turbo build"` y declarar `"dependsOn": ["^build"]` en la tarea `build` de
   `turbo.json` para respetar el orden topológico (dom-utils → loader → button → ui).
 - Añadir `@ownui/button`, `@ownui/dropdown`, `@ownui/loader`, `@ownui/dom-utils` como
@@ -319,6 +335,7 @@ Hay que reescribirlo completo con RTL.
 - Añadir script raíz `"storybook": "pnpm --filter @ownui/storybook storybook"`.
 
 **Criterios de aceptación**
+
 - [ ] `pnpm build` en limpio produce `dist/` en los 5 paquetes publicables.
 - [ ] `node -e "require('./packages/ui/dist/index.js')"` no lanza módulo no encontrado.
 - [ ] `pnpm --filter @ownui/ui build` funciona tras `rm -rf packages/*/dist`.
@@ -339,15 +356,16 @@ colores base son fijos (negro/blanco) — no cambian entre light y dark, lo que 
 `.btn` sin variante sea negro en tema claro.
 
 **Alcance**
+
 - Mover la escala de superficies de `rootColors.ts` a `light.ts` y `dark.ts` (son
   dependientes del tema, no globales):
 
-  | Token | Light | Dark | Rol |
-  |---|---|---|---|
-  | `--color-base-100` | `#ffffff` | `#1d232a` | superficie principal |
-  | `--color-base-200` | `#f2f2f2` | `#191e24` | superficie elevada/alterna |
-  | `--color-base-300` | `#e5e6e6` | `#15191e` | bordes y separadores |
-  | `--color-base-content` | `#1f2937` | `#e5e7eb` | texto sobre superficies |
+  | Token                  | Light     | Dark      | Rol                        |
+  | ---------------------- | --------- | --------- | -------------------------- |
+  | `--color-base-100`     | `#ffffff` | `#1d232a` | superficie principal       |
+  | `--color-base-200`     | `#f2f2f2` | `#191e24` | superficie elevada/alterna |
+  | `--color-base-300`     | `#e5e6e6` | `#15191e` | bordes y separadores       |
+  | `--color-base-content` | `#1f2937` | `#e5e7eb` | texto sobre superficies    |
 
 - Dejar en `rootColors.ts` sólo lo verdaderamente invariante (o vaciarlo y simplificar
   `themes/index.ts`).
@@ -358,6 +376,7 @@ colores base son fijos (negro/blanco) — no cambian entre light y dark, lo que 
 - Revisar `button.css` (usa `base-200` como color por defecto) y `dropdown.css`.
 
 **Criterios de aceptación**
+
 - [ ] `grep -rn "color-base-" packages/tw-theme/src/css/` — todo token referenciado existe en
       `light.ts` **y** `dark.ts`.
 - [ ] Fixture e2e: `.bg-base-100` resuelve a blanco en light y a oscuro con `data-theme="dark"`.
@@ -383,6 +402,7 @@ colores base son fijos (negro/blanco) — no cambian entre light y dark, lo que 
    Además `startIcon`/`endIcon` están tipados `boolean`, lo que no permite pasar un nodo.
 
 **Alcance**
+
 - Alinear el contrato en las 3 capas: `variants/button.ts` → `variant: {outline, dash, soft}`;
   `useButton` → `button.variant[variant]`; `ButtonVariant` sin `solid` (solid = ausencia de
   variante, como ya asume el CSS y las stories).
@@ -398,6 +418,7 @@ colores base son fijos (negro/blanco) — no cambian entre light y dark, lo que 
 - Actualizar stories y tests para cubrir cada variante y cada combinación icono/loading.
 
 **Criterios de aceptación**
+
 - [ ] Test: para cada `variant ∈ {outline, dash, soft}`, el nodo tiene la clase `btn-<variant>`.
 - [ ] Test: para los 10 `theme`, clase `btn-<theme>`.
 - [ ] Test: `loading` ⇒ children siguen en el DOM **y** existe `[role="status"]` **y**
@@ -420,6 +441,7 @@ posicionamiento, elevación ni transición. Los semánticos sólo cubren 4 de la
 `DropdownVariant` permite.
 
 **Alcance**
+
 - `.dropdown-trigger` + `.dropdown-trigger-active`: siguiendo la cascada de custom properties
   (`--dropdown-trigger-bg`, `-fg`, `-border`), estados por `color-mix`, `:focus-visible` con
   `outline` de 2px.
@@ -437,6 +459,7 @@ posicionamiento, elevación ni transición. Los semánticos sólo cubren 4 de la
   debe ser `.dropdown-menu`.
 
 **Criterios de aceptación**
+
 - [ ] Fixture e2e `dropdown/`: con el menú abierto, `position` computado = `absolute` y
       `box-shadow` ≠ `none`.
 - [ ] Ninguna clase emitida por los hooks carece de selector:
@@ -454,10 +477,11 @@ posicionamiento, elevación ni transición. Los semánticos sólo cubren 4 de la
 inválidos en el HTML servido. Y la a11y está a medias: hay `aria-expanded`, `aria-haspopup`,
 `role="menu"`, `role="menuitem"`, `tabIndex`, pero **no hay** navegación por flechas, cierre con
 `Esc`, cierre por click-outside, retorno de foco al trigger, ni `aria-controls`/`id` enlazando
-trigger y menú. Un `role="menu"` sin navegación por teclado es *peor* que un div: miente al
+trigger y menú. Un `role="menu"` sin navegación por teclado es _peor_ que un div: miente al
 lector de pantalla.
 
 **Alcance**
+
 - `DropdownRoot` debe consumir las props de configuración y pasar al `<div>` **sólo** los
   atributos DOM válidos. Patrón: separar `contextProps` de `domProps` explícitamente, no con
   rest spread del objeto completo.
@@ -473,6 +497,7 @@ lector de pantalla.
   hooks, que devuelven `classes` aparte. Unificar.
 
 **Criterios de aceptación**
+
 - [ ] `render` del Dropdown no emite warnings de React (test que falle si `console.error`
       recibe algo).
 - [ ] El HTML del contenedor no contiene atributos `variant`, `size`, `defaultOpen`, etc.
@@ -493,6 +518,7 @@ capa del contrato. La receta de 12 pasos de `AGENTS.md` §7 tiene demasiados pun
 manual; los lotes L5 y L6 existen justamente porque alguien saltó un paso.
 
 **Alcance**
+
 - Script `scripts/create-component.mjs` (expuesto como `pnpm create-component <Name>`) que
   genere: carpeta del paquete (package.json, tsconfig, tsup.config), `<Name>.types.ts`,
   `use<Name>.tsx`, `<Name>.tsx`, `index.ts`, `__test__`, `.stories.tsx`,
@@ -505,6 +531,7 @@ manual; los lotes L5 y L6 existen justamente porque alguien saltó un paso.
 - Integrar `check-contract` en `ci.yml` y como script `pnpm check:contract`.
 
 **Criterios de aceptación**
+
 - [ ] `pnpm create-component Demo` produce un paquete que compila, pasa lint, tiene un test que
       pasa y una story que renderiza — sin edición manual.
 - [ ] `pnpm check:contract` detecta los desajustes conocidos de L5 y L6 si se reintroducen
@@ -525,6 +552,7 @@ raíz. `e2e/README.md` enlaza 7 documentos inexistentes.
 La documentación que miente es peor que la ausente: un agente la sigue y produce código roto.
 
 **Alcance**
+
 - Crear `apps/example-app` real (Vite + React + TS) que consuma los paquetes por
   `workspace:*`, con cambio de tema (`data-theme`), todas las variantes de cada componente y un
   tema custom vía `@plugin "@ownui/tw-theme/theme"`. Sirve además como **prueba de humo de
@@ -537,6 +565,7 @@ La documentación que miente es peor que la ausente: un agente la sigue y produc
 - Pasar el README por una revisión de "¿esto se ejecuta?" comando a comando.
 
 **Criterios de aceptación**
+
 - [ ] `pnpm example` arranca y la app renderiza los 3 componentes estilados.
 - [ ] El toggle de tema cambia los colores en vivo.
 - [ ] Todo comando del README fue ejecutado y funciona (listarlos en el PR).
@@ -551,6 +580,7 @@ La documentación que miente es peor que la ausente: un agente la sigue y produc
 criterios; la ficha de cada uno sólo añade lo específico.
 
 **Alcance estándar (en este orden):**
+
 1. `packages/tw-theme/src/css/<name>.css` con la cascada de §4.8 de AGENTS.md: base define
    todas las props → variantes sólo redefinen `--{c}-color` → estados vía `color-mix` en oklab →
    tamaños vía `--size-field` → `:focus-visible` con outline de 2px → estado disabled.
@@ -566,6 +596,7 @@ criterios; la ficha de cada uno sólo añade lo específico.
 11. Changeset.
 
 **Criterios de aceptación estándar:**
+
 - [ ] `pnpm check:contract` en verde (ninguna clase emitida sin CSS, ningún valor de tipo sin
       entrada en `variants/`).
 - [ ] Cada valor de cada prop de variante/tamaño aplica una clase que existe en el CSS.
@@ -580,6 +611,7 @@ criterios; la ficha de cada uno sólo añade lo específico.
 ---
 
 ### L10 Input / Field
+
 `@ownui/input`. Tokens nuevos probables: `--input-bg`, `-fg`, `-border`, `-placeholder`.
 React Aria: `useTextField`. Props: `theme`, `size`, `variant` (`outline`/`ghost`/`bordered`),
 `disabled`, `readOnly`, `invalid`, `startIcon`, `endIcon`, `label`, `description`, `errorMessage`.
@@ -588,6 +620,7 @@ Específico: estados `:invalid`/`aria-invalid`; relación `label`↔`input`↔`d
 descripción + error) es un compound aparte — recomendado, para no inflar `Input`.
 
 ### L11 Checkbox + Radio + Switch
+
 `@ownui/checkbox`, `@ownui/radio`, `@ownui/switch`. React Aria: `useCheckbox`,
 `useCheckboxGroup`, `useRadio`, `useRadioGroup`, `useSwitch` (+ `@react-stately/*`).
 Específico: estado indeterminado del checkbox; `RadioGroup` como Provider con roving tabindex;
@@ -595,12 +628,14 @@ el Switch comparte tokens con Checkbox pero no su geometría. Ir en un solo lote
 comparten el patrón de control marcable y los mismos tokens de `--control-*`.
 
 ### L12 Card + Badge + Avatar
+
 `@ownui/card`, `@ownui/badge`, `@ownui/avatar`. Sin estado, sin React Aria (salvo `img` alt y
 fallback de Avatar). Es el lote que **consume** la escala de superficies de L4 — buen test de
 que `base-100/200/300` quedó bien. Card compound (`Card.Header`/`Body`/`Footer`); Badge con 8
 variantes + `outline`/`soft` + tamaños; Avatar con imagen, iniciales, fallback y grupo.
 
 ### L13 Modal / Dialog
+
 `@ownui/modal`. Provider. React Aria: `useDialog`, `useModalOverlay`, `useOverlayTrigger`,
 `FocusScope`, `useId`. Específico: portal a `document.body`; focus trap y retorno de foco;
 `Esc`; scroll lock; `aria-modal`, `aria-labelledby`, `aria-describedby`;
@@ -608,36 +643,42 @@ variantes + `outline`/`soft` + tamaños; Avatar con imagen, iniciales, fallback 
 AGENTS.md, porque Popover/Tooltip/Select lo reutilizarán.
 
 ### L14 Tabs
+
 `@ownui/tabs`. Provider + compound (`Tabs.List`/`Tab`/`Panels`/`Panel`).
 React Aria: `useTabList`, `useTab`, `useTabPanel`. Específico: orientación horizontal/vertical;
 controlado/no controlado; `activationMode` manual vs automática; indicador animado;
 `aria-controls`/`aria-labelledby` cruzados.
 
 ### L15 Tooltip + Popover
+
 `@ownui/tooltip`, `@ownui/popover`. React Aria: `useTooltip`/`useTooltipTrigger`,
-`usePopover`/`useOverlayTrigger`. Específico: posicionamiento con *flip* y *shift* — decidir si
+`usePopover`/`useOverlayTrigger`. Específico: posicionamiento con _flip_ y _shift_ — decidir si
 se usa `@react-aria/overlays` (incluye el posicionamiento) o `@floating-ui/react`;
 **no escribir posicionamiento a mano**. Delays de apertura/cierre en tooltip; Popover con foco,
 Tooltip sin él.
 
 ### L16 Select
+
 `@ownui/select`. Provider. React Aria: `useSelect` + `@react-stately/select` + `useListBox`.
 Específico: typeahead; opciones agrupadas; `multiple` (decidir si entra en este lote o en uno
 posterior); colección virtualizada si >100 items (probablemente fuera de alcance, anotarlo).
 Reutiliza los tokens de Dropdown y de Input — verificar que no se dupliquen.
 
 ### L17 Toast
+
 `@ownui/toast`. Provider global + imperativo (`toast.success(...)`). React Aria: `useToast`,
 `useToastRegion`. Específico: cola con límite, auto-dismiss con pausa al hover/focus,
 `role="status"`/`"alert"` según severidad, posición configurable, portal, apilado. Es el primer
 componente con API imperativa: documentar el patrón.
 
 ### L18 Accordion
+
 `@ownui/accordion`. Provider + compound. React Aria: `useAccordion`/`useAccordionItem`
 (o `useDisclosure`). Específico: `single`/`multiple`, animación de altura sin layout thrash
 (`grid-template-rows: 0fr→1fr` o `interpolate-size`), `aria-expanded`/`aria-controls`.
 
 ### L19 Table
+
 `@ownui/table`. Compound. React Aria: `useTable` + `@react-stately/table`.
 Específico: `<caption>` y `scope`; ordenación con `aria-sort`; selección; sticky header;
 responsive (scroll horizontal con sombras de borde); zebra con `base-200`.
@@ -648,6 +689,7 @@ responsive (scroll horizontal con sombras de borde); zebra con `base-200`.
 # FASE 4 — Madurez
 
 ## L20 Tokens de tipografía y espaciado
+
 Hoy el sistema de diseño es **sólo color + geometría de control**. Faltan escalas de tipografía
 (familia, pesos, tamaños, line-height, letter-spacing) y de espaciado. `--fontsize` y
 `--paragraph` son tokens de control, no una escala.
@@ -657,6 +699,7 @@ pesos, y una escala de espaciado derivada de `--size-field`. Decidir si son toke
 determina si `text-lg` del usuario y el del sistema colisionan. Añadir fixture e2e.
 
 ## L21 Temas adicionales y constructor de temas
+
 Hoy hay 2 temas built-in. `builtInThemes` es un `Record<string, ThemeColors>` y `plugin.ts` ya
 tiene la rama para `othersSelectors`, pero no hay temas adicionales que la ejerciten.
 Alcance: 3–5 temas (p. ej. `midnight`, `solar`, `forest`); habilitar `themes: "midnight,solar"`
@@ -665,26 +708,204 @@ valide que un tema custom aporta las 24 claves semánticas + superficies, con er
 falta alguna. Arreglar `formatAndCleanPluginConfig`, que hoy corrompe en silencio nombres con
 mayúsculas o dígitos: debe **fallar con mensaje**, no sanear.
 
+**Decidido (aprobado por el dueño, 2026-11-19) — entra en el alcance de este lote:**
+
+1. **Flag `--opt-in`** (P-05 del lote 1). Hoy un tema custom sin flag y uno con `--default` se
+   comportan igual, así que `--default` es decorativo y el caso "mi tema existe pero hay que
+   activarlo con `[data-theme]`" **no tiene forma de expresarse**. Se añade como flag **nuevo
+   y aditivo**: un valor en el enum `Flags` (`types.ts`), una rama en `theme.ts` y un fixture
+   e2e. No se cambia la semántica de `--default`, que **sigue pintando la raíz** (P-01 del lote
+   0, cerrada en `specs/lote-1.md` D-20 y ya fijada por `custom-theme.spec.ts:15`). Eso deja la
+   propuesta de la rama `tw-theme/v1` resuelta sin romper a nadie: su mitad útil entra como
+   flag, su cambio _breaking_ se descarta.
+2. **La paleta de marca se publica como tema con nombre, no como tema por defecto** (P-02 de
+   los lotes 0 y 1). El light/dark built-in se queda con la paleta neutra actual: una librería
+   cuyo tema por defecto es la marca de su autor obliga a cada consumidor a sobreescribir 24
+   tokens antes de usarla. La marca se registra con
+   `@plugin "@ownui/tw-theme/theme" { name: "ownui --default"; … }`, que el plugin ya soporta.
+   Los hex definitivos y las tres correcciones que necesitaba la paleta de la rama `components`
+   (`--color-accent` ≠ `--color-primary`, `--color-accent-content` ≠ `--color-accent` —hoy
+   contraste 1:1, texto invisible— y los 8 `-focus`) **ya están calculados y aprobados: ver la
+   tabla de abajo.** La rama `components` se conserva como referencia histórica de los hex
+   originales.
+
+### L21 · Paleta de marca `ownui` — decidida y verificada (2026-11-19)
+
+Se publica como **par de temas built-in opcionales** (`ownui` claro / `ownui-dark`), que el
+consumidor activa con `themes: "ownui"`; **no** sustituye al tema por defecto. Cada par
+relleno/`-content` alcanza **AA 4.5:1 en reposo y en interacción** — el segundo estado es el que
+se olvida, porque `button.css` recalcula el relleno en `:hover`. Verificable con
+`node scripts/check-contrast.mjs --theme ownui`.
+
+**Tema claro**
+
+| Familia   | Relleno             | ¿Cambia frente a `components`?   | `-content` | `-focus`  | Ratio reposo / interacción |
+| --------- | ------------------- | -------------------------------- | ---------- | --------- | -------------------------- |
+| primary   | `#4E46B4` (Piccolo) | no                               | `#FFFFFF`  | `#3F33A0` | 7.35 / 9.58                |
+| secondary | `#0C847E`           | **sí**: Hit oscurecido 11 % de L | `#FFFFFF`  | `#00726D` | 4.55 / 5.79                |
+| accent    | `#9E3A91` (Jireh)   | **nuevo**: ver abajo             | `#FFFFFF`  | `#8B267F` | 6.06 / 7.83                |
+| neutral   | `#F5F5F5` (Goku)    | no                               | `#211F43`  | `#E1E1E1` | 14.36 / 11.97              |
+| info      | `#0EA5E9`           | no                               | `#211F43`  | `#0092D5` | 5.65 / 4.53                |
+| success   | `#22C55E`           | no                               | `#211F43`  | `#00B14B` | 6.87 / 5.51                |
+| warning   | `#F59E0B`           | no                               | `#211F43`  | `#E18B00` | 7.29 / 5.88                |
+| error     | `#DF3236`           | sí: 4.5 % de L, imperceptible    | `#FFFFFF`  | `#C91223` | 4.52 / 5.84                |
+
+**Tema oscuro**
+
+| Familia   | Relleno             | ¿Cambia frente a `components`? | `-content` | `-focus`  | Ratio reposo / interacción |
+| --------- | ------------------- | ------------------------------ | ---------- | --------- | -------------------------- |
+| primary   | `#4E46B4` (Piccolo) | no                             | `#FFFFFF`  | `#5D58C8` | 7.35 / 5.68                |
+| secondary | `#40A69F` (Hit)     | **sí**: antes era el navy      | `#211F43`  | `#55B9B2` | 5.35 / 6.68                |
+| accent    | `#DA72CB` (Jireh)   | **sí**: antes era Hit          | `#211F43`  | `#EF85DF` | 5.40 / 6.78                |
+| neutral   | `#444444` (Beerus)  | no                             | `#FFFFFF`  | `#545454` | 9.74 / 7.57                |
+| info      | `#38BDF8`           | no                             | `#211F43`  | `#51D1FF` | 7.31 / 8.88                |
+| success   | `#4ADE80`           | no                             | `#211F43`  | `#62F293` | 8.98 / 10.91               |
+| warning   | `#FBBF24`           | no                             | `#211F43`  | `#FFD343` | 9.38 / 10.92               |
+| error     | `#F87171`           | no                             | `#211F43`  | `#FF8483` | 5.66 / 6.62                |
+
+#### Implementación lista para copiar
+
+Los dos temas, con los 24 tokens cada uno. El lote 21 los coloca en
+`packages/tw-theme/src/themes/`, los registra en `builtInThemes` y añade el fixture e2e; aquí
+están para que la auditoría sea reproducible sin teclear 48 hex.
+
+```ts
+// ownui.ts — tema de marca, claro
+export const ownuiTheme: ThemeColors = {
+  "--color-primary": "#4E46B4",
+  "--color-primary-content": "#FFFFFF",
+  "--color-primary-focus": "#3F33A0",
+  "--color-secondary": "#0C847E",
+  "--color-secondary-content": "#FFFFFF",
+  "--color-secondary-focus": "#00726D",
+  "--color-accent": "#9E3A91",
+  "--color-accent-content": "#FFFFFF",
+  "--color-accent-focus": "#8B267F",
+  "--color-neutral": "#F5F5F5",
+  "--color-neutral-content": "#211F43",
+  "--color-neutral-focus": "#E1E1E1",
+  "--color-info": "#0EA5E9",
+  "--color-info-content": "#211F43",
+  "--color-info-focus": "#0092D5",
+  "--color-success": "#22C55E",
+  "--color-success-content": "#211F43",
+  "--color-success-focus": "#00B14B",
+  "--color-warning": "#F59E0B",
+  "--color-warning-content": "#211F43",
+  "--color-warning-focus": "#E18B00",
+  "--color-error": "#DF3236",
+  "--color-error-content": "#FFFFFF",
+  "--color-error-focus": "#C91223",
+};
+
+// ownui-dark.ts — tema de marca, oscuro
+export const ownuiDarkTheme: ThemeColors = {
+  "--color-primary": "#4E46B4",
+  "--color-primary-content": "#FFFFFF",
+  "--color-primary-focus": "#5D58C8",
+  "--color-secondary": "#40A69F",
+  "--color-secondary-content": "#211F43",
+  "--color-secondary-focus": "#55B9B2",
+  "--color-accent": "#DA72CB",
+  "--color-accent-content": "#211F43",
+  "--color-accent-focus": "#EF85DF",
+  "--color-neutral": "#444444",
+  "--color-neutral-content": "#FFFFFF",
+  "--color-neutral-focus": "#545454",
+  "--color-info": "#38BDF8",
+  "--color-info-content": "#211F43",
+  "--color-info-focus": "#51D1FF",
+  "--color-success": "#4ADE80",
+  "--color-success-content": "#211F43",
+  "--color-success-focus": "#62F293",
+  "--color-warning": "#FBBF24",
+  "--color-warning-content": "#211F43",
+  "--color-warning-focus": "#FFD343",
+  "--color-error": "#F87171",
+  "--color-error-content": "#211F43",
+  "--color-error-focus": "#FF8483",
+};
+```
+
+Auditados con la herramienta del lote 22, no a mano:
+
+```bash
+mkdir -p /tmp/ownui && cd /tmp/ownui   # pegar los dos bloques como ownui.ts y ownui-dark.ts
+node scripts/check-contrast.mjs --dir /tmp/ownui
+# → 32/32 pares en AA 4.5:1, salida 0
+```
+
+Cómo se construyó, para que sea reproducible y no una elección de gusto:
+
+- **Los rellenos de marca se tocan lo mínimo.** Piccolo, Goku, Beerus y el navy `#211F43`
+  quedan intactos. Sólo se mueven dos: el teal Hit en claro (con blanco da **2.93:1**, y con
+  tinta oscura aprueba en reposo pero suspende en `:hover`) y el rojo de error (4.5 % de L).
+- **La tinta oscura no es inventada**: `#211F43` ya es color de marca — es el `secondary` del
+  tema oscuro de `components`. Así el único hex nuevo de todo el sistema es el `accent`.
+- **Los 16 `-focus` se derivan, no se eligen**: ∓6 % de luminosidad en OKLab (−6 % en claro,
+  +6 % en oscuro, porque sobre fondo oscuro la interacción aclara), y cada uno se verifica
+  contra su propio `-content`.
+- **Jireh (`accent`) se diseña, porque la marca no tiene hex para él.** No se deriva de Piccolo:
+  un accent del mismo tono que el primary no acentúa nada. Se elige por hueco en la rueda de
+  tonos. Medidos en OKLCH, los tonos ya ocupados son error 25°, warning 70°, success 150°,
+  Hit 189°, info 237° y Piccolo 281°: **el único sector libre va de 281° a 25°**, y su centro
+  exacto es **333°**. Ahí se coloca Jireh, con la croma de Piccolo (`C = 0.168`) para que pese
+  lo mismo que el primary. Resultado: **52.1° de separación de Piccolo y 52.4° de error** —
+  equidistante de sus dos vecinos por construcción, no por tanteo. La luminosidad se resuelve
+  después, como en el resto: la mínima que aprueba AA con blanco en reposo y en `:hover`.
+- **Cada rol conserva su tono entre temas.** Fijar Jireh deja a la vista una incoherencia de la
+  paleta de `components`: allí `accent` era Jireh en claro pero **Hit** en oscuro, y `secondary`
+  era Hit en claro pero el **navy** en oscuro, con lo que las dos familias cambiaban de color al
+  cambiar de tema. Se corrige sin coste de contraste: `secondary` es teal (189°) en ambos y
+  `accent` es magenta (333°) en ambos; sólo varía la luminosidad, que es lo que debe variar.
+  El navy `#211F43` vuelve a ser lo que es —tinta y superficie oscura—, y como superficie
+  pertenece a la escala `base-100/200/300` del lote 4, no a una familia semántica.
+- **`secondary #0C847E` en claro, aprobado por el dueño:** el Hit original no puede llevar texto
+  encima (2.93:1 con blanco).
+- Los 8 `-focus` **siguen siendo parte del contrato**: los consumen `css/button.css` y las 40
+  utilidades de `utilities/colors.ts`. Esta paleta los aporta; no se eliminan.
+
 ## L22 Auditoría de contraste WCAG AA
+
 Ningún par `--color-{name}` / `--color-{name}-content` ha sido verificado, y los ratios
 calculados sobre el tema light son malos: **ninguno de los tres medidos alcanza AA para texto
 normal (4.5:1)**.
 
-| Par (tema light) | Ratio | AA texto normal | AA componente (3:1) |
-|---|---|---|---|
-| `warning #f59e0b` / `#ffffff` | **2.15** | ❌ | ❌ |
-| `success #22c55e` / `#ffffff` | **2.28** | ❌ | ❌ |
-| `primary #3b82f6` / `#ffffff` | **3.68** | ❌ | ✅ |
+| Par (tema light)              | Ratio    | AA texto normal | AA componente (3:1) |
+| ----------------------------- | -------- | --------------- | ------------------- |
+| `warning #f59e0b` / `#ffffff` | **2.15** | ❌              | ❌                  |
+| `success #22c55e` / `#ffffff` | **2.28** | ❌              | ❌                  |
+| `primary #3b82f6` / `#ffffff` | **3.68** | ❌              | ✅                  |
 
 El patrón `-content: #ffffff` aplicado uniformemente a las 8 familias es la causa: los rellenos
 claros (warning, success) necesitan `-content` oscuro. Hay que recalcular los 8 pares en ambos
 temas, no parchear uno.
 Alcance: script `scripts/check-contrast.mjs` que calcule el ratio de cada par en cada tema y
 falle bajo 4.5:1 (texto normal) / 3:1 (texto grande y componentes); corregir los `-content` que
-no pasen; integrar en CI. Es un lote de **corrección de tokens**, y por eso va después de que
+no pasen; integrar en CI.
+
+**El script ya existe: `scripts/check-contrast.mjs`.** Sin dependencias: lee todos los temas de
+`packages/tw-theme/src/themes/`, mide el par relleno/`-content` en reposo **y** en interacción
+(`-focus`) y sale con código 1 por debajo del umbral. Hoy, sobre `develop`, **sale en rojo a
+propósito**: ésa es la deuda que paga este lote. **No está enganchado a CI** todavía, porque
+hacerlo antes de corregir los tokens dejaría el pipeline rojo de forma permanente — el lote 22
+corrige primero y engancha después.
+
+⚠️ **La tabla de arriba se queda corta.** Medido con el script: **15 de los 32 pares fallan**,
+no 3. La diferencia es el estado de **interacción**, que nunca se había medido: en el tema
+oscuro los `-focus` de `primary` (3.98), `accent` (3.45), `neutral` (3.03) y `error` (3.89)
+suspenden aunque sus estados de reposo aprueben. El problema no son sólo los rellenos claros con
+`-content` blanco: es que **el `-focus` nunca entró en la auditoría**.
+
+**Decidido (aprobado por el dueño, 2026-11-19):** esta corrección y la paleta de marca de L21
+se hacen **en el mismo movimiento**. Recalcular los `-content` del tema neutro y, por separado,
+estrenar una paleta de marca que tampoco se ha verificado, significaría auditar el contraste
+dos veces. El `check-contrast.mjs` debe correr sobre **todos** los temas registrados, built-in
+y de marca, no sólo sobre light/dark. Es un lote de **corrección de tokens**, y por eso va después de que
 los componentes existan: cambiar un `-content` afecta a todo.
 
 ## L23 Visual regression y budgets de bundle
+
 Alcance: Chromatic o Playwright screenshots sobre las stories (el repo ya tiene
 `@chromatic-com/storybook` y `@storybook/experimental-addon-test` instalados pero sin usar);
 `size-limit` por paquete con presupuesto declarado; `publint` + `@arethetypeswrong/cli` para
@@ -695,20 +916,20 @@ habría cazado). Integrar los tres en `ci.yml`.
 
 ## Resumen de prioridad
 
-| Lote | Impacto | Esfuerzo | Bloquea |
-|---|---|---|---|
-| L0 Reconciliar ramas | 🔴 crítico | S (decidir, no programar) | L1, L4, L5, L21 |
-| L1 CSS publicado | 🔴 crítico | M | todo lo visual |
-| L2 Tests | 🔴 crítico | S | toda verificación |
-| L3 Build/release | 🔴 crítico | S | toda publicación |
-| L4 Superficies | 🟠 alto | S | L6, L12 |
-| L5 Button | 🟠 alto | M | — |
-| L6 Dropdown CSS | 🟠 alto | M | — |
-| L7 Dropdown a11y | 🟠 alto | M | L16 |
-| L8 Generador | 🟡 medio | M | fase 3 (acelera) |
-| L9 Example + docs | 🟡 medio | M | — |
-| L10–L19 | 🟢 feature | L cada uno | — |
-| L20–L23 | 🟡 medio | M–L | — |
+| Lote                 | Impacto    | Esfuerzo                  | Bloquea           |
+| -------------------- | ---------- | ------------------------- | ----------------- |
+| L0 Reconciliar ramas | 🔴 crítico | S (decidir, no programar) | L1, L4, L5, L21   |
+| L1 CSS publicado     | 🔴 crítico | M                         | todo lo visual    |
+| L2 Tests             | 🔴 crítico | S                         | toda verificación |
+| L3 Build/release     | 🔴 crítico | S                         | toda publicación  |
+| L4 Superficies       | 🟠 alto    | S                         | L6, L12           |
+| L5 Button            | 🟠 alto    | M                         | —                 |
+| L6 Dropdown CSS      | 🟠 alto    | M                         | —                 |
+| L7 Dropdown a11y     | 🟠 alto    | M                         | L16               |
+| L8 Generador         | 🟡 medio   | M                         | fase 3 (acelera)  |
+| L9 Example + docs    | 🟡 medio   | M                         | —                 |
+| L10–L19              | 🟢 feature | L cada uno                | —                 |
+| L20–L23              | 🟡 medio   | M–L                       | —                 |
 
 ---
 
