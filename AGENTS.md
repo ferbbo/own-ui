@@ -3,7 +3,7 @@
 > Contexto canónico para agentes (Claude Code, Copilot, etc.) y para cualquier
 > persona que entre al repo. Describe **lo que el código realmente hace hoy**,
 > no lo que la documentación histórica aspira a hacer.
-> Última verificación contra el código: **2026-11-17** (rama `claude/great-archimedes-5f008a`).
+> Última verificación contra el código: **2026-11-18** (rama `claude/lote-1`, tras el lote 0).
 >
 > Plan de trabajo por lotes: **[`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md)**
 
@@ -73,7 +73,7 @@ own-ui/
 │   │   │   ├── variants/          → CONTRATO de clases: button, dropdown, loader
 │   │   │   ├── functions/         → generateThemeProperties, formatAndClean…, plugin.withOptions, splitStyles
 │   │   │   ├── utilities/         → colors.ts (generateColorUtilities, cssVarName/Ref), file.ts
-│   │   │   └── css/               → button/dropdown/loader/menu .css  ⚠️ HUÉRFANOS (§9.1)
+│   │   │   └── css/               → index + button/dropdown/loader .css  [PUBLICADO en ./css]
 │   │   └── e2e/                   → 6 fixtures + specs Playwright
 │   │
 │   ├── ui/                        → @ownui/ui          paquete agregador (barrel)
@@ -337,9 +337,21 @@ Clases existentes hoy:
 | `button.css` (306 ln) | `.btn`, `.btn-active`, 8 semánticos, `.btn-ghost`, `.btn-link`, `.btn-outline`, `.btn-dash`, `.btn-soft`, `.btn-{xs..xl}`, `.btn-square`, `.btn-circle`, `.btn-wide`, `.btn-block` |
 | `dropdown.css` (224 ln) | `.dropdown`, `.dropdown-item` (+ selected/disabled), `.dropdown-{primary,secondary,accent,neutral}`, `.dropdown-{xs..xl}`, `.dropdown-{ghost,bordered,compact}`, `.dropdown-item-text` |
 | `loader.css` (110 ln) | `.loader`, `.loader-spinner`, `@keyframes loader-spin`, `.loader-{2xs..lg}`, 8 colores, soporte `prefers-reduced-motion` |
-| `menu.css` | **vacío (0 líneas)** |
+| `index.css` | agregador: `@import` de los tres anteriores. Es el destino de `@ownui/tw-theme/css` |
 
-⚠️ Ninguno de estos archivos llega al bundle publicado. Ver §9.1 — es el bug #1 del repo.
+Estos archivos **sí llegan al paquete publicado** desde el lote 1: el build los copia a
+`dist/css/` y se exponen como `@ownui/tw-theme/css` (todos) y `@ownui/tw-theme/css/<archivo>`
+(uno a uno). El consumidor los carga desde su CSS de entrada, **no** como hoja de estilos
+estática, porque `loader.css` usa `@apply` y hace falta que pasen por su build de Tailwind:
+
+```css
+@import "tailwindcss";
+@plugin "@ownui/tw-theme";
+@import "@ownui/tw-theme/css";
+```
+
+`menu.css` existía vacío (0 líneas) y se eliminó en el lote 1: no hay componente `Menu` ni
+`variants/menu.ts`. Las clases `.dropdown-menu*` que el Dropdown emite siguen sin CSS (§9.7).
 
 ---
 
@@ -489,7 +501,9 @@ pnpm --filter @ownui/storybook storybook   # :6006 — NO existe `pnpm storybook
 
 `tw-theme` difiere: sólo ESM, `minify: false`, `external: ["tailwindcss","@tailwindcss/oxide"]`
 (no empaquetar Oxide), y multi-entry `["src/index.ts","src/theme.ts","src/variants/*.ts"]` para
-sostener los subpath exports `.`, `./theme`, `./variants`.
+sostener los subpath exports `.`, `./theme`, `./variants`. Desde el lote 1 añade un hook
+`onSuccess` que copia `src/css` → `dist/css` (tsup no procesa CSS), que es lo que sostiene los
+exports `./css` y `./css/*`.
 
 ### 6.3 Jest — dos proyectos
 
@@ -611,20 +625,28 @@ stories completas · build sin errores con banner `"use client"`.
 Ordenada por impacto. Cada ítem está convertido en lote de trabajo en
 [`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md).
 
-### 9.1 🔴 El CSS de componentes nunca se publica — *bug raíz*
-`packages/tw-theme/src/css/{button,dropdown,loader,menu}.css` **no se importan en ningún
-lado** (`grep` sobre todo el repo: 0 referencias). `plugin.ts` sólo llama
-`addBase(temas)` + `addUtilities(colores)`. `package.json` publica únicamente `dist/`, y
-`tsup` no procesa CSS. Consecuencia: quien instale `@ownui/ui` + `@ownui/tw-theme` obtiene
-`class="btn btn-primary btn-md"` **sin una sola regla que las defina**. La librería no
-renderiza estilada fuera de Storybook.
-`components-css.instructions.md` describe un paso `build:components` que genera
-`src/build/components.js` con exports `{component}Styles`: **ese script y esa carpeta no
-existen.** `menu.css` está vacío.
+### 9.1 ✅ El CSS de componentes nunca se publicaba — *bug raíz, RESUELTO en el lote 1*
+**Era** el bug #1 del repo: `packages/tw-theme/src/css/*.css` no se importaba en ningún lado
+(`grep`: 0 referencias) y `tsup` no procesa CSS, así que quien instalaba `@ownui/ui` +
+`@ownui/tw-theme` obtenía `class="btn btn-primary btn-md"` **sin una sola regla que la
+defina**; la librería no renderizaba estilada fuera de Storybook.
 
-**Hay dos soluciones ya prototipadas en ramas sin mergear** (ver §11): `tw-theme/v1` añade
-`exports["./css"]` y copia `src/css` → `dist/css` en el build; `components` añade `@import` de
-los cuatro `.css` en el `tailwind.css` de Storybook. Ninguna está en `main`.
+Resuelto con la opción (B) del plan: CSS plano publicado + subpath exports.
+- `src/css/index.css` agrega los tres componentes.
+- `exports["./css"] → ./dist/css/index.css` y `exports["./css/*"] → ./dist/css/*`. Ojo: el
+  prototipo de `tw-theme/v1` era `"./css": "./dist/css"`, que apunta a un **directorio** y Node
+  no resuelve.
+- El hook `onSuccess` de `tsup.config.ts` copia `src/css` → `dist/css` con `node:fs`, y
+  `files: ["dist"]` lo mete en el tarball.
+- Verificado con el fixture e2e `component-styles` (estilos computados en Chromium) **y** con
+  el tarball de `npm pack` instalado en un proyecto limpio fuera del monorepo. Esto último es
+  imprescindible: dentro del paquete, `@import "@ownui/tw-theme/css"` resuelve por
+  *self-reference* de Node y da un falso positivo.
+
+Sigue pendiente: `components-css.instructions.md` describe un paso `build:components` que
+genera `src/build/components.js` con exports `{component}Styles` — **ese script y esa carpeta
+no existen** y la opción (A) que describen no se implementó. La guía debería actualizarse o
+marcar ese apartado como no vigente (lote 9).
 
 ### 9.2 🔴 Los tests de componentes no se ejecutan
 `jest.config.js` → proyecto `components` → `testMatch: packages/components/**`. La ruta real es
@@ -684,8 +706,9 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
   paquete con Emotion; no corresponde a este monorepo.
 
 ### 9.10 🟡 Varios
-- `peerDependencies: tailwindcss ">= 3.4.17 <4.1.1"` pero se usa 4.1.7 (dev) / 4.1.1
-  (storybook) ⇒ el rango excluye lo que realmente se usa, y el plugin depende de features v4.
+- ~~`peerDependencies: tailwindcss ">= 3.4.17 <4.1.1"`~~ **corregido a `">=4.1.0 <5"` en el
+  lote 1**: el rango viejo excluía las versiones realmente usadas (4.1.7 dev / 4.1.1 storybook)
+  y hacía fallar `npm install` del tarball con `ERESOLVE`. Este punto sale del alcance de L3.
 - `@ownui/ui` importa los componentes por ruta relativa, pero `Button` importa `@ownui/loader`
   y `@ownui/dom-utils`, que **no están en las dependencias de `@ownui/ui`** ⇒ build frágil.
 - `@ownui/dropdown` tiene `"main": ".src/index.ts"` (typo, con punto inicial).

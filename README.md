@@ -27,30 +27,37 @@ pnpm add @ownui/ui @ownui/tw-theme
 
 ### Setup
 
-1. Install the components and theme plugin:
+> Estos tres pasos se verificaron en el lote 1 ejecutandolos de verdad: `npm pack` del
+> paquete, instalacion del tarball en un proyecto limpio fuera del monorepo y compilacion
+> con Tailwind CSS 4.1.11. Requiere **Tailwind CSS >= 4.1.0** (el plugin usa la API de v4).
+
+1. Instala los componentes y el plugin de theming:
 
 ```bash
 pnpm add @ownui/ui @ownui/tw-theme
 ```
 
-2. Configure Tailwind CSS in your `tailwind.config.js`:
-
-```js
-import tailwindPlugin from '@ownui/tw-theme';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  plugins: [tailwindPlugin()],
-}
-```
-
-3. Add Tailwind directives to your CSS:
+2. En tu CSS de entrada, carga Tailwind, el plugin y el **CSS de componentes**:
 
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* 1. Tokens semanticos + utilidades de color (temas light y dark incluidos) */
+@plugin "@ownui/tw-theme";
+
+/* 2. CSS de componentes: define .btn, .dropdown y .loader */
+@import "@ownui/tw-theme/css";
+```
+
+En Tailwind v4 el plugin se carga **desde el CSS** con `@plugin`: no hace falta
+`tailwind.config.js` ni una entrada en `plugins: []`.
+
+3. Sin el `@import "@ownui/tw-theme/css"` del paso 2 los componentes se renderizan **sin
+   estilos**: `<Button>` emite `class="btn btn-primary btn-md"` y esas clases vienen de ese
+   archivo. Para cargar un solo componente:
+
+```css
+@import "@ownui/tw-theme/css/button.css";
 ```
 
 ## Usage

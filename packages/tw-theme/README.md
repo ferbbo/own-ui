@@ -34,6 +34,9 @@ A powerful Tailwind CSS v4 plugin that provides a comprehensive semantic theming
 
 ## Installation
 
+Requires **Tailwind CSS >= 4.1.0**: the plugin is loaded from CSS with `@plugin`, which is a
+Tailwind v4 feature.
+
 ```bash
 # Using pnpm (recommended)
 pnpm add -D @ownui/tw-theme
@@ -74,7 +77,37 @@ yarn add -D @ownui/tw-theme
 }
 ```
 
-### 2. Configure in your tailwind.config.js
+### 2. Import the component CSS
+
+The plugin injects **tokens** (CSS custom properties) and **color utilities**. The rules that
+define the component classes (`.btn`, `.dropdown`, `.loader`) live in plain CSS files shipped
+with the package, and you import them explicitly:
+
+```css
+@import "tailwindcss";
+@plugin "@ownui/tw-theme";
+
+/* All components */
+@import "@ownui/tw-theme/css";
+```
+
+Or one component at a time:
+
+```css
+@import "@ownui/tw-theme/css/button.css";
+@import "@ownui/tw-theme/css/loader.css";
+@import "@ownui/tw-theme/css/dropdown.css";
+```
+
+Without this import, a component from `@ownui/ui` renders **unstyled**: `<Button>` emits
+`class="btn btn-primary btn-md"` and nothing defines those classes.
+
+These files must go through *your* Tailwind build (they use `@apply` and native nesting), which
+is why they are imported from your CSS entry point instead of being linked as a static
+stylesheet. Verified end to end in the `component-styles` e2e fixture, which measures computed
+styles in Chromium, and against the real tarball in a clean project outside the monorepo.
+
+### 3. Configure in your tailwind.config.js
 
 ```js
 /** @type {import('tailwindcss').Config} */
@@ -83,7 +116,7 @@ module.exports = {
 };
 ```
 
-### 3. Use in your components
+### 4. Use in your components
 
 ```jsx
 function Button({ children, variant = "primary", size = "md" }) {

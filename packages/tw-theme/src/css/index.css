@@ -1,0 +1,33 @@
+/* =========================================================
+   index.css — agregador del CSS de componentes de Own UI
+
+   Punto de entrada publico del CSS de componentes. Se consume asi:
+
+     @import "tailwindcss";
+     @plugin "@ownui/tw-theme";
+     @import "@ownui/tw-theme/css";
+
+   El orden importa: `@plugin "@ownui/tw-theme"` inyecta los tokens
+   (--color-*, --depth, --size-field...) con addBase(), y estos archivos
+   los consumen. Importarlos antes del plugin no rompe la cascada (las
+   custom properties se resuelven en tiempo de computo, no de parseo),
+   pero se documenta el orden canonico para que el consumidor no tenga
+   que razonarlo.
+
+   Cada archivo importado sigue el patron de cascada de
+   `.github/instructions/components-css.instructions.md` y de
+   `AGENTS.md` §4.8: la base define TODAS las custom properties, la
+   variante solo redefine --{componente}-color, y los estados recalculan
+   por color-mix.
+
+   Para importar un solo componente en vez de todos:
+
+     @import "@ownui/tw-theme/css/button.css";
+
+   Mantener esta lista alineada con `src/variants/index.ts`: cada
+   contrato de clases declarado ahi debe tener su CSS aqui.
+   ========================================================= */
+
+@import "./button.css";
+@import "./dropdown.css";
+@import "./loader.css";

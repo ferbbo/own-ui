@@ -19,7 +19,9 @@
     "./variants": {
       "import": "./dist/variants/index.js",
       "require": "./dist/variants/index.js"
-    }
+    },
+    "./css": "./dist/css/index.css",
+    "./css/*": "./dist/css/*"
   },
   "type": "module",
   "scripts": {
@@ -42,7 +44,7 @@
     "custom-properties"
   ],
   "peerDependencies": {
-    "tailwindcss": ">= 3.4.17 <4.1.1"
+    "tailwindcss": ">=4.1.0 <5"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Styles (published CSS) Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Component Styles E2E Test</h1>
+  <p>
+    Valida que el CSS de componentes publicado por <code>@ownui/tw-theme/css</code>
+    define de verdad las clases que emiten los componentes React.
+  </p>
+
+  <!-- .btn en tema claro (por defecto) -->
+  <div class="test-section">
+    <h2>☀️ .btn .btn-primary .btn-md (light)</h2>
+    <button id="btn-primary" class="btn btn-primary btn-md" type="button">Primary</button>
+  </div>
+
+  <!-- .btn en tema oscuro, por ambito local -->
+  <div class="test-section" data-theme="dark" id="dark-scope">
+    <h2>🌙 .btn .btn-primary .btn-md (data-theme="dark")</h2>
+    <button id="btn-primary-dark" class="btn btn-primary btn-md" type="button">Primary dark</button>
+  </div>
+
+  <!-- Resto de la escala de tamanos: comprueba que --size se recalcula -->
+  <div class="test-section">
+    <h2>📐 Escala de tamanos</h2>
+    <button id="btn-xs" class="btn btn-primary btn-xs" type="button">xs</button>
+    <button id="btn-sm" class="btn btn-primary btn-sm" type="button">sm</button>
+    <button id="btn-lg" class="btn btn-primary btn-lg" type="button">lg</button>
+    <button id="btn-xl" class="btn btn-primary btn-xl" type="button">xl</button>
+  </div>
+
+  <!-- Un rol distinto: el token semantico correcto llega al componente -->
+  <div class="test-section">
+    <h2>🎨 Otro rol semantico</h2>
+    <button id="btn-success" class="btn btn-success btn-md" type="button">Success</button>
+  </div>
+
+  <!-- Control negativo: una clase que NO existe en el CSS publicado -->
+  <div class="test-section">
+    <h2>🚫 Control negativo (clase inexistente)</h2>
+    <button id="btn-unstyled" class="btn-does-not-exist" type="button">Sin estilar</button>
+  </div>
+
+  <!-- .loader: su CSS usa @apply, asi que prueba el pipeline de Tailwind
+       sobre el archivo publicado, no solo la copia del archivo -->
+  <div class="test-section">
+    <h2>⏳ .loader (CSS con @apply)</h2>
+    <div id="loader" class="loader loader-md loader-primary" role="status" aria-label="Cargando">
+      <div id="loader-spinner" class="loader-spinner"></div>
+    </div>
+  </div>
+
+  <!-- .dropdown: tercer componente del agregador -->
+  <div class="test-section">
+    <h2>📂 .dropdown</h2>
+    <div id="dropdown" class="dropdown dropdown-md">
+      <div id="dropdown-item" class="dropdown-item">Item</div>
+    </div>
+  </div>
+
+  <script>
+    // Helper functions for tests
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getElementTextColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).color : null;
+    };
+
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+
+    window.getComputedProp = (id, prop) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).getPropertyValue(prop).trim() : null;
+    };
+
+    window.setTheme = (theme) => {
+      if (theme === null) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    };
+
+    window.getTheme = () => {
+      return document.documentElement.getAttribute('data-theme') || 'light';
+    };
+  </script>
+</body>
+</html>
