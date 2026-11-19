@@ -231,13 +231,13 @@ y fue ahí donde apareció el fallo de peer dependency de D-16 — invisible des
   rama `claude/decisiones-lotes-0-1`. Se dejan aquí con su resolución para que no se reabran.
 
 - **P-01 → RESUELTA** en D-20: se conserva la semántica actual, ya cubierta por e2e.
-- **P-02 — ¿paleta de marca definitiva? → la neutra se queda como tema built-in por defecto; la
-  de marca se publicará como tema con nombre** (`@plugin "@ownui/tw-theme/theme" { name: "ownui
---default"; … }`), en el lote 21 y en el mismo movimiento que la auditoría de contraste del 22.
-  Razón: un tema por defecto de marca obliga a cada consumidor a sobreescribir 24 tokens antes
-  de usar la librería. **Lo que falta ya no es una decisión sino un dato**: los hex definitivos,
-  con `-content` que pasen WCAG AA y los 8 `-focus`. La rama `components` se conserva por ser su
-  única copia.
+- **P-02 — ¿paleta de marca definitiva? → CERRADA el 2026-11-19.** La neutra se queda como
+  tema built-in por defecto y la de marca se publica como par de temas opcionales (`ownui` /
+  `ownui-dark`), activables con `themes: "ownui"`. **Los valores, que eran lo único que
+  faltaba, ya están calculados, verificados y aprobados**: las dos tablas (24 tokens por tema,
+  con sus 8 `-focus`, todos en AA 4.5:1 en reposo **y** en interacción) están en
+  `@docs/BUILD-BATCHES.md` §L21, y `scripts/check-contrast.mjs` las reproduce. Único hex nuevo
+  del sistema: `accent #6865D6`. Implementación: slice del lote 21.
 - **P-03 — ¿se borran las ramas muertas? → SÍ, aprobado**, y el script se amplió a 12 ramas
   (`claude/lote-0` incluida) con detección por contenido para las squash-mergeadas. **No se pudo
   ejecutar**: `git push origin --delete` devuelve 403 desde el proxy git de la sesión en las 12
