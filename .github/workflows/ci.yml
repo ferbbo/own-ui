@@ -16,7 +16,13 @@ concurrency:
 jobs:
   build-and-test:
     name: Build and Test
-    runs-on: ubuntu-latest
+    # Fijado a propósito, no `ubuntu-latest`: desde que el runner pasó a Ubuntu
+    # 26.04, `playwright install --with-deps` falla con
+    # "Playwright does not support chromium on ubuntu26.04-x64" (Playwright
+    # 1.57). Que la imagen del runner se mueva sola es justo lo que rompio la
+    # primera ejecucion de este workflow. Subir a 26.04 cuando Playwright lo
+    # soporte.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout Repo
