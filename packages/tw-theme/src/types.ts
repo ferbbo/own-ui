@@ -22,6 +22,23 @@ export type SemanticColorVariant = "" | "-content" | "-focus";
 export type SemanticColorToken = `${SemanticColorName}${SemanticColorVariant}`;
 
 /**
+ * Escala de superficies. Definida por tema en `themes/light.ts` y
+ * `themes/dark.ts` (no en `root.ts`: una superficie fija no puede servir a un
+ * tema claro y a uno oscuro a la vez). Ver AGENTS.md §4.2.
+ *
+ * A diferencia de los colores semanticos, las superficies **no** tienen
+ * variantes `-content` ni `-focus`: `base-content` es el unico color de texto
+ * de la escala, y no existe `--color-base-100-focus`. Mezclarlas en
+ * `SemanticColorName` generaria 15 utilidades apuntando a tokens inexistentes.
+ */
+export type SurfaceColorName = "base-100" | "base-200" | "base-300" | "base-content";
+
+/**
+ * Cualquier token de color del sistema: semantico o de superficie.
+ */
+export type ColorToken = SemanticColorToken | SurfaceColorName;
+
+/**
  * Color value in hex, rgb, hsl, oklch format
  */
 export type ColorValue = string;
