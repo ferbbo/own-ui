@@ -331,6 +331,14 @@ Ningún bloqueante crítico. El lote se completó entero.
   `|| echo`. Reescrito como tubería lineal (D-11), con lint no bloqueante (D-12).
 - **T+14** — Suite completa otra vez con la secuencia exacta del workflow: lint 4 errores
   (baseline), build 6/6, tests 89/89, e2e 98/98. Spec y PR actualizados.
+- **T+15** — **Primera ejecución de CI de la historia de estos PRs**, y falla: `ubuntu-latest`
+  ya es Ubuntu 26.04 y Playwright 1.57 no lo soporta (`--with-deps`). Pasó lint, build y tests
+  89/89 antes de morir en el navegador. Runner fijado a `ubuntu-24.04` (`1b3024b`) → gaps G-19
+  y G-20.
+- **T+16** — La corrida de `1b3024b` sale **cancelled**: el push siguiente la superó por
+  `cancel-in-progress: true` del grupo de concurrencia. No es un fallo.
+- **T+17** — CI **verde** en `02dba80`: los 12 pasos ejecutados, build 6/6, tests 89/89,
+  e2e **98/98**. Evidencia en §10. El lote queda cerrado con señal de CI real, no sólo local.
 
 ---
 
@@ -420,7 +428,26 @@ $ git status --short     # tras el e2e, sin contar los cambios del lote
   (vacio de artefactos)
 ```
 
-### Lint y tests (fase final)
+### CI — primera ejecución real del pipeline (commit `02dba80`, run 44728535618)
+
+```
+success  Install Dependencies
+success  Lint          → ✖ 287 problems (4 errors, 283 warnings)   [no bloqueante, D-12]
+success  Build         → Tasks: 6 successful, 6 total
+success  Unit Tests    → Test Suites: 8 passed, 8 total / Tests: 89 passed, 89 total
+success  Install Playwright Browsers
+success  E2E Tests     → 98 passed (19.6s)
+skipped  Upload E2E Reports on Failure
+```
+
+Los 12 pasos se ejecutaron. **Ojo al leerlo**: el paso `Lint` sale en verde por el
+`continue-on-error` de D-12, no porque lint pase — sigue reportando los 4 errores de
+`Dropdown.stories.tsx` que son de L6. Los otros tres pasos sí son verde real.
+
+Antes de este lote el pipeline **no se ejecutaba** en un PR a `develop` (trigger sólo en PRs a
+`main`), así que esta es la primera señal de CI que ha tenido cualquiera de los lotes.
+
+### Lint y tests (fase final, en local)
 ```
 ✖ 287 problems (4 errors, 283 warnings)
 Test Suites: 8 passed, 8 total
