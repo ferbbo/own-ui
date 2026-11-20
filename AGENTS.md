@@ -50,7 +50,7 @@ prototipo y tiene desconexiones reales con el plugin — documentadas sin eufemi
 | Test unitario | Jest 29 + ts-jest ESM + React Testing Library | config multi-proyecto en raíz |
 | Test e2e | Playwright (Chromium) sobre CSS compilado real | `packages/tw-theme/e2e` |
 | Calidad | ESLint 9 flat config + Prettier + Husky | `printWidth: 100`, dobles comillas |
-| Versionado | Changesets | `.releaserc` de semantic-release quedó huérfano |
+| Versionado | Changesets | único sistema; `.releaserc` eliminado en el lote 3 |
 | Node | v20.16.0 (`.nvmrc`), `engines: node >=20, pnpm >=10` | |
 
 ---
@@ -482,9 +482,10 @@ distintos coexistiendo**; conviene unificar (ver lote 5 del plan).
 ```bash
 pnpm install                       # requiere Node 20.16 / pnpm 10
 
-pnpm build                         # ⚠️ turbo build --filter='@ownui/tw-theme' — SÓLO el plugin
-pnpm --filter @ownui/ui build      # construir el agregador
-pnpm --filter @ownui/button build  # construir un componente
+pnpm build                         # turbo build — los 6 paquetes en orden topológico
+pnpm --filter "@ownui/ui..." build # el agregador + sus dependencias (ojo a los 3 puntos)
+turbo build --filter=@ownui/ui     # equivalente vía turbo (usa dependsOn: ["^build"])
+pnpm --filter @ownui/button build  # SÓLO ese paquete: falla en limpio si sus deps no están
 
 pnpm test                          # Jest, ambos proyectos — 8 suites / 89 tests (sin coverage)
 pnpm test:coverage                 # lo mismo + informe de cobertura
@@ -496,8 +497,14 @@ pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (~88 tests)
 pnpm lint  /  pnpm lint:fix  /  pnpm format
 pnpm changeset                     # crear changeset antes de abrir PR
 
-pnpm --filter @ownui/storybook storybook   # :6006 — NO existe `pnpm storybook` en la raíz
+pnpm storybook                     # :6006 (delega en @ownui/storybook)
+pnpm build-storybook               # build estático del Storybook
 ```
+
+> **Orden topológico.** `pnpm --filter <pkg> build` ejecuta **sólo** el script de ese paquete:
+> pnpm no construye sus dependencias. Para que las construya hay que pedirlo — con el sufijo
+> `...` (`pnpm --filter "@ownui/ui..." build`) o con turbo, que lo deriva de
+> `dependsOn: ["^build"]`. Es semántica de pnpm, no un defecto del repo.
 
 ### 6.2 tsup por paquete
 
@@ -552,16 +559,30 @@ fixture.** Es el único mecanismo que detecta regresiones reales del plugin.
 
 ### 6.5 CI/CD
 
-- **`ci.yml`** (PR → main): detecta paquetes cambiados con `git diff --name-only main...HEAD`
-  (prefijos `packages/tw-theme/`, `packages/ui/`, `packages/utils/`; cambios en archivos raíz ⇒
-  `all`), construye, instala Chromium, corre e2e y unitarios sólo de lo cambiado.
+- **`ci.yml`** (PR → `main` o `develop`, y push → `develop`): tubería lineal
+  `install → lint → build → test → e2e`, sin detección de cambios. Lint entra con
+  `continue-on-error: true` hasta que el lote 6 cierre los 4 errores de `Dropdown.stories.tsx`.
+  Reescrito en el lote 3: antes disparaba **sólo** en PRs a `main`, así que ningún PR de los
+  lotes 0–3 pasó por CI; la detección de cambios comparaba contra `main` (diff equivocado en un
+  PR a `develop`); y el paso de tests era `pnpm test:$pkg || echo "No tests for $pkg"`, que
+  invocaba `test:ui`/`test:utils` —scripts inexistentes— y se tragaba el fallo.
 - **`release.yml`** (push → main): `pnpm build` → `pnpm version` (changesets) →
-  `pnpm release` (`pnpm --filter @ownui/tw-theme publish --access public --no-git-checks`) →
-  GitHub Releases vía `changesets/action`. Secrets: `NPM_TOKEN`, `CHANGESET_PAT`.
-- ⚠️ El paso de publicación está **cableado sólo a `@ownui/tw-theme`**, aunque el README anuncia
-  6 paquetes publicados.
-- `.releaserc` (semantic-release) está huérfano: no lo invoca ningún workflow. Conviven dos
-  sistemas de release declarados y sólo Changesets está en uso.
+  `pnpm release` (`changeset publish`) → GitHub Releases vía `changesets/action`.
+  Secrets: `NPM_TOKEN`, `CHANGESET_PAT`.
+- El release cubre los **6 paquetes publicables** (los que el README anuncia); `@ownui/storybook`
+  queda fuera por `private: true`. `changeset publish` sólo publica lo que tenga changeset
+  (resuelto en el lote 3; antes estaba cableado sólo a `@ownui/tw-theme`).
+- Changesets es el **único** sistema de release. `.releaserc` (semantic-release) se eliminó en el
+  lote 3: ningún workflow lo invocaba.
+- **Versiones.** El repo adoptó la `1.0.1` publicada de `@ownui/tw-theme` (lote 3), así que la
+  base del versionado coincide con el registro. El próximo release sale en **1.1.0** para el
+  plugin y **1.0.1** para los otros cinco, que es su **primera publicación**.
+- ⚠️ **La `@ownui/tw-theme@1.0.1` que hay hoy en npm está parcialmente rota** y lo seguirá
+  estando hasta que salga la 1.1.0: su `exports["./css"]` apunta a un directorio, así que
+  `@import "@ownui/tw-theme/css"` falla en el consumidor; no lleva agregador `index.css`;
+  `menu.css` va vacío; y su peer de Tailwind excluye las 4.1.x que el plugin necesita. Todo
+  corregido en `develop` por el lote 1. Ver `packages/tw-theme/CHANGELOG.md` y
+  `specs/lote-3.md` G-18.
 
 **Modelo de ramas** (vigente desde el lote 0):
 
@@ -683,10 +704,13 @@ Hoy: `testMatch` y `collectCoverageFrom` apuntan a `packages/ui/**` y `packages/
 tumba el pipeline. El lote 2 no lo tocó por la regla de no modificar CI sin autorización
 explícita; está registrado como gap en `specs/lote-2.md` (G-04).
 
-### 9.3 🔴 `pnpm build` no construye la librería
-`"build": "turbo build --filter='@ownui/tw-theme'"`. `@ownui/ui`, `@ownui/button`,
-`@ownui/dropdown`, `@ownui/loader` y `@ownui/dom-utils` **no se construyen** con el comando
-raíz — y `release.yml` llama exactamente a ese `pnpm build` antes de publicar.
+### 9.3 ✅ `pnpm build` no construye la librería — *resuelto en el lote 3*
+Era `"build": "turbo build --filter='@ownui/tw-theme'"`, así que `@ownui/ui`, `@ownui/button`,
+`@ownui/dropdown`, `@ownui/loader` y `@ownui/dom-utils` no se construían con el comando raíz,
+y `release.yml` llamaba exactamente a ese `pnpm build` antes de publicar.
+Hoy `pnpm build` es `turbo build` y la tarea `build` declara `dependsOn: ["^build"]`, con las
+dependencias internas de `@ownui/ui` declaradas para que el grafo exista. Verificado en limpio:
+6/6 `dist/`. Ver `specs/lote-3.md`.
 
 ### 9.4 🟠 `Button.variant` no aplica ninguna clase
 `useButton.tsx` resuelve `const variantCls = button.theme[variant]` — busca la variante en el
@@ -739,7 +763,8 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
   y hacía fallar `npm install` del tarball con `ERESOLVE`. Este punto sale del alcance de L3.
 - `@ownui/ui` importa los componentes por ruta relativa, pero `Button` importa `@ownui/loader`
   y `@ownui/dom-utils`, que **no están en las dependencias de `@ownui/ui`** ⇒ build frágil.
-- `@ownui/dropdown` tiene `"main": ".src/index.ts"` (typo, con punto inicial).
+- ~~`@ownui/dropdown` tiene `"main": ".src/index.ts"` (typo)~~ → corregido en el lote 3, junto
+  con su entrada de build (`tsup src --dts` metía `Dropdown.stories.tsx` en el bundle publicado).
 - `Loader.variants.ts` existe y está vacío.
 - `generateThemeProperties` está duplicado: en `functions/` (exportado y testeado) y
   reimplementado literal dentro de `plugin.ts`.
@@ -747,7 +772,7 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 - `formatAndCleanPluginConfig` corrompe nombres de tema con mayúsculas/dígitos sin avisar.
 - ~~`@ownui/dom-utils` no tiene tests~~ **Corregido en el lote 2** (6 tests de `useDOMRef` en
   `packages/utils/dom-utils/__test__/`). Sigue sin `tsconfig` propio de test — usa el
-  `tsconfig.jest.json` de la raíz — y con `license: ISC` mientras el resto es MIT.
+  `tsconfig.jest.json` de la raíz. ~~`license: ISC`~~ → MIT desde el lote 3.
 - ~~`collectCoverage: true` global en Jest.~~ **Corregido en el lote 2**: sólo en
   `pnpm test:coverage`.
 - ~~El ref de `Button` nunca llegaba al consumidor~~ **Corregido en el lote 2**: `Button.tsx`
@@ -760,7 +785,7 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 - Con `as="a"`, React Aria fuerza `role="button"` sobre el ancla: el nodo tiene `href` pero
   **no** expone el rol `link`. Decidir en el lote 5 si un Button-enlace debe pasar por
   `useLink` en lugar de `useButton`.
-- `packages/tw-theme/test-results/` está versionado (artefacto de Playwright).
+- ~~`packages/tw-theme/test-results/` está versionado~~ → desindexado e ignorado en el lote 3.
 - ~~`getThemeNameConfig` (`theme.ts`) compara `flag !== "string"`…~~ **Corregido en el lote 0.**
   Era una comparación contra el literal `"string"` donde se pretendía `typeof`, así que
   `--prefersdark` se ignoraba y todo tema custom se registraba como `--default`. Cubierto con

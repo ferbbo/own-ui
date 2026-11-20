@@ -129,5 +129,20 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },
+  },
+
+  // Ficheros de configuracion en CommonJS.
+  // El `package.json` de la raiz no declara `"type": "module"`, asi que estos
+  // `.js` SON CommonJS: Jest los carga con `require`, y un `import` ahi es un
+  // error de sintaxis. No es una excepcion de conveniencia a la regla, es la
+  // forma del fichero.
+  {
+    files: ["jest.config.js", "jest.setup.js", "packages/*/jest.setup.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+    },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
   }
 );

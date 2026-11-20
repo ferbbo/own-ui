@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A React component library built with TypeScript, Tailwind CSS, and Vite",
   "scripts": {
-    "build": "turbo build --filter='@ownui/tw-theme'",
+    "build": "turbo build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -15,9 +15,11 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}'",
     "prepare": "husky",
+    "storybook": "pnpm --filter @ownui/storybook storybook",
+    "build-storybook": "pnpm --filter @ownui/storybook build-storybook",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm --filter @ownui/tw-theme publish --access public --no-git-checks",
+    "release": "changeset publish",
     "example": "cd apps/example-app && pnpm dev",
     "example:build": "cd apps/example-app && pnpm build",
     "example:install": "cd apps/example-app && pnpm install"
