@@ -72,10 +72,9 @@ describe("Button", () => {
       expect(screen.getByRole("button")).toHaveClass(`btn-${size}`);
     });
 
-    // El bug de origen (AGENTS.md §9.4): `useButton` consultaba
-    // `button.theme[variant]` —el mapa de roles— con una clave de tratamiento,
-    // así que `dash` y `soft` se perdían y `outline` sólo funcionaba por
-    // coincidencia de nombre entre los dos mapas.
+    // El bug de origen (AGENTS.md §9.4): `useButton` buscaba la clave de
+    // tratamiento en el mapa de roles, así que `dash` y `soft` se perdían y
+    // `outline` sólo funcionaba por coincidencia de nombre entre los dos mapas.
     test.each(VARIANTS)('variant="%s" aplica la clase btn-%s', (variant) => {
       render(<Button variant={variant}>Texto</Button>);
 

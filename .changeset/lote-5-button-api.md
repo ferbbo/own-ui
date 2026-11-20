@@ -1,5 +1,5 @@
 ---
-"@ownui/button": minor
+"@ownui/button": major
 ---
 
 Button: `variant` aplica clase, `loading` conserva el contenido e iconos reales (lote 5).
@@ -31,7 +31,7 @@ Button: `variant` aplica clase, `loading` conserva el contenido e iconos reales 
 - Modificadores de layout que el CSS ya tenía: `shape` (`square`/`circle`), `width`
   (`wide`/`block`) y `active`.
 
-## Cambios que rompen (pre-1.0)
+## Cambios que rompen la API (de ahí el `major`)
 
 - `variant="solid"` y `variant="ghost"` ya no existen: un botón sólido es la ausencia de
   `variant`, y `ghost` es un rol (`theme="ghost"`).

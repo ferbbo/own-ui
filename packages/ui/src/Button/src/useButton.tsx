@@ -81,10 +81,10 @@ export function useButton(
   const classNames = useMemo(() => {
     const base = "btn";
     const themeCls = button.theme[theme] || "";
-    // `button.variant[variant]`, no `button.theme[variant]`: el bug original
-    // (AGENTS.md §9.4) consultaba el mapa de roles con una clave de
-    // tratamiento, así que `dash` y `soft` se perdían y `outline` sólo
-    // funcionaba por coincidencia de nombre.
+    // Se resuelve en el mapa de tratamientos. El bug original (AGENTS.md
+    // §9.4) consultaba el mapa de roles con una clave de tratamiento, así que
+    // `dash` y `soft` se perdían y `outline` sólo funcionaba por coincidencia
+    // de nombre entre los dos mapas.
     const variantCls = variant ? button.variant[variant] || "" : "";
     const sizeCls = button.size[size] || "";
     // Un botón icon-only es cuadrado salvo que se pida otra forma.
