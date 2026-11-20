@@ -559,9 +559,13 @@ fixture.** Es el único mecanismo que detecta regresiones reales del plugin.
 
 ### 6.5 CI/CD
 
-- **`ci.yml`** (PR → main): detecta paquetes cambiados con `git diff --name-only main...HEAD`
-  (prefijos `packages/tw-theme/`, `packages/ui/`, `packages/utils/`; cambios en archivos raíz ⇒
-  `all`), construye, instala Chromium, corre e2e y unitarios sólo de lo cambiado.
+- **`ci.yml`** (PR → `main` o `develop`, y push → `develop`): tubería lineal
+  `install → lint → build → test → e2e`, sin detección de cambios. Lint entra con
+  `continue-on-error: true` hasta que el lote 6 cierre los 4 errores de `Dropdown.stories.tsx`.
+  Reescrito en el lote 3: antes disparaba **sólo** en PRs a `main`, así que ningún PR de los
+  lotes 0–3 pasó por CI; la detección de cambios comparaba contra `main` (diff equivocado en un
+  PR a `develop`); y el paso de tests era `pnpm test:$pkg || echo "No tests for $pkg"`, que
+  invocaba `test:ui`/`test:utils` —scripts inexistentes— y se tragaba el fallo.
 - **`release.yml`** (push → main): `pnpm build` → `pnpm version` (changesets) →
   `pnpm release` (`changeset publish`) → GitHub Releases vía `changesets/action`.
   Secrets: `NPM_TOKEN`, `CHANGESET_PAT`.
@@ -570,9 +574,15 @@ fixture.** Es el único mecanismo que detecta regresiones reales del plugin.
   (resuelto en el lote 3; antes estaba cableado sólo a `@ownui/tw-theme`).
 - Changesets es el **único** sistema de release. `.releaserc` (semantic-release) se eliminó en el
   lote 3: ningún workflow lo invocaba.
-- ⚠️ **El registro va por delante del repo**: `@ownui/tw-theme` está publicado en npm como
-  **1.0.1** mientras el `package.json` del repo dice `1.0.0` (el bump vive en la rama
-  `tw-theme/v1`, nunca mergeada). Ver `specs/lote-3.md` G-17 antes del próximo release.
+- **Versiones.** El repo adoptó la `1.0.1` publicada de `@ownui/tw-theme` (lote 3), así que la
+  base del versionado coincide con el registro. El próximo release sale en **1.1.0** para el
+  plugin y **1.0.1** para los otros cinco, que es su **primera publicación**.
+- ⚠️ **La `@ownui/tw-theme@1.0.1` que hay hoy en npm está parcialmente rota** y lo seguirá
+  estando hasta que salga la 1.1.0: su `exports["./css"]` apunta a un directorio, así que
+  `@import "@ownui/tw-theme/css"` falla en el consumidor; no lleva agregador `index.css`;
+  `menu.css` va vacío; y su peer de Tailwind excluye las 4.1.x que el plugin necesita. Todo
+  corregido en `develop` por el lote 1. Ver `packages/tw-theme/CHANGELOG.md` y
+  `specs/lote-3.md` G-18.
 
 **Modelo de ramas** (vigente desde el lote 0):
 

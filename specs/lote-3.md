@@ -7,7 +7,7 @@
 | Lote            | **L3** — Arreglar build y release (`@docs/BUILD-BATCHES.md` §L3)   |
 | Rama base       | `develop` (en `11bf5a8`)                                          |
 | Rama de trabajo | `claude/lote-3`                                                   |
-| Estado general  | **COMPLETO** — 4 tasks, 0 bloqueadas, 5/5 criterios cumplidos      |
+| Estado general  | **COMPLETO** — 6 tasks, 0 bloqueadas, 5/5 criterios cumplidos      |
 | Fecha           | 2026-11-19                                                        |
 
 > **Nota sobre el número de lote.** El prompt programado llegó por tercera vez con el
@@ -58,6 +58,8 @@ Dos reglas duras del prompt restringen el alcance por encima de la ficha:
 | S10 | `@ownui/dom-utils` con licencia MIT como el resto del monorepo (G-06)               | —          | `packages/utils/dom-utils/package.json`          | —          | HECHO |
 | S11 | `pnpm lint` sin el error de `jest.setup.js` (G-09)                                  | —          | `jest.setup.js`                                  | —          | HECHO |
 | S13 | `@ownui/dropdown` construye con entrada única (`src/index.ts`) y deja de publicar sus stories | AC1        | `packages/ui/src/Dropdown/{tsup.config.ts,tsconfig.json,package.json}` | S04        | HECHO |
+| S14 | El repo adopta la `1.0.1` publicada de `@ownui/tw-theme` y el changeset rancio sale | AC4        | `packages/tw-theme/{package.json,CHANGELOG.md}`, `.changeset/tw-theme-v1.md` | —          | HECHO |
+| S15 | `ci.yml` dispara en PRs a `develop` y deja de tragarse los fallos                   | AC4        | `.github/workflows/ci.yml`                       | S02        | HECHO |
 | S12 | Spec cerrada, changeset y `AGENTS.md` §6 / §9.3 / §9.10 actualizados                | —          | `specs/lote-3.md`, `AGENTS.md`, `.changeset/*`   | S01–S11    | HECHO |
 
 ---
@@ -69,7 +71,9 @@ Dos reglas duras del prompt restringen el alcance por encima de la ficha:
 | T1  | S01–S05, S13  | —              | SECUENCIAL — es el habilitador del lote: sin orden topológico ni dependencias declaradas no hay `dist/` que verificar, y AC2/AC3 dependen de su salida | `b8aa953` | HECHO |
 | T2  | S06, S07      | T1             | SECUENCIAL — comparte `package.json` con T1, y el `--dry-run` de AC4 necesita que el build de T1 funcione | `18e335a` | HECHO |
 | T3  | S08–S11       | T2             | SECUENCIAL — comparte `package.json` con T1 y T2. Los commits se hacen de uno en uno; no hubo task paralelizable en este lote porque **las tres tocan el manifiesto raíz** | `0ed9fce` | HECHO |
-| T4  | S12           | T3             | SECUENCIAL — documenta el resultado de las anteriores | *(este commit)* | HECHO |
+| T4  | S12           | T3             | SECUENCIAL — documenta el resultado de las anteriores | `805da8b` | HECHO |
+| T5  | S14           | T4             | SECUENCIAL — desbloqueada por la respuesta del dueño a G-17; toca el versionado, que T2 dejó listo | `75d1123` | HECHO |
+| T6  | S15           | T5             | SECUENCIAL — desbloqueada por la autorización para tocar CI (Q-01); el workflow invoca los scripts que T1/T2 arreglaron, así que no podía ir antes | `dbfec5e` | HECHO |
 
 > **Sobre el paralelismo.** El prompt autoriza ejecutar tasks en paralelo cuando no comparten
 > archivos ni dependencias. Aquí **ninguna pareja cumple la condición**: `package.json` de la
@@ -191,13 +195,52 @@ Dos reglas duras del prompt restringen el alcance por encima de la ficha:
 | Razón | AC1 es **el** criterio del lote y es inalcanzable sin esto: no es scope creep, es la condición del criterio. Y el efecto colateral es puro beneficio: el paquete publicado dejaba de incluir 37 KB de stories de Storybook. Se alineó con la forma que ya tenían sus 5 hermanos (`entry: ["src/index.ts"]`), sin inventar nada. |
 | Reversibilidad | Alta: 3 ficheros de configuración de un paquete. |
 
+### D-11 — El arreglo de `ci.yml` es una reescritura, no las 4 líneas que anuncié
+
+| Campo | Valor |
+| --- | --- |
+| Contexto | Pedí autorización para "~4 líneas" (quitar el `|| echo` y añadir `pnpm test`). Al abrir el fichero con permiso aparecieron tres defectos más: (1) el trigger era `pull_request: branches: [main]`, así que **ningún PR de los lotes 0–3 pasó por CI**, porque todos van a `develop`; (2) la detección de cambios compara contra `main` (`git diff main...HEAD`), diff equivocado en un PR a `develop`; (3) el bucle llamaba `pnpm test:ui` y `pnpm test:utils`, **scripts que no existen**, y el `|| echo` tapaba el fallo: para dos de los tres paquetes los tests nunca corrieron. |
+| Opciones | (a) Hacer sólo las 4 líneas anunciadas. (b) Reescribir el job como una tubería lineal: lint → build → test → e2e. |
+| Decisión | **(b).** |
+| Razón | (a) no arregla nada mientras el workflow no se dispare, y dejaría la heurística de detección —que es la fuente de los otros dos defectos— en pie. Con build 8 s, tests 1,5 s y e2e 10 s, **ejecutar todo cuesta menos que mantener la heurística**. Me salgo de lo que anuncié, así que lo declaro aquí en vez de esconderlo en el diff. |
+| Reversibilidad | Total: el workflow anterior está en el historial. |
+
+### D-12 — Lint entra en CI pero **no** bloquea todavía
+
+| Campo | Valor |
+| --- | --- |
+| Contexto | `pnpm lint` sale en rojo en `develop` por 4 errores de `rules-of-hooks` en `Dropdown.stories.tsx` (alcance del lote 6). CI no tenía paso de lint. |
+| Opciones | (a) No añadirlo. (b) Añadirlo bloqueante. (c) Añadirlo con `continue-on-error: true` y un comentario que diga cuándo quitarlo. |
+| Decisión | **(c).** |
+| Razón | (b) pondría en rojo permanente todos los PRs por un defecto ajeno al PR, y el primer reflejo de cualquiera sería borrar el paso. (c) hace visible la deuda sin convertirla en un muro, y el comentario en el YAML ata la retirada del flag al cierre de L6. |
+| Reversibilidad | Una línea. |
+
+### D-13 — Se elimina el changeset `tw-theme-v1.md` en vez de dejar que publique un 2.0.0
+
+| Campo | Valor |
+| --- | --- |
+| Contexto | El dueño respondió a G-17: **"avancemos con 1.0.1"**. Pero adoptar 1.0.1 no basta: el changeset `tw-theme-v1.md` declara `major` con el cuerpo "First Major Release - v1.0.0", un release **que ya salió** (npm: 1.0.0 el 2025-12-15, 1.0.1 el 2026-03-02). Con él dentro, el siguiente `changeset version` daría **2.0.0**. |
+| Opciones | (a) Dejarlo y publicar 2.0.0. (b) Eliminarlo: su contenido ya está publicado. (c) Degradarlo a `patch`. |
+| Decisión | **(b).** |
+| Razón | Un major por trabajo ya entregado es ruido en el versionado y rompería a los consumidores por nada. (c) deja en el CHANGELOG una entrada que describe el release anterior como si fuera nuevo. Con (b) la cadena queda coherente: base **1.0.1** + los dos `minor` de los lotes 0 y 1 → **1.1.0**, verificado con `changeset version` en un worktree desechable. |
+| Reversibilidad | Total (`git show`). |
+
+### D-14 — El CHANGELOG de `@ownui/tw-theme` se siembra a mano con la historia publicada
+
+| Campo | Valor |
+| --- | --- |
+| Contexto | El paquete no tenía `CHANGELOG.md`, y sus dos versiones publicadas salieron de una rama sin mergear: el repo no tenía registro de lo que la gente instala. |
+| Decisión | Crear `packages/tw-theme/CHANGELOG.md` con las entradas de 1.0.0 y 1.0.1 en el formato de Changesets, marcadas como reconstruidas a posteriori, **incluyendo los defectos conocidos de la 1.0.1**. De ahí en adelante lo escribe Changesets. |
+| Razón | Verificado descargando el tarball (`npm pack @ownui/tw-theme@1.0.1`): la 1.0.1 **publica el CSS pero con `exports["./css"]` apuntando a un directorio**, que Node no resuelve, sin agregador `index.css`, con `menu.css` vacío y con el peer de Tailwind en `>= 3.4.17 <4.1.1`. Quien instale hoy el paquete no puede hacer `@import "@ownui/tw-theme/css"`. El lote 1 corrigió las cuatro cosas, así que la 1.1.0 es el arreglo de lo que la 1.0.1 publicó a medias — y eso merece estar escrito. |
+| Reversibilidad | Alta. |
+
 ---
 
 ## 7. Bloqueantes
 
 | ID | Bloqueante | Crítico | Estado |
 | --- | --- | --- | --- |
-| B-01 | **`ci.yml` no se toca**, por la regla dura del prompt ("sin tocar CI"). En consecuencia el pipeline **sigue tragándose los fallos de test** (`pnpm test:$pkg \|\| echo "No tests for $pkg"`) y sigue sin un paso `pnpm test` incondicional, que la ficha de L3 pide y el gap G-04 del lote 2 reclama. **El arreglo del build de este lote no llega a CI**: `ci.yml` construye por paquete, no con `pnpm build`. | No | ABIERTO — requiere autorización explícita (ver Q-01) |
+| B-01 | **`ci.yml` no se podía tocar** por la regla dura del prompt. El pipeline se tragaba los fallos de test y no corría `pnpm build`. | No | **CERRADO** — el dueño autorizó tocar CI; resuelto en T6 `dbfec5e`. Al abrirlo apareció algo peor: **CI no se ejecutaba en estos PRs** (trigger sólo en PRs a `main`, y todos los lotes van a `develop`). Ver D-11 |
 | B-02 | El entorno corre **Node 22.23.5**, no el 20.16.0 de `.nvmrc`. Todo lo verificado aquí lo está sobre Node 22. `engines` pide `>=20.x`, así que no hay violación, pero la verificación no es idéntica a la de CI. | No | ACEPTADO — documentado, sin acción |
 
 Ningún bloqueante crítico. El lote se completó entero.
@@ -206,13 +249,16 @@ Ningún bloqueante crítico. El lote se completó entero.
 
 ## 8. Preguntas abiertas, objeciones y gaps
 
-### Preguntas abiertas (requieren decisión del dueño)
+### Preguntas abiertas — **las tres respondidas por el dueño (2026-11-20)**
 
-| ID | Pregunta |
-| --- | --- |
-| Q-01 | **¿Autorizas tocar `ci.yml`?** (reiterada del lote 2, sin respuesta). Con el build arreglado, la discrepancia se agrava: `pnpm build` ya construye los 6 paquetes, pero `ci.yml` sigue construyendo por paquete y tragándose los fallos de test. Son ~4 líneas. Mientras no se autorice, **el verde de CI no significa nada** y B-01 sigue abierto. |
-| Q-02 | **¿`@ownui/ui` debe empaquetar los componentes o re-exportarlos?** Hoy los compila desde fuente y duplica el código de `@ownui/loader` y `@ownui/dom-utils` dentro de su bundle. Marcarlos `external` haría de `@ownui/ui` un barrel real (instalación más ligera, una sola copia), a cambio de que el consumidor instale 4 paquetes transitivos. Ver gap G-11. |
-| Q-03 | **¿Se publica `@ownui/ui` en el primer release?** `changeset publish` lo publicará en cuanto tenga changeset. Si la intención era publicar sólo el plugin hasta que los componentes estén maduros (§9 de `AGENTS.md` los llama "prototipo"), hay que decirlo: el README ya promete los 6 y D-03 se alineó con el README. |
+| ID | Pregunta | Respuesta | Dónde se ejecuta |
+| --- | --- | --- | --- |
+| Q-01 | ¿Autorizas tocar `ci.yml`? | **Sí** | T6 `dbfec5e`. Ver **D-11**: el arreglo resultó ser una reescritura, porque CI ni se disparaba en PRs a `develop`. Y **D-12** para el lint no bloqueante. |
+| Q-02 | ¿`@ownui/ui` debe empaquetar los componentes o re-exportarlos? | *sin respuesta — sigue abierta* | Gap **G-11**, para L8/L9. No bloquea nada. |
+| Q-03 | ¿Se publica `@ownui/ui` en el primer release? | **Sí** | Ya era el comportamiento tras D-03; verificado: los **6** paquetes se versionan y publican (`@ownui/tw-theme` 1.1.0, los otros cinco 1.0.1). Sin cambio de código. |
+| G-17 | ¿Qué se hace con el desfase repo (1.0.0) / npm (1.0.1)? | **"Avancemos con 1.0.1"** | T5 `75d1123`. Ver **D-13** (fuera el changeset rancio que habría publicado un 2.0.0) y **D-14** (CHANGELOG sembrado). |
+
+> Q-02 es la única que sigue viva, y no bloquea ningún lote.
 
 ### Objeciones a la ficha del lote
 
@@ -229,12 +275,14 @@ Ningún bloqueante crítico. El lote se completó entero.
 
 | ID | Hallazgo | Lote sugerido |
 | --- | --- | --- |
-| G-04 | *(heredado del lote 2, sigue abierto)* `ci.yml` se traga los fallos de test y no corre `pnpm build`. Ver B-01 / Q-01. | cuando se autorice CI |
+| ~~G-04~~ | ~~`ci.yml` se traga los fallos de test y no corre `pnpm build`~~ → **RESUELTO** en T6 `dbfec5e`, con la autorización del dueño. Heredado del lote 2. | cerrado |
+| ~~G-17~~ | ~~El registro de npm va por delante del repo~~ → **RESUELTO** en T5 `75d1123`: el repo adopta 1.0.1 y el próximo release es 1.1.0. | cerrado |
+| G-18 | **La 1.0.1 que hay publicada en npm está parcialmente rota** y seguirá estándolo hasta que salga la 1.1.0: `exports["./css"]` apunta a un directorio, así que `@import "@ownui/tw-theme/css"` **falla** en el consumidor; no hay agregador `index.css`; `menu.css` va vacío; y el peer de Tailwind (`>= 3.4.17 <4.1.1`) excluye las 4.1.x que el plugin necesita. Los cuatro defectos están corregidos en `develop` (lote 1). **Es un argumento para publicar la 1.1.0 pronto**, y queda escrito en el CHANGELOG del paquete. | release |
 | G-11 | **`@ownui/ui` duplica el código de `@ownui/loader` y `@ownui/dom-utils`** dentro de su bundle (tsup sólo externaliza `react`/`react-dom`). Un consumidor que instale `@ownui/ui` + `@ownui/button` acaba con dos copias del loader. Ver Q-02. | L8 o L9 |
 | G-12 | **`@ownui/dropdown` construye con `tsup src --dts`** (entrada = directorio), así que emite un `.js`/`.mjs`/`.d.ts` por cada fichero de `src/` en vez de un bundle con entrada única, al revés que los otros 5 paquetes. Funciona (los `exports` apuntan a `index`), pero es ~6× más ficheros y una `.d.ts` por módulo. Unificar con `entry: ["src/index.ts"]` es trivial; se dejó fuera para no cambiar la forma del artefacto publicado en el mismo lote que se arregla el release. | L6 o L8 |
 | G-13 | Los scripts raíz **`example`, `example:build` y `example:install`** apuntan a `apps/example-app`, que **no existe** (`AGENTS.md` §9.9). Siguen en el manifiesto tras este lote porque crear la app es el alcance de L9. | L9 |
 | G-14 | `packages/storybook` **no tiene tarea `build`** en el grafo de Turborepo (su script es `build-storybook`), así que `turbo build` no lo cubre. Correcto para un paquete `private`, pero conviene decidir si el Storybook se construye en CI como verificación. | L9 / CI |
-| G-15 | **4 errores de lint vivos** en `Dropdown.stories.tsx` (`react-hooks/rules-of-hooks`: `useState` dentro de las funciones `render`) y **307 warnings** de Prettier en el repo. `pnpm lint` sigue en rojo tras este lote, ahora por 4 errores en vez de 5. | L6 (stories) / L9 (formato) |
+| G-15 | *(actualizado en T6)* **4 errores de lint vivos** en `Dropdown.stories.tsx` (`react-hooks/rules-of-hooks`: `useState` dentro de las funciones `render`) y **307 warnings** de Prettier en el repo. `pnpm lint` sigue en rojo tras este lote, ahora por 4 errores en vez de 5. | L6 (stories) / L9 (formato) — y entonces hay que quitar el `continue-on-error` del paso de lint en `ci.yml` (D-12) |
 | G-17 | 🔴 **El registro de npm va por delante del repo.** `@ownui/tw-theme` está publicado como **1.0.1**, pero el `package.json` del repo dice **1.0.0**: el bump vive en la rama `tw-theme/v1`, que nunca se mergeó aunque la publicación sí ocurrió. Consecuencia práctica: el repo no tiene en su historia la versión que la gente instala, y `changeset status` propone hoy un **major** para `tw-theme` (1.0.0 → 2.0.0), saltándose la 1.0.1. No se toca: el prompt prohíbe cambiar versiones a mano y la corrección (¿se adopta 1.0.1 en el repo? ¿se publica 2.0.0 y se olvida?) es una decisión del dueño. **Resolver antes del próximo release.** | antes del próximo release |
 | G-16 | `@ownui/dom-utils` declara `react` en **`dependencies`**, no en `peerDependencies`, al revés que los otros 5 paquetes. Puede forzar una segunda copia de React en el árbol del consumidor. No se tocó: cambiar el tipo de dependencia de un paquete publicable es un cambio de contrato que merece su propio changeset. | L8 |
 
@@ -266,6 +314,21 @@ Ningún bloqueante crítico. El lote se completó entero.
 - **T+9** — Fase final: `git fetch` → `develop` sin novedades (0 behind, sin rebase ni
   conflictos). Suite completa: `pnpm build` 6/6, `pnpm test` 89/89, e2e 98/98,
   `pnpm lint` 4 errores (de 5; los 4 restantes son de L6). Spec, changeset y docs cerrados.
+- **T+10** — PR [#29](https://github.com/ferbbo/own-ui/pull/29) abierto hacia `develop` con las
+  3 preguntas abiertas y G-17 destacados.
+- **T+11 (2026-11-20)** — **El dueño responde las tres**: avanzar con 1.0.1, autorizado tocar
+  `ci.yml`, y sí a publicar `@ownui/ui`. Se ejecutan sobre la misma rama (un lote = un PR).
+- **T+12** — T5. Al adoptar 1.0.1 aparece que no basta: el changeset `tw-theme-v1.md` declara
+  `major` por un release ya publicado ⇒ habría sacado un **2.0.0** falso. Se elimina (D-13).
+  Verificado con `changeset version` en un worktree desechable: **tw-theme 1.1.0** y los otros
+  cinco en **1.0.1**, los 6 publicables, que es la respuesta a Q-03.
+  Descargado el tarball de la 1.0.1 publicada: está **parcialmente roto** → gap G-18 y CHANGELOG.
+- **T+13** — T6. Con permiso para abrir `ci.yml` aparece lo peor del lote: **CI no se ejecutaba
+  en ninguno de estos PRs** (trigger sólo en PRs a `main`; todos los lotes van a `develop`), y
+  el bucle de tests invocaba `test:ui`/`test:utils`, que no existen, con el fallo tapado por el
+  `|| echo`. Reescrito como tubería lineal (D-11), con lint no bloqueante (D-12).
+- **T+14** — Suite completa otra vez con la secuencia exacta del workflow: lint 4 errores
+  (baseline), build 6/6, tests 89/89, e2e 98/98. Spec y PR actualizados.
 
 ---
 
@@ -374,8 +437,20 @@ Changeset: `.changeset/lote-3-build-release.md` → **patch** para `@ownui/dropd
 | `@ownui/ui` | **patch** | Declara 4 dependencias internas que ya importaba. No cambia su API ni su bundle (los componentes se siguen empaquetando desde fuente), pero sí el manifiesto que el consumidor instala. |
 | `@ownui/dropdown` | **patch** | `main` apuntaba a la fuente (`.src/index.ts`) y el tarball incluía `Dropdown.stories.tsx`. Sin cambio de API; el artefacto publicado adelgaza. |
 | `@ownui/dom-utils` | **patch** | Licencia `ISC` → `MIT`. Metadatos. |
-| `@ownui/tw-theme` | **sin changeset** | No se tocó en este lote. Ojo a **G-17** antes del próximo release: el repo dice 1.0.0 y npm tiene 1.0.1. |
-| `@ownui/button`, `@ownui/loader` | **sin changeset** | No se tocaron. |
+| `@ownui/tw-theme` | **minor** (ya existente, de L0 y L1) | No se tocó su código en este lote, pero sí su **versión base**: `1.0.0` → `1.0.1` para igualar el registro (G-17, respuesta del dueño). Se eliminó el changeset `major` rancio que habría publicado un 2.0.0 (D-13). |
+| `@ownui/button`, `@ownui/loader` | **patch** | `button` ya traía changeset de L2; `loader` lo recibe por `updateInternalDependencies: patch`. |
+
+**Versiones del próximo release**, verificadas ejecutando `changeset version` en un worktree
+desechable (la rama no se tocó):
+
+| Paquete | De | A | Nota |
+| --- | --- | --- | --- |
+| `@ownui/tw-theme` | 1.0.1 | **1.1.0** | primera versión del repo que coincide con el registro; arregla lo que la 1.0.1 publicó a medias (G-18) |
+| `@ownui/ui` | 1.0.0 | **1.0.1** | **primera publicación** (respuesta a Q-03: sí) |
+| `@ownui/button` | 1.0.0 | **1.0.1** | primera publicación |
+| `@ownui/dropdown` | 1.0.0 | **1.0.1** | primera publicación |
+| `@ownui/loader` | 1.0.0 | **1.0.1** | primera publicación |
+| `@ownui/dom-utils` | 1.0.0 | **1.0.1** | primera publicación |
 
 Los cambios de raíz (`turbo.json`, scripts, `.gitignore`, `eslint.config.js`, `.releaserc`
 eliminado) no son publicables y no llevan changeset, pero **cambian el comportamiento del
