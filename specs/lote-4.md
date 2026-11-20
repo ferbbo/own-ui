@@ -5,7 +5,7 @@
 | Campo           | Valor                                                                        |
 | --------------- | ---------------------------------------------------------------------------- |
 | Lote            | **L4** — Escala de superficies `base-100/200/300` (`@docs/BUILD-BATCHES.md` §L4) |
-| Rama base       | `develop` (en `11bf5a8`)                                                     |
+| Rama base       | `develop` (en `11bf5a8`; integrado después con `f3526d3`, que trae el lote 3) |
 | Rama de trabajo | `claude/lote-4`                                                              |
 | Estado general  | **COMPLETO** — 5 tasks, 0 bloqueadas, 5/5 criterios cumplidos                |
 | Fecha           | 2026-11-20                                                                   |
@@ -13,9 +13,16 @@
 > **Nota sobre el número de lote.** El prompt programado llegó por **cuarta** vez con el
 > marcador `{{N}}` sin sustituir. Se resuelve a **N = 4**. Registrado como **D-01**.
 
-> **🔴 BLOQUEANTE CRÍTICO DE ENTREGA.** El lote está **terminado y verificado**, pero esta
-> sesión **no tiene acceso de escritura al repositorio**: no hay `push` ni PR, que es el gate
-> humano previsto. Ver **B-01**. Se entrega como parche aplicable con `git am`.
+> **✅ Entregado.** El bloqueante crítico de entrega (**B-01**: la sesión que ejecutó el lote no
+> tenía acceso de escritura) está **resuelto**: la rama se publicó y el PR es
+> [#31 → `develop`](https://github.com/ferbbo/own-ui/pull/31), con **CI en verde**.
+>
+> El 2026-11-20 se integró `develop` en la rama (merge `6ae2b79`) después de que el lote 3 se
+> mergeara: sin conflictos, aunque hubo que reconciliar dos pasajes de `AGENTS.md` que el merge
+> dejó contradiciéndose. Detalle en §5, «Integración efectiva».
+>
+> ⚠️ Queda un **PR #30 de esta misma rama hacia `main`** que hay que cerrar sin mergear: el
+> modelo de ramas lo prohíbe. Ver gap **G-07**.
 
 ---
 
@@ -132,11 +139,41 @@ Todos verificados contra evidencia real (ejecución, no lectura de archivos).
 
 - `git rebase origin/develop` → «Current branch is up to date»: `develop` no se movió
   (`11bf5a8`), 0 behind / 5 ahead. **Sin conflictos que resolver.**
-- Comprobado además contra el lote 3, que sigue pendiente de merge:
+- Comprobado además contra el lote 3, que entonces seguía pendiente de merge:
   `git merge-tree --write-tree origin/claude/lote-3 HEAD` → **0 conflictos**. El único archivo
   que las dos ramas tocan es `AGENTS.md`, y en secciones distintas (L3 en §6/§9.3, L4 en
   §4.2/§4.5/§9.6). Corrige lo que decía **D-02**: la intersección de archivos no es vacía, es
   `AGENTS.md`, pero se mezcla limpiamente.
+
+#### Integración efectiva (2026-11-20, tras mergearse el lote 3)
+
+El lote 3 se mergeó en `develop` (PR #29 → `f3526d3`) mientras este PR estaba abierto, dejando
+la rama **11 commits por detrás**. Se integró con `git merge origin/develop` —no rebase, para
+no reescribir la historia de una rama ya publicada— en el commit de merge `6ae2b79`.
+
+- **Sin conflictos.** `AGENTS.md` se auto-fusionó, como predecía la comprobación previa.
+- **Pero el merge limpio dejó el documento contradiciéndose**, que es lo que un `merge-tree`
+  no puede ver: el lote 4 había documentado el bug de CI (*«`ci.yml` se dispara sólo en PRs
+  hacia `main`», «las PRs de lote no ejecutan CI»*) y el *«queda pendiente la parte de CI»* de
+  §9.2, y el lote 3 **ya los había arreglado**. Se reconcilian los dos bloques y se actualizan
+  las cifras de la suite (§6.1 y §9.2: 8 suites/89 tests → **10/122**; e2e ~88 → **116**).
+- **Las cifras de lint cambian a mejor**: el baseline de `develop` pasó de 5 errores a **4**,
+  porque el lote 3 arregló el de `jest.setup.js`. Los 4 que quedan siguen siendo los de
+  `Dropdown.stories.tsx` (alcance del lote 6), ninguno de este lote. **B-02 sigue en pie.**
+- **Los changesets de los dos lotes conviven bien.** `changeset status` sobre el merge:
+  `@ownui/tw-theme` **minor** (1.0.1 → **1.1.0**, con la 1.0.1 que el lote 3 adoptó del
+  registro como base) y los otros cinco **patch** → 1.0.1, su primera publicación. **0 major**,
+  que era el riesgo que el lote 3 cerró al retirar el changeset rancio.
+
+**Suite completa sobre el merge** (`6ae2b79`), en limpio:
+
+| | Resultado |
+|---|---|
+| `pnpm build` | **6/6 paquetes** |
+| `pnpm test` | **10 suites / 122 tests** |
+| `pnpm e2e` (Chromium) | **116 passed** |
+| `pnpm lint` | 4 errores / 283 warnings — baseline de `develop`, sin aportar ninguno |
+| **CI en el PR #31** | **verde**, los 12 pasos ejecutados (run 44732736065) |
 
 ---
 
@@ -279,7 +316,14 @@ Todos verificados contra evidencia real (ejecución, no lectura de archivos).
 
 ## 7. Bloqueantes
 
-### 🔴 B-01 — CRÍTICO: sin acceso de escritura al repositorio (no hay push ni PR)
+### ✅ B-01 — RESUELTO: sin acceso de escritura al repositorio (no hubo push ni PR)
+
+> **Cerrado el 2026-11-20.** La rama se publicó y el PR existe: **#31 → `develop`**
+> (https://github.com/ferbbo/own-ui/pull/31), con CI en verde. El bloqueante era del entorno de
+> aquella sesión, no del lote. Lo que sigue describe el síntoma tal como se vivió.
+>
+> ⚠️ Quedó además un **PR #30 de la misma rama hacia `main`**, que el modelo de ramas prohíbe
+> (`main` es sólo release). Hay que cerrarlo: ver «Gaps».
 
 - **Síntoma.** Cualquier `git push` (incluido `--dry-run`) devuelve:
   `remote: access denied by the git proxy: ferbbo/own-ui is not in this session's authorized`
@@ -338,9 +382,17 @@ Todos verificados contra evidencia real (ejecución, no lectura de archivos).
 
 ### Gaps (fuera de alcance, para el backlog)
 
-- **G-01.** `pnpm lint` falla en `develop` con 5 errores y 283 warnings de formato. Nadie es
-  dueño de ese arreglo: L3 cubre 1 de los 5. Propuesta: un lote de higiene que corra
-  `pnpm lint:fix` y añada `lint` como gate de CI.
+- **G-01.** *(actualizado tras el merge del lote 3)* `pnpm lint` falla en `develop` con
+  **4 errores** y 283 warnings de formato. El lote 3 arregló el quinto (`jest.setup.js`) y
+  **metió `lint` en CI**, pero con `continue-on-error`: los 4 que quedan son el
+  `rules-of-hooks` de `Dropdown.stories.tsx`, alcance del lote 6. Al cerrarlos hay que quitar
+  ese flag del workflow para que lint sea puerta de verdad.
+- **G-07.** **Hay un PR #30 de `claude/lote-4` hacia `main`**, además del #31 hacia `develop`.
+  El modelo de ramas de `AGENTS.md` §6.5 lo prohíbe: `main` es sólo release y nada se mergea
+  ahí directamente. Mergearlo metería el lote 4 en `main` **saltándose `develop`** y dejaría a
+  las dos ramas divergiendo. Hay que cerrarlo sin mergear — es una acción del dueño, no se hizo
+  desde la sesión. (Su CI además falló con el workflow antiguo, antes de que el lote 3 fijara
+  el runner.)
 - **G-02.** La matemática de contraste WCAG queda duplicada en `scripts/check-contrast.mjs` y en
   `src/__tests__/surfaces.test.ts` (D-09). El lote 22 debería extraerla a un módulo compartido y
   auditar también las superficies.

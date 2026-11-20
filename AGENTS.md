@@ -536,12 +536,12 @@ pnpm --filter "@ownui/ui..." build # el agregador + sus dependencias (ojo a los 
 turbo build --filter=@ownui/ui     # equivalente vía turbo (usa dependsOn: ["^build"])
 pnpm --filter @ownui/button build  # SÓLO ese paquete: falla en limpio si sus deps no están
 
-pnpm test                          # Jest, ambos proyectos — 8 suites / 89 tests (sin coverage)
+pnpm test                          # Jest, ambos proyectos — 10 suites / 122 tests (sin coverage)
 pnpm test:coverage                 # lo mismo + informe de cobertura
 pnpm test:tw-theme                 # sólo el plugin
 pnpm test:components               # componentes de packages/ui + utils de packages/utils
 
-pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (~88 tests)
+pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (116 tests)
 
 pnpm lint  /  pnpm lint:fix  /  pnpm format
 pnpm changeset                     # crear changeset antes de abrir PR
@@ -641,11 +641,11 @@ fixture.** Es el único mecanismo que detecta regresiones reales del plugin.
 | `develop` | Integración. Base de todos los lotes y destino de sus PRs. |
 | `claude/lote-<N>` | Rama de trabajo de un lote, creada desde la última `develop`. Un lote = una PR. |
 
-- 🔴 **`ci.yml` se dispara sólo en PRs hacia `main`** (`on: pull_request: branches: [main]`).
-  Con `develop` como rama de integración, **las PRs de lote no ejecutan CI**: la ausencia de
-  checks en una PR hacia `develop` no significa que esté verde, significa que nadie la miró.
-  Hasta que se añada `develop` a ese trigger, la verificación de un lote es la que su autor
-  haya corrido en local y documentado en su spec.
+- ✅ **Las PRs de lote sí ejecutan CI**, desde el lote 3: el trigger cubre PRs hacia `main` y
+  hacia `develop`, más push a `develop`. Antes era sólo `branches: [main]`, así que ninguna PR
+  de los lotes 0–3 pasó por CI y la ausencia de checks no significaba nada. Dicho esto, el paso
+  de **lint no bloquea** todavía (`continue-on-error`), así que un check verde **no** garantiza
+  que `pnpm lint` pase — sólo que build, tests y e2e pasan.
 
 ### 6.6 Convenciones de código
 
@@ -746,12 +746,12 @@ corrieron, `Button.test.tsx` era un stub con `console.log` y `pnpm test` salía 
 
 Hoy: `testMatch` y `collectCoverageFrom` apuntan a `packages/ui/**` y `packages/utils/**`,
 `Button.test.tsx` está reescrito con RTL + `user-event`, `useDOMRef` tiene suite propia, y
-`pnpm test` corre **8 suites / 89 tests**. Ver `specs/lote-2.md`.
+`pnpm test` corre **10 suites / 122 tests** (89 tras el lote 2, +33 del lote 4). Ver
+`specs/lote-2.md`.
 
-**Queda pendiente la parte de CI**: `ci.yml` sigue ejecutando el paso por paquete como
-`pnpm test:$pkg || echo "No tests for $pkg"`, que **se traga el fallo** ⇒ un test roto no
-tumba el pipeline. El lote 2 no lo tocó por la regla de no modificar CI sin autorización
-explícita; está registrado como gap en `specs/lote-2.md` (G-04).
+**La parte de CI se cerró en el lote 3** (gap G-04), con autorización del dueño: el paso era
+`pnpm test:$pkg || echo "No tests for $pkg"`, que se tragaba el fallo y además invocaba
+`test:ui`/`test:utils`, scripts inexistentes. Hoy el pipeline corre `pnpm test` incondicional.
 
 ### 9.3 ✅ `pnpm build` no construye la librería — *resuelto en el lote 3*
 Era `"build": "turbo build --filter='@ownui/tw-theme'"`, así que `@ownui/ui`, `@ownui/button`,
