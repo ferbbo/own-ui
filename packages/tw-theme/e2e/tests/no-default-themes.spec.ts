@@ -47,7 +47,7 @@ test.describe("E2E-2: No Default Themes", () => {
     expect(lightPrimary).toBeFalsy();
   });
 
-  test("rootColors variables should be available in :root", async ({ page }) => {
+  test("root.ts tokens should be available in :root", async ({ page }) => {
     const rootVars = await page.evaluate(() => {
       const root = document.querySelector(":root");
       if (root) {
@@ -57,7 +57,10 @@ test.describe("E2E-2: No Default Themes", () => {
       return { radius: "" };
     });
 
-    // rootColors are always applied regardless of themes
+    // Los tokens de `themes/root.ts` (forma, geometria, profundidad) se inyectan
+    // siempre en :root, con themes o sin ellos. Ojo: los tokens de COLOR ya no
+    // estan aqui. Desde el lote 4 la escala de superficies (--color-base-*) vive
+    // en light.ts/dark.ts, asi que con `themes: false` no existe ninguna.
     expect(rootVars.radius).toBeTruthy();
   });
 

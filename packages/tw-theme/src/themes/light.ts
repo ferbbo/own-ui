@@ -4,6 +4,15 @@ import { ThemeColors } from "../types.ts";
  * Default light theme colors
  */
 export const lightTheme: ThemeColors = {
+  // Escala de superficies.
+  // Son dependientes del tema, no globales: una superficie fija (el negro que
+  // vivia en rootColors.ts) hacia que `.btn` sin variante y `.dropdown` se
+  // pintaran oscuros tambien en tema claro. Ver AGENTS.md §4.2.
+  "--color-base-100": "#ffffff", // superficie principal
+  "--color-base-200": "#f2f2f2", // superficie elevada/alterna
+  "--color-base-300": "#e5e6e6", // bordes y separadores
+  "--color-base-content": "#1f2937", // texto sobre superficies
+
   // Primary color and variants
   "--color-primary": "#3b82f6", // Blue
   "--color-primary-content": "#ffffff",

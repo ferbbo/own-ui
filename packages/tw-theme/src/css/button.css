@@ -3,9 +3,14 @@
 
    Rescatado de la rama `components` en el lote 0 y reconciliado con la
    paleta de `develop` (que conserva los 8 tokens --color-*-focus).
-   Respecto al original: sin fallbacks hex de paleta (los tokens
-   --color-base-* existen en themes/rootColors.ts) y con fallback
+   Respecto al original: sin fallbacks hex de paleta y con fallback
    explicito al color base en los 8 roles.
+
+   Los tokens --color-base-* que consume este archivo (--color-base-200 como
+   relleno por defecto y --color-base-content como texto) son la escala de
+   superficies, definida **por tema** en themes/light.ts y themes/dark.ts
+   desde el lote 4. Antes vivian en themes/rootColors.ts con valores fijos
+   negro/blanco, y por eso un `.btn` sin variante salia negro en tema claro.
 
    Se publica desde el lote 1 como `@ownui/tw-theme/css/button.css`
    (y agregado en `@ownui/tw-theme/css`). Ver `src/css/index.css`.
