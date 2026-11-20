@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* Plugin principal: inyecta los tokens de cada tema, incluida la escala de
+   superficies --color-base-100/200/300/-content, que desde el lote 4 vive en
+   themes/light.ts y themes/dark.ts en vez de en :root. */
+@plugin "@ownui/tw-theme";
+
+/* CSS de componentes publicado: necesario para .dropdown y .btn, que son dos
+   de los consumidores de la escala. */
+@import "@ownui/tw-theme/css";

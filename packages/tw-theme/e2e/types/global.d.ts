@@ -86,6 +86,18 @@ declare global {
      * Simula hover en un elemento
      */
     triggerHover(id: string): Promise<string | null>;
+
+    /**
+     * Luminancia relativa WCAG 2.1 de un color computado (`rgb(r, g, b)`).
+     * @returns Valor entre 0 y 1, o null si el color no se pudo parsear
+     */
+    relativeLuminance(rgbString: string): number | null;
+
+    /**
+     * Ratio de contraste WCAG 2.1 entre dos colores computados.
+     * @returns Ratio entre 1 y 21, o null si algun color no se pudo parsear
+     */
+    contrastRatio(fg: string, bg: string): number | null;
   }
 }
 
