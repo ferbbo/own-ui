@@ -4,6 +4,10 @@ on:
   pull_request:
     branches:
       - main
+      - develop
+  push:
+    branches:
+      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,7 +16,13 @@ concurrency:
 jobs:
   build-and-test:
     name: Build and Test
-    runs-on: ubuntu-latest
+    # Fijado a propósito, no `ubuntu-latest`: desde que el runner pasó a Ubuntu
+    # 26.04, `playwright install --with-deps` falla con
+    # "Playwright does not support chromium on ubuntu26.04-x64" (Playwright
+    # 1.57). Que la imagen del runner se mueva sola es justo lo que rompio la
+    # primera ejecucion de este workflow. Subir a 26.04 cuando Playwright lo
+    # soporte.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout Repo
@@ -47,102 +57,37 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Detect changed packages
-        id: changed-packages
-        run: |
-          # Get list of changed files compared to main
-          git fetch origin main:main
-          CHANGED_FILES=$(git diff --name-only main...HEAD)
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-          
-          # Detect which packages changed
-          CHANGED_PACKAGES=""
-          
-          if echo "$CHANGED_FILES" | grep -q "^packages/tw-theme/"; then
-            CHANGED_PACKAGES="$CHANGED_PACKAGES tw-theme"
-            echo "tw-theme changed"
-          fi
-          
-          if echo "$CHANGED_FILES" | grep -q "^packages/ui/"; then
-            CHANGED_PACKAGES="$CHANGED_PACKAGES ui"
-            echo "ui changed"
-          fi
-          
-          if echo "$CHANGED_FILES" | grep -q "^packages/utils/"; then
-            CHANGED_PACKAGES="$CHANGED_PACKAGES utils"
-            echo "utils changed"
-          fi
-          
-          # Check if root files changed (run all tests)
-          if echo "$CHANGED_FILES" | grep -qE "^(package\.json|jest\.config\.js|jest\.setup\.js|turbo\.json)"; then
-            CHANGED_PACKAGES="all"
-            echo "Root files changed, will run all tests"
-          fi
-          
-          echo "packages=$CHANGED_PACKAGES" >> $GITHUB_OUTPUT
+      # No bloquea todavia: `develop` arrastra 4 errores de `rules-of-hooks` en
+      # Dropdown.stories.tsx, que son alcance del lote 6. En cuanto ese lote los
+      # cierre, hay que quitar el `continue-on-error` para que lint sea puerta.
+      # Ver specs/lote-3.md G-15.
+      - name: Lint
+        run: pnpm lint
+        continue-on-error: true
 
-      - name: Build changed packages
-        run: |
-          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
-            pnpm build
-          elif [ -n "${{ steps.changed-packages.outputs.packages }}" ]; then
-            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
-              echo "Building @ownui/$pkg"
-              pnpm --filter "@ownui/$pkg" build
-            done
-          else
-            echo "No packages changed, skipping build"
-          fi
+      # `pnpm build` construye los 6 paquetes en orden topologico (turbo con
+      # `dependsOn: ["^build"]`). Antes se construia paquete a paquete segun una
+      # deteccion de cambios que comparaba contra `main`, lo que en un PR a
+      # `develop` daba un diff equivocado.
+      - name: Build
+        run: pnpm build
+
+      # Incondicional y sin `|| echo`: antes era
+      # `pnpm test:$pkg || echo "No tests for $pkg"`, que se tragaba el fallo, y
+      # ademas invocaba scripts inexistentes (`test:ui`, `test:utils`) para dos de
+      # los tres paquetes, asi que esos tests nunca corrian. CI salia verde sin
+      # haber ejecutado nada.
+      - name: Unit Tests
+        run: pnpm test
 
       - name: Install Playwright Browsers
-        if: steps.changed-packages.outputs.packages != ''
-        run: |
-          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
-            # Install for all packages that have e2e tests
-            pnpm --filter "@ownui/tw-theme" exec playwright install --with-deps chromium
-          else
-            # Install only for changed packages that have e2e tests
-            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
-              if [ "$pkg" = "tw-theme" ]; then
-                echo "Installing Playwright for @ownui/$pkg"
-                pnpm --filter "@ownui/$pkg" exec playwright install --with-deps chromium
-              fi
-            done
-          fi
+        run: pnpm --filter "@ownui/tw-theme" exec playwright install --with-deps chromium
 
-      - name: Run E2E Tests
-        if: steps.changed-packages.outputs.packages != ''
-        run: |
-          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
-            # Run e2e for all packages that have e2e tests
-            pnpm --filter "@ownui/tw-theme" e2e
-          else
-            # Run e2e only for changed packages that have e2e tests
-            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
-              if pnpm --filter "@ownui/$pkg" run e2e --if-present 2>/dev/null; then
-                echo "Running E2E tests for @ownui/$pkg"
-              else
-                echo "No E2E tests for @ownui/$pkg"
-              fi
-            done
-          fi
-
-      - name: Run Unit Tests
-        run: |
-          if [ "${{ steps.changed-packages.outputs.packages }}" = "all" ]; then
-            pnpm test
-          elif [ -n "${{ steps.changed-packages.outputs.packages }}" ]; then
-            for pkg in ${{ steps.changed-packages.outputs.packages }}; do
-              echo "Testing $pkg"
-              pnpm test:$pkg || echo "No tests for $pkg"
-            done
-          else
-            echo "No packages changed, skipping tests"
-          fi
+      - name: E2E Tests
+        run: pnpm --filter "@ownui/tw-theme" e2e
 
       - name: Upload E2E Reports on Failure
-        if: failure() && steps.changed-packages.outputs.packages != ''
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-reports
