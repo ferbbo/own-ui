@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import button from "../button.js";
+import loader from "../loader.js";
 
 /**
  * "El contrato manda" (`@docs/BUILD-BATCHES.md`): toda clase declarada en
@@ -85,6 +86,35 @@ describe("contrato de clases de los componentes", () => {
       expect(exposed).toEqual(
         expect.arrayContaining(["btn-square", "btn-circle", "btn-wide", "btn-block", "btn-active"])
       );
+    });
+  });
+
+  describe("loader", () => {
+    const classNames = cssClassNames("loader.css");
+    const entries = contractEntries(loader);
+
+    test("el CSS declara la clase base .loader y su spinner", () => {
+      expect(classNames.has("loader")).toBe(true);
+      expect(classNames.has("loader-spinner")).toBe(true);
+    });
+
+    test.each(entries)("%s -> .%s existe en loader.css", (_path, cls) => {
+      expect(classNames.has(cls)).toBe(true);
+    });
+
+    test("no quedan clases del contrato sin CSS", () => {
+      const missing = entries.filter(([, cls]) => !classNames.has(cls)).map(([path]) => path);
+
+      expect(missing).toEqual([]);
+    });
+
+    test("`current` hereda el color del contexto, no un token semantico", () => {
+      // Es la clase que permite al spinner del Button contrastar con cualquier
+      // rol: sin ella habria que mapear rol de boton -> color de loader.
+      const css = readFileSync(join(CSS_DIR, "loader.css"), "utf8");
+
+      expect(loader.color.current).toBe("loader-current");
+      expect(css).toMatch(/\.loader-current\s*\{\s*--loader-color:\s*currentColor;/);
     });
   });
 });
