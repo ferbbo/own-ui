@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base Surfaces Scale Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Base Surfaces E2E Test</h1>
+  <p>
+    Valida la escala de superficies <code>--color-base-100/200/300</code> del lote 4:
+    que exista, que sea dependiente del tema y que sus tres consumidores
+    (utilidades, <code>.dropdown</code> y <code>.btn</code> sin variante) resuelvan.
+  </p>
+
+  <!-- ☀️ Utilidades de superficie en tema claro (por defecto) -->
+  <div class="test-section">
+    <h2>☀️ Utilidades de superficie (light)</h2>
+    <div id="surface-100" class="bg-base-100 p-3">bg-base-100</div>
+    <div id="surface-200" class="bg-base-200 p-3">bg-base-200</div>
+    <div id="surface-300" class="bg-base-300 p-3">bg-base-300</div>
+    <p id="surface-content" class="text-base-content">text-base-content</p>
+    <div id="surface-border" class="border-4 border-base-300 p-3">border-base-300</div>
+    <div id="surface-divide" class="divide-base-300">divide-base-300</div>
+  </div>
+
+  <!-- 🌙 Las mismas utilidades bajo un ambito data-theme="dark" -->
+  <div class="test-section" data-theme="dark" id="dark-scope">
+    <h2>🌙 Utilidades de superficie (data-theme="dark")</h2>
+    <div id="surface-100-dark" class="bg-base-100 p-3">bg-base-100</div>
+    <div id="surface-200-dark" class="bg-base-200 p-3">bg-base-200</div>
+    <div id="surface-300-dark" class="bg-base-300 p-3">bg-base-300</div>
+    <p id="surface-content-dark" class="text-base-content">text-base-content</p>
+  </div>
+
+  <!-- 📂 .dropdown: su fondo era `transparent` porque --color-base-100 no existia -->
+  <div class="test-section">
+    <h2>📂 .dropdown (light)</h2>
+    <div id="dropdown" class="dropdown dropdown-md">
+      <div id="dropdown-item" class="dropdown-item">Item</div>
+    </div>
+  </div>
+
+  <div class="test-section" data-theme="dark">
+    <h2>📂 .dropdown (dark)</h2>
+    <div id="dropdown-dark" class="dropdown dropdown-md">
+      <div id="dropdown-item-dark" class="dropdown-item">Item</div>
+    </div>
+  </div>
+
+  <!-- 🔘 .btn SIN variante: usa --color-base-200 de relleno y --color-base-content
+       de texto. Con la escala global (negro/blanco) salia negro en tema claro. -->
+  <div class="test-section">
+    <h2>🔘 .btn sin variante (light)</h2>
+    <button id="btn-default" class="btn btn-md" type="button">Sin variante</button>
+  </div>
+
+  <div class="test-section" data-theme="dark">
+    <h2>🔘 .btn sin variante (dark)</h2>
+    <button id="btn-default-dark" class="btn btn-md" type="button">Sin variante</button>
+  </div>
+
+  <script>
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getElementTextColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).color : null;
+    };
+
+    window.getElementBorderColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).borderTopColor : null;
+    };
+
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+
+    window.getComputedProp = (id, prop) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).getPropertyValue(prop).trim() : null;
+    };
+
+    window.setTheme = (theme) => {
+      if (theme === null) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    };
+
+    window.getTheme = () => {
+      return document.documentElement.getAttribute('data-theme') || 'light';
+    };
+
+    /**
+     * Luminancia relativa WCAG 2.1 a partir de un `rgb(r, g, b)` computado.
+     * Permite afirmar legibilidad sobre lo que el navegador pinta de verdad,
+     * no sobre los hex del tema.
+     */
+    window.relativeLuminance = (rgbString) => {
+      const parts = rgbString.match(/\d+(\.\d+)?/g);
+      if (!parts || parts.length < 3) return null;
+      const [r, g, b] = parts.slice(0, 3).map(Number).map((channel) => {
+        const srgb = channel / 255;
+        return srgb <= 0.03928 ? srgb / 12.92 : Math.pow((srgb + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+
+    /** Ratio de contraste WCAG 2.1 entre dos colores computados. */
+    window.contrastRatio = (fg, bg) => {
+      const lf = window.relativeLuminance(fg);
+      const lb = window.relativeLuminance(bg);
+      if (lf === null || lb === null) return null;
+      const lighter = Math.max(lf, lb);
+      const darker = Math.min(lf, lb);
+      return (lighter + 0.05) / (darker + 0.05);
+    };
+  </script>
+</body>
+</html>

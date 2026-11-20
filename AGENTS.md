@@ -69,7 +69,7 @@ own-ui/
 │   │   │   ├── plugin.ts          → createPlugin(): temas built-in + utilidades
 │   │   │   ├── theme.ts           → entry "@ownui/tw-theme/theme": temas custom
 │   │   │   ├── types.ts           → SemanticColorName, PluginOptions, Flags…
-│   │   │   ├── themes/            → TOKENS: root, rootColors, light, dark
+│   │   │   ├── themes/            → TOKENS: root (forma), light, dark (color)
 │   │   │   ├── variants/          → CONTRATO de clases: button, dropdown, loader
 │   │   │   ├── functions/         → generateThemeProperties, formatAndClean…, plugin.withOptions, splitStyles
 │   │   │   ├── utilities/         → colors.ts (generateColorUtilities, cssVarName/Ref), file.ts
@@ -155,15 +155,46 @@ El patrón `--depth` es el más idiosincrático del sistema: en lugar de tokens 
 discretos, las sombras se **calculan** con `color-mix` sobre el color de fondo, escalado por
 `--depth`. Poner `--depth: 0` aplana todo el sistema sin tocar un solo componente.
 
-### 4.2 Tokens de color base — `src/themes/rootColors.ts`
+### 4.2 Escala de superficies — `src/themes/light.ts` y `dark.ts`
 
-```ts
-'--color-base-200':     '#000000'
-'--color-base-content': '#ffffff'
-```
+Las superficies son los colores de *fondo* del sistema y el color de texto que va encima.
+**Son dependientes del tema**, así que viven en los temas, no en `root.ts`:
 
-Sólo dos. **`--color-base-100` y `--color-base-300` no existen** aunque
-`dropdown.css` los usa (§9.6).
+| Token | Light | Dark | Rol |
+|---|---|---|---|
+| `--color-base-100` | `#ffffff` | `#1d232a` | superficie principal |
+| `--color-base-200` | `#f2f2f2` | `#191e24` | superficie elevada/alterna |
+| `--color-base-300` | `#e5e6e6` | `#15191e` | bordes y separadores |
+| `--color-base-content` | `#1f2937` | `#e5e7eb` | texto sobre superficies |
+
+La escala va **de la superficie principal a la más hundida en los dos temas**: `base-100` es la
+más clara en light y la más clara de las oscuras en dark. No es una inversión.
+
+Sus consumidores son tres: las 16 utilidades de superficie (§4.5), `dropdown.css`
+(`--dropdown-color`, `--dropdown-item-*`) y `button.css`, que usa `--color-base-200` como
+relleno por defecto y `--color-base-content` como texto del `.btn` **sin variante**.
+
+> **Historia (lote 4).** Hasta el lote 4 esto era `src/themes/rootColors.ts`, con dos tokens
+> globales y fijos: `--color-base-200: #000000` y `--color-base-content: #ffffff`. De ahí salían
+> dos defectos: (1) al ser globales no cambiaban con el tema, así que un `.btn` sin variante
+> salía **negro en tema claro**; (2) `--color-base-100` y `--color-base-300` simplemente **no
+> existían**, aunque `dropdown.css` referenciaba el primero tres veces — y un `var()` a un token
+> *indefinido* queda `guaranteed-invalid`, lo que **no** dispara el fallback (IACVT), así que el
+> fondo del dropdown caía a `transparent`. El lote 4 movió la escala a los temas, la completó y
+> borró `rootColors.ts`, que ya no tenía ningún color invariante que guardar.
+
+**Consecuencia a tener presente.** Con `@plugin "@ownui/tw-theme" { themes: false }` **no hay
+superficies**, igual que no hay `--color-primary`: quien deshabilite los temas built-in define
+las suyas en su tema custom. Era tentador duplicarlas en `root.ts` como red de seguridad, pero
+`:root` (especificidad 0,1,0) vence a `:where(:root)` (0,0,0), así que ese "fallback" ganaría al
+tema y reintroduciría el bug. Ver `specs/lote-4.md` D-07.
+
+**Regla de contrato, verificada por test.** Todo token `--color-base-*` que aparezca en
+`src/css/*.css` tiene que existir en `light.ts` **y** en `dark.ts`.
+`src/__tests__/surfaces.test.ts` extrae las referencias del CSS real con una regex y genera un
+caso por token, así que una referencia nueva a un token inexistente falla en `pnpm test` sin que
+nadie tenga que acordarse de actualizar nada. Ese mismo test exige WCAG AA (≥ 4.5:1) entre las
+3 superficies y `base-content` en ambos temas.
 
 ### 4.3 Tokens de color semántico — `src/themes/light.ts` y `dark.ts`
 
@@ -215,7 +246,7 @@ WCAG AA y sus 8 `-focus`). Ver `@docs/BUILD-BATCHES.md` L21.
 ### 4.4 Cómo se inyectan los temas — `src/plugin.ts`
 
 ```css
-:root                                    { /* root.ts + rootColors.ts */ }
+:root                                    { /* root.ts: forma y geometria */ }
 :where(:root), [data-theme="light"]      { /* light.ts */ }
 [data-theme="dark"]                      { /* dark.ts */ }
 @media (prefers-color-scheme: dark) {
@@ -229,7 +260,9 @@ gana sobre el tema por defecto. Es el mecanismo que hace que
 
 ### 4.5 Utilidades generadas — `src/utilities/colors.ts`
 
-`generateColorUtilities()` produce **120 clases** = 8 colores × 3 variantes × 5 prefijos:
+`generateColorUtilities()` produce **136 clases**: 120 semánticas + 16 de superficie.
+
+Las **120 semánticas** son 8 colores × 3 variantes × 5 prefijos:
 
 | Prefijo | Propiedad emitida |
 |---|---|
@@ -240,6 +273,22 @@ gana sobre el tema por defecto. Es el mecanismo que hace que
 | `.divide-{token}` | `--tw-divide-color` |
 
 Ej.: `.bg-primary`, `.text-primary-content`, `.border-primary-focus`, `.ring-error`.
+
+Las **16 de superficie** (lote 4, `generateSurfaceUtilities()`) son los 4 tokens de §4.2 ×
+**4 prefijos**: `bg`, `text`, `border` y `divide`. Ej.: `.bg-base-100`, `.text-base-content`,
+`.border-base-300`, `.divide-base-300`.
+
+Dos asimetrías deliberadas respecto a las semánticas, las dos para no emitir clases que
+apunten al vacío:
+
+- **Sin variantes `-content` ni `-focus`.** `surfaceColorNames` es una lista **separada** de
+  `semanticColorNames` justamente por esto: el generador semántico multiplica nombre × variante,
+  así que meter las superficies ahí emitiría `.bg-base-100-content`, `.bg-base-100-focus` y 13
+  clases más apuntando a tokens que ningún tema define. Es el mismo defecto que la rama
+  `components` introdujo con los `-focus` (§11.1).
+- **Sin prefijo `ring`.** Un anillo de foco del color de la propia superficie no contrasta con
+  ella. Ver `specs/lote-4.md` D-04 (y P-01, por si se decide lo contrario).
+
 Hay un bloque comentado que iteraba `vars` dinámicamente — intento abandonado de derivar
 utilidades de tokens arbitrarios (p. ej. `--color-brand`). Hoy la lista es **estática**: un
 token custom como `--color-brand` se inyecta pero **no genera utilidades**.
@@ -487,12 +536,12 @@ pnpm --filter "@ownui/ui..." build # el agregador + sus dependencias (ojo a los 
 turbo build --filter=@ownui/ui     # equivalente vía turbo (usa dependsOn: ["^build"])
 pnpm --filter @ownui/button build  # SÓLO ese paquete: falla en limpio si sus deps no están
 
-pnpm test                          # Jest, ambos proyectos — 8 suites / 89 tests (sin coverage)
+pnpm test                          # Jest, ambos proyectos — 10 suites / 122 tests (sin coverage)
 pnpm test:coverage                 # lo mismo + informe de cobertura
 pnpm test:tw-theme                 # sólo el plugin
 pnpm test:components               # componentes de packages/ui + utils de packages/utils
 
-pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (~88 tests)
+pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (116 tests)
 
 pnpm lint  /  pnpm lint:fix  /  pnpm format
 pnpm changeset                     # crear changeset antes de abrir PR
@@ -592,11 +641,11 @@ fixture.** Es el único mecanismo que detecta regresiones reales del plugin.
 | `develop` | Integración. Base de todos los lotes y destino de sus PRs. |
 | `claude/lote-<N>` | Rama de trabajo de un lote, creada desde la última `develop`. Un lote = una PR. |
 
-- 🔴 **`ci.yml` se dispara sólo en PRs hacia `main`** (`on: pull_request: branches: [main]`).
-  Con `develop` como rama de integración, **las PRs de lote no ejecutan CI**: la ausencia de
-  checks en una PR hacia `develop` no significa que esté verde, significa que nadie la miró.
-  Hasta que se añada `develop` a ese trigger, la verificación de un lote es la que su autor
-  haya corrido en local y documentado en su spec.
+- ✅ **Las PRs de lote sí ejecutan CI**, desde el lote 3: el trigger cubre PRs hacia `main` y
+  hacia `develop`, más push a `develop`. Antes era sólo `branches: [main]`, así que ninguna PR
+  de los lotes 0–3 pasó por CI y la ausencia de checks no significaba nada. Dicho esto, el paso
+  de **lint no bloquea** todavía (`continue-on-error`), así que un check verde **no** garantiza
+  que `pnpm lint` pase — sólo que build, tests y e2e pasan.
 
 ### 6.6 Convenciones de código
 
@@ -697,12 +746,12 @@ corrieron, `Button.test.tsx` era un stub con `console.log` y `pnpm test` salía 
 
 Hoy: `testMatch` y `collectCoverageFrom` apuntan a `packages/ui/**` y `packages/utils/**`,
 `Button.test.tsx` está reescrito con RTL + `user-event`, `useDOMRef` tiene suite propia, y
-`pnpm test` corre **8 suites / 89 tests**. Ver `specs/lote-2.md`.
+`pnpm test` corre **10 suites / 122 tests** (89 tras el lote 2, +33 del lote 4). Ver
+`specs/lote-2.md`.
 
-**Queda pendiente la parte de CI**: `ci.yml` sigue ejecutando el paso por paquete como
-`pnpm test:$pkg || echo "No tests for $pkg"`, que **se traga el fallo** ⇒ un test roto no
-tumba el pipeline. El lote 2 no lo tocó por la regla de no modificar CI sin autorización
-explícita; está registrado como gap en `specs/lote-2.md` (G-04).
+**La parte de CI se cerró en el lote 3** (gap G-04), con autorización del dueño: el paso era
+`pnpm test:$pkg || echo "No tests for $pkg"`, que se tragaba el fallo y además invocaba
+`test:ui`/`test:utils`, scripts inexistentes. Hoy el pipeline corre `pnpm test` incondicional.
 
 ### 9.3 ✅ `pnpm build` no construye la librería — *resuelto en el lote 3*
 Era `"build": "turbo build --filter='@ownui/tw-theme'"`, así que `@ownui/ui`, `@ownui/button`,
@@ -726,11 +775,18 @@ contraste en botones no-primary. Lo esperable es spinner **junto** al contenido,
 tamaño y usando el color `-content` del tema. Las props `icon`, `startIcon`, `endIcon` están
 en los tipos pero **no se usan en el render**.
 
-### 9.6 🟠 `--color-base-100` no existe
-`dropdown.css` lo referencia 3 veces como color de superficie; `rootColors.ts` sólo define
-`--color-base-200` y `--color-base-content`. El fallback de `var()` no se dispara (el token
-está *indefinido*, no vacío) ⇒ fondo del dropdown sin resolver. Falta la escala de superficies
-(`base-100`/`200`/`300`) que el patrón daisyUI-like presupone.
+### 9.6 ✅ `--color-base-100` no existía — *corregido en el lote 4*
+`dropdown.css` lo referenciaba 3 veces como color de superficie, y `rootColors.ts` sólo definía
+`--color-base-200` y `--color-base-content`. El fallback de `var()` no se dispara cuando el
+token está *indefinido* (queda `guaranteed-invalid`, no vacío) ⇒ el fondo del dropdown caía a
+`transparent`. Faltaba la escala de superficies completa que el patrón daisyUI-like presupone, y
+los dos tokens que sí existían eran **globales y fijos** (negro/blanco), de modo que un `.btn`
+sin variante salía negro en tema claro.
+
+El lote 4 movió la escala a `light.ts`/`dark.ts`, la completó con `base-100`/`base-300`, añadió
+16 utilidades de superficie y borró `rootColors.ts`. Ver §4.2, §4.5 y `specs/lote-4.md`.
+Queda fijado por `src/__tests__/surfaces.test.ts` (contrato token↔CSS + WCAG AA) y por el
+fixture e2e `base-surfaces/` (18 tests sobre estilos computados en Chromium).
 
 ### 9.7 🟠 Dropdown: clases generadas sin CSS
 Los hooks emiten `dropdown-trigger`, `dropdown-trigger-active`, `dropdown-open`,
@@ -808,7 +864,7 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
 
 | Pregunta | Archivo |
 |---|---|
-| ¿Qué tokens existen? | `packages/tw-theme/src/themes/{root,rootColors,light,dark}.ts` |
+| ¿Qué tokens existen? | `packages/tw-theme/src/themes/{root,light,dark}.ts` |
 | ¿Cómo se inyecta un tema? | `packages/tw-theme/src/plugin.ts`, `src/theme.ts` |
 | ¿Qué clases genera el plugin? | `packages/tw-theme/src/utilities/colors.ts` |
 | ¿Qué prop → qué clase? | `packages/tw-theme/src/variants/*.ts` |
@@ -929,9 +985,10 @@ pendiente para quien siga:
 
 - **Lote 1** parte del snippet ya corregido que le dejó el lote 0 en su ficha, más el fixture
   React de `@docs/salvage/`. No hace falta volver a `tw-theme/v1`.
-- **Lote 4** (escala `base-100/200/300`) se vuelve más urgente de lo que parecía:
-  `rootColors.ts` define `--color-base-200: #000000`, y el `button.css` que entró en el lote 0
-  lo usa como relleno del botón neutro por defecto, así que ese botón sale negro en tema claro.
+- **Lote 4** (escala `base-100/200/300`) ✅ **hecho**. Era más urgente de lo que parecía:
+  `rootColors.ts` definía `--color-base-200: #000000`, y el `button.css` que entró en el lote 0
+  lo usa como relleno del botón neutro por defecto, así que ese botón salía negro en tema claro.
+  La escala vive ahora en los temas (§4.2) y `rootColors.ts` ya no existe.
 - **Lote 5** sigue intacto: el bug de `Button.variant` (§9.4) no estaba arreglado en ninguna
   rama, y el lote 0 no tocó el contrato de clases (el conjunto de selectores de `button.css`
   es idéntico al anterior).

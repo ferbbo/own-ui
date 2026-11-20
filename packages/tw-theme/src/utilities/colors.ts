@@ -1,4 +1,4 @@
-import { SemanticColorName, SemanticColorVariant } from "../types.ts";
+import { SemanticColorName, SemanticColorVariant, SurfaceColorName } from "../types.ts";
 
 /**
  * List of all semantic color names
@@ -18,6 +18,22 @@ export const semanticColorNames: SemanticColorName[] = [
  * List of all semantic color variants
  */
 export const semanticColorVariants: SemanticColorVariant[] = ["", "-content", "-focus"];
+
+/**
+ * List of all surface color names (escala de superficies).
+ *
+ * Lista **separada** de `semanticColorNames` a proposito: el generador
+ * semantico multiplica cada nombre por `semanticColorVariants`, asi que meter
+ * las superficies ahi emitiria `.bg-base-100-content`, `.bg-base-100-focus` y
+ * 13 clases mas apuntando a tokens que ningun tema define. Ver
+ * `specs/lote-4.md` O-01.
+ */
+export const surfaceColorNames: SurfaceColorName[] = [
+  "base-100",
+  "base-200",
+  "base-300",
+  "base-content",
+];
 
 /**
  * Generate CSS variable name for a semantic color
@@ -64,6 +80,37 @@ export const hexToRgb = (hex: string): string => {
   const b = parseInt(hex.substring(4, 6), 16);
 
   return `${r} ${g} ${b}`;
+};
+
+/**
+ * Declaracion CSS que emite cada prefijo de utilidad de superficie.
+ *
+ * Las superficies emiten 4 prefijos, no los 5 de los colores semanticos: se
+ * deja fuera `ring`, porque un anillo de foco del color de la propia
+ * superficie no contrasta con ella. Ver `specs/lote-4.md` D-04 / P-01.
+ */
+const surfaceUtilityDeclarations: Record<string, (ref: string) => Record<string, string>> = {
+  bg: (ref) => ({ "background-color": ref }),
+  text: (ref) => ({ color: ref }),
+  border: (ref) => ({ "border-color": ref }),
+  divide: (ref) => ({ "--tw-divide-color": ref }),
+};
+
+/**
+ * Generate utility classes for the surface scale (`base-100/200/300/-content`).
+ *
+ * Emite 4 tokens x 4 prefijos = 16 clases, sin variantes `-content`/`-focus`.
+ */
+export const generateSurfaceUtilities = (): Record<string, Record<string, string>> => {
+  const utilities: Record<string, Record<string, string>> = {};
+
+  surfaceColorNames.forEach((tokenName) => {
+    Object.entries(surfaceUtilityDeclarations).forEach(([prefix, toDeclaration]) => {
+      utilities[`.${prefix}-${tokenName}`] = toDeclaration(cssVarRef(tokenName));
+    });
+  });
+
+  return utilities;
 };
 
 /**
@@ -167,5 +214,10 @@ export const generateColorUtilities = () => {
       };
     });
   });
+
+  // Utilidades de la escala de superficies (lote 4). Van en la misma llamada a
+  // `addUtilities()` que las semanticas: para el plugin es un unico objeto.
+  Object.assign(utilities, generateSurfaceUtilities());
+
   return utilities;
 };

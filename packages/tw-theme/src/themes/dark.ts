@@ -4,6 +4,14 @@ import { ThemeColors } from "../types.ts";
  * Default dark theme colors
  */
 export const darkTheme: ThemeColors = {
+  // Escala de superficies (contrapartida oscura de la de light.ts).
+  // El orden 100 -> 300 va de la superficie principal a la mas hundida, igual
+  // que en light: no es una inversion de la escala clara. Ver AGENTS.md §4.2.
+  "--color-base-100": "#1d232a", // superficie principal
+  "--color-base-200": "#191e24", // superficie elevada/alterna
+  "--color-base-300": "#15191e", // bordes y separadores
+  "--color-base-content": "#e5e7eb", // texto sobre superficies
+
   // Primary color and variants
   "--color-primary": "#60a5fa", // Lighter blue for dark mode
   "--color-primary-content": "#1e293b", // Dark text on light background
