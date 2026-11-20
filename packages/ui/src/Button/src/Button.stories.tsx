@@ -1,16 +1,28 @@
 // Button.stories.tsx
-import { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 import Button from "./Button";
 
-
+/**
+ * Las clases que emite el componente las define `@ownui/tw-theme/css`, que
+ * Storybook importa en `.storybook/styles/tailwind.css`. Si una story sale sin
+ * estilar, el problema está en ese import, no aquí.
+ */
 const meta: Meta<typeof Button> = {
   title: "Components/Button",
   component: Button,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "Botón con rol semántico (`theme`), tratamiento (`variant`), tamaño, iconos y " +
+          "estado de carga. No lleva estilos propios: sólo compone las clases del contrato " +
+          "de `@ownui/tw-theme/variants`.",
+      },
+    },
+  },
   argTypes: {
     theme: {
-      control: {
-        type: "select",
-      },
+      control: { type: "select" },
       options: [
         "primary",
         "secondary",
@@ -25,24 +37,28 @@ const meta: Meta<typeof Button> = {
       ],
     },
     variant: {
-      control: {
-        type: "select",
-      },
-      options: ["", "outline", "dash", "soft"],
+      control: { type: "select" },
+      // `undefined` es el botón sólido: la ausencia de tratamiento.
+      options: [undefined, "outline", "dash", "soft"],
     },
     size: {
-      control: {
-        type: "select",
-        options: ["xs", "sm", "md", "lg", "xl"],
-      },
+      control: { type: "select" },
+      options: ["xs", "sm", "md", "lg", "xl"],
     },
+    shape: {
+      control: { type: "select" },
+      options: [undefined, "square", "circle"],
+    },
+    width: {
+      control: { type: "select" },
+      options: [undefined, "wide", "block"],
+    },
+    active: { control: "boolean" },
     disabled: { control: "boolean" },
     loading: { control: "boolean" },
     as: {
-      control: {
-        type: "radio",
-        options: ["button", "a"],
-      },
+      control: { type: "radio" },
+      options: ["button", "a"],
     },
     href: { control: "text" },
     className: { control: "text" },
@@ -53,91 +69,89 @@ const meta: Meta<typeof Button> = {
 export default meta;
 type Story = StoryObj<typeof Button>;
 
-export const Primary: Story = {
+/** Iconos inline: las stories no deben depender de una librería de iconos. */
+const ArrowLeft = () => (
+  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M15 18l-6-6 6-6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const ArrowRight = () => (
+  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M9 6l6 6-6 6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const Star = () => (
+  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
+
+const row = { display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" } as const;
+const column = { display: "flex", flexDirection: "column", gap: "1rem" } as const;
+
+export const Default: Story = {
   args: {
     theme: "primary",
     size: "md",
-    disabled: false,
     children: "Primary Button",
-    as: "button",
   },
 };
 
-export const Secondary: Story = {
-  args: {
-    theme: "secondary",
-    size: "md",
-    disabled: false,
-    children: "Secondary Button",
-    as: "button",
-  },
-};
-
-export const AccentLarge: Story = {
-  args: {
-    theme: "accent",
-    size: "lg",
-    disabled: false,
-    children: "Accent Large",
-    as: "button",
-  },
-};
-
-export const NeutralSmallDisabled: Story = {
-  args: {
-    theme: "neutral",
-    size: "sm",
-    disabled: true,
-    children: "Disabled Button",
-    as: "button",
-  },
-};
-
-export const InfoExtraSmall: Story = {
-  args: {
-    theme: "info",
-    size: "xs",
-    disabled: false,
-    children: "Info XS",
-    as: "button",
-  },
-};
-
-export const WarningXL: Story = {
-  args: {
-    theme: "warning",
-    size: "xl",
-    disabled: false,
-    children: "Warning XL",
-    as: "button",
-  },
-};
-
-export const SuccessGhost: Story = {
-  args: {
-    theme: "ghost",
-    size: "md",
-    disabled: false,
-    children: "Ghost Button",
-    as: "button",
-  },
-};
-
-export const LinkAsAnchor: Story = {
+/**
+ * Los tres tratamientos que el CSS define. Hasta el lote 5 ninguno aplicaba
+ * clase (`dash` y `soft` se perdían, `outline` colaba por coincidencia de
+ * nombre), así que esta story es la verificación visual del arreglo: los
+ * cuatro botones tienen que verse distintos entre sí.
+ */
+export const AllVariants: Story = {
   render: () => (
-    <Button 
-      theme="link" 
-      size="md" 
-      href="https://example.com" 
-      as="a"
-    >
-      Visit Example
-    </Button>
+    <div style={column}>
+      <div style={row}>
+        <Button theme="primary">Sólido (sin variant)</Button>
+        <Button theme="primary" variant="outline">
+          Outline
+        </Button>
+        <Button theme="primary" variant="dash">
+          Dash
+        </Button>
+        <Button theme="primary" variant="soft">
+          Soft
+        </Button>
+      </div>
+      <div style={row}>
+        <Button theme="error">Sólido</Button>
+        <Button theme="error" variant="outline">
+          Outline
+        </Button>
+        <Button theme="error" variant="dash">
+          Dash
+        </Button>
+        <Button theme="error" variant="soft">
+          Soft
+        </Button>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
       description: {
-        story: "Button rendered as an anchor element with href attribute.",
+        story:
+          "Sólido = ausencia de `variant` (no existe `.btn-solid`). `outline` y `dash` vacían " +
+          "el fondo y pintan el borde (dash, punteado); `soft` es un tinte del rol al 10 %.",
       },
     },
   },
@@ -145,143 +159,212 @@ export const LinkAsAnchor: Story = {
 
 export const AllThemes: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-      <Button theme="primary" size="md">Primary</Button>
-      <Button theme="secondary" size="md">Secondary</Button>
-      <Button theme="accent" size="md">Accent</Button>
-      <Button theme="neutral" size="md">Neutral</Button>
-      <Button theme="info" size="md">Info</Button>
-      <Button theme="success" size="md">Success</Button>
-      <Button theme="warning" size="md">Warning</Button>
-      <Button theme="error" size="md">Error</Button>
-      <Button theme="ghost" size="md">Ghost</Button>
-      <Button theme="link" size="md">Link</Button>
+    <div style={row}>
+      <Button theme="primary">Primary</Button>
+      <Button theme="secondary">Secondary</Button>
+      <Button theme="accent">Accent</Button>
+      <Button theme="neutral">Neutral</Button>
+      <Button theme="info">Info</Button>
+      <Button theme="success">Success</Button>
+      <Button theme="warning">Warning</Button>
+      <Button theme="error">Error</Button>
+      <Button theme="ghost">Ghost</Button>
+      <Button theme="link">Link</Button>
     </div>
   ),
 };
 
-export const OutlineDashSoft: Story = {
+export const AllSizes: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: "1rem" }}>
-      <Button theme="primary" variant="outline" size="md">
+    <div style={row}>
+      <Button size="xs">xs</Button>
+      <Button size="sm">sm</Button>
+      <Button size="md">md</Button>
+      <Button size="lg">lg</Button>
+      <Button size="xl">xl</Button>
+    </div>
+  ),
+};
+
+/** `startIcon` / `endIcon` son `ReactNode` y se renderizan alrededor del contenido. */
+export const WithIcons: Story = {
+  render: () => (
+    <div style={column}>
+      <div style={row}>
+        <Button startIcon={<ArrowLeft />}>Anterior</Button>
+        <Button endIcon={<ArrowRight />}>Siguiente</Button>
+        <Button startIcon={<ArrowLeft />} endIcon={<ArrowRight />}>
+          Ambos
+        </Button>
+      </div>
+      <div style={row}>
+        {(["xs", "sm", "md", "lg", "xl"] as const).map((size) => (
+          <Button key={size} size={size} startIcon={<Star />}>
+            {size}
+          </Button>
+        ))}
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "El icono escala con el texto (`width: 1em`) y el espacio lo pone el `gap` de `.btn`.",
+      },
+    },
+  },
+};
+
+/** `icon` hace el botón icon-only: exige `aria-label` y aplica `.btn-square`. */
+export const IconOnly: Story = {
+  render: () => (
+    <div style={row}>
+      <Button icon={<Star />} aria-label="Favorito" />
+      <Button icon={<Star />} aria-label="Favorito" shape="circle" />
+      <Button icon={<Star />} aria-label="Favorito" theme="ghost" />
+      <Button icon={<Star />} aria-label="Favorito" variant="outline" size="lg" />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Sin texto visible no hay nombre accesible, así que `aria-label` es obligatorio en " +
+          "TypeScript cuando se pasa `icon`.",
+      },
+    },
+  },
+};
+
+/** Modificadores de layout que el CSS tenía y React no exponía hasta el lote 5. */
+export const Modifiers: Story = {
+  render: () => (
+    <div style={column}>
+      <div style={row}>
+        <Button shape="square" icon={<Star />} aria-label="Cuadrado" />
+        <Button shape="circle" icon={<Star />} aria-label="Círculo" />
+        <Button active>Active</Button>
+      </div>
+      <Button width="wide">Wide (16rem)</Button>
+      <Button width="block">Block (100 %)</Button>
+    </div>
+  ),
+};
+
+export const Disabled: Story = {
+  render: () => (
+    <div style={row}>
+      <Button disabled>Sólido</Button>
+      <Button disabled variant="outline">
         Outline
       </Button>
-      <Button theme="primary" variant="dash" size="md">
-        Dashed
+      <Button disabled theme="error">
+        Error
       </Button>
-      <Button theme="primary" variant="soft" size="md">
-        Soft
+      <Button as="a" href="https://example.com" theme="link">
+        Enlace (no admite disabled)
       </Button>
     </div>
   ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`disabled` emite `.btn-disabled`, que es el estado final del CSS: gana a rol y " +
+          'tratamiento. En `as="a"` la prop está prohibida por tipos.',
+      },
+    },
+  },
 };
 
-export const VariantCombinations: Story = {
+export const AsLink: Story = {
   render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <Button theme="primary" size="md">Primary</Button>
-        <Button theme="primary" variant="outline" size="md">Primary Outline</Button>
-        <Button theme="primary" variant="dash" size="md">Primary Dash</Button>
-        <Button theme="primary" variant="soft" size="md">Primary Soft</Button>
-      </div>
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <Button theme="success" size="md">Success</Button>
-        <Button theme="success" variant="outline" size="md">Success Outline</Button>
-        <Button theme="success" variant="dash" size="md">Success Dash</Button>
-        <Button theme="success" variant="soft" size="md">Success Soft</Button>
-      </div>
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <Button theme="error" size="md">Error</Button>
-        <Button theme="error" variant="outline" size="md">Error Outline</Button>
-        <Button theme="error" variant="dash" size="md">Error Dash</Button>
-        <Button theme="error" variant="soft" size="md">Error Soft</Button>
-      </div>
+    <div style={row}>
+      <Button as="a" href="https://example.com">
+        Enlace con aspecto de botón
+      </Button>
+      <Button as="a" href="https://example.com" theme="link">
+        Enlace de verdad
+      </Button>
     </div>
   ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Con `href`, el nodo conserva el rol nativo `link`: el lector de pantalla anuncia " +
+          "que navega, no que acciona.",
+      },
+    },
+  },
 };
 
-// Historias para estado de loading
+/** El spinner acompaña al contenido; no lo sustituye. */
 export const Loading: Story = {
   args: {
     theme: "primary",
     size: "md",
     loading: true,
-    children: "Loading...",
-    as: "button",
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: "Button en estado de loading mostrando el componente Loader.",
-      },
-    },
+    children: "Guardando",
   },
 };
 
-export const LoadingWithoutText: Story = {
-  args: {
-    theme: "primary",
-    size: "md",
-    loading: true,
-    children: "",
-    as: "button",
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: "Button en estado de loading sin texto, solo mostrando el spinner.",
-      },
-    },
-  },
-};
-
-export const LoadingDifferentSizes: Story = {
+export const LoadingAllThemes: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-      <Button theme="primary" size="xs" loading>
-        Saving
+    <div style={row}>
+      <Button theme="primary" loading>
+        Primary
       </Button>
-      <Button theme="primary" size="sm" loading>
-        Processing
+      <Button theme="secondary" loading>
+        Secondary
       </Button>
-      <Button theme="primary" size="md" loading>
-        Loading
+      <Button theme="accent" loading>
+        Accent
       </Button>
-      <Button theme="primary" size="lg" loading>
-        Uploading
+      <Button theme="neutral" loading>
+        Neutral
       </Button>
-      <Button theme="primary" size="xl" loading>
-        Downloading
+      <Button theme="info" loading>
+        Info
+      </Button>
+      <Button theme="success" loading>
+        Success
+      </Button>
+      <Button theme="warning" loading>
+        Warning
+      </Button>
+      <Button theme="error" loading>
+        Error
       </Button>
     </div>
   ),
   parameters: {
     docs: {
       description: {
-        story: "Botones en estado de loading en diferentes tamaños.",
+        story:
+          "El spinner usa `loader-current`, o sea `--btn-fg`: contrasta con el relleno de " +
+          "cualquier rol. Con un color semántico fijo, el spinner de un `btn-primary` era azul " +
+          "sobre azul.",
       },
     },
   },
 };
 
-export const LoadingDifferentThemes: Story = {
+export const LoadingAllSizes: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-      <Button theme="primary" loading>Saving...</Button>
-      <Button theme="secondary" loading>Processing...</Button>
-      <Button theme="success" loading>Uploading...</Button>
-      <Button theme="warning" loading>Converting...</Button>
-      <Button theme="error" loading>Deleting...</Button>
-      <Button theme="info" loading>Analyzing...</Button>
-      <Button theme="accent" loading>Generating...</Button>
-      <Button theme="neutral" loading>Loading...</Button>
+    <div style={row}>
+      {(["xs", "sm", "md", "lg", "xl"] as const).map((size) => (
+        <Button key={size} size={size} loading>
+          {size}
+        </Button>
+      ))}
     </div>
   ),
   parameters: {
     docs: {
       description: {
-        story: "Botones en estado de loading con diferentes temas de color.",
+        story: "El spinner hereda el tamaño del botón: `xs → loader-2xs` … `xl → loader-lg`.",
       },
     },
   },
@@ -289,49 +372,18 @@ export const LoadingDifferentThemes: Story = {
 
 export const LoadingWithVariants: Story = {
   render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <Button theme="primary" loading>Primary Loading</Button>
-        <Button theme="primary" variant="outline" loading>Outline Loading</Button>
-        <Button theme="primary" variant="dash" loading>Dash Loading</Button>
-        <Button theme="primary" variant="soft" loading>Soft Loading</Button>
-      </div>
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <Button theme="success" loading>Success Loading</Button>
-        <Button theme="success" variant="outline" loading>Success Outline</Button>
-        <Button theme="success" variant="dash" loading>Success Dash</Button>
-        <Button theme="success" variant="soft" loading>Success Soft</Button>
-      </div>
+    <div style={row}>
+      <Button loading>Sólido</Button>
+      <Button variant="outline" loading>
+        Outline
+      </Button>
+      <Button variant="dash" loading>
+        Dash
+      </Button>
+      <Button variant="soft" loading>
+        Soft
+      </Button>
+      <Button icon={<Star />} aria-label="Guardando" loading />
     </div>
   ),
-  parameters: {
-    docs: {
-      description: {
-        story: "Botones en estado de loading con diferentes variantes de estilo.",
-      },
-    },
-  },
-};
-
-export const LoadingDisabled: Story = {
-  render: () => (
-    <div style={{ display: "flex", gap: "1rem" }}>
-      <Button theme="primary" loading disabled>
-        Loading & Disabled
-      </Button>
-      <Button theme="secondary" loading disabled>
-        Processing...
-      </Button>
-      <Button theme="success" loading disabled>
-        Uploading...
-      </Button>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: "Botones en estado de loading y deshabilitados simultáneamente.",
-      },
-    },
-  },
 };

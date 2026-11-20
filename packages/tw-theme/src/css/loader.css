@@ -3,7 +3,7 @@
 /* Base loader styles */
 .loader {
   @apply inline-flex items-center justify-center relative;
-  
+
   /* CSS Custom Properties for theming */
   --loader-color: var(--color-primary);
   --loader-size: 1.5rem;
@@ -88,6 +88,16 @@
 
 .loader-error {
   --loader-color: var(--color-error);
+}
+
+/* Hereda el color del contexto en vez de fijar uno semantico.
+   Lo consume el Button (lote 5): dentro de un `.btn` el spinner toma el
+   `color` del boton — es decir `--btn-fg`, el `-content` del rol — asi que
+   contrasta en los 10 roles sin que React tenga que mapear rol -> color de
+   loader. Va despues de los ocho roles a proposito: misma especificidad
+   (0,1,0), de modo que si llegaran juntas gana la ultima declarada. */
+.loader-current {
+  --loader-color: currentColor;
 }
 
 /* Accessibility improvements */
