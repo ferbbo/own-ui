@@ -400,6 +400,29 @@ describe("Button", () => {
       expect(button.childNodes).toHaveLength(1);
     });
 
+    test("un botón icon-only que carga muestra sólo el spinner", () => {
+      render(<Button icon={<span data-testid="icon">★</span>} aria-label="Guardando" loading />);
+
+      const button = screen.getByRole("button", { name: "Guardando" });
+      expect(screen.getByRole("status")).toBeInTheDocument();
+      // El icono no cabe junto al spinner en un .btn-square (ancho = --size).
+      expect(screen.queryByTestId("icon")).not.toBeInTheDocument();
+      expect(button.childNodes).toHaveLength(1);
+      expect(button).toHaveAttribute("aria-busy", "true");
+    });
+
+    test("al dejar de cargar, el botón icon-only recupera su icono", () => {
+      const { rerender } = render(
+        <Button icon={<span data-testid="icon">★</span>} aria-label="Guardando" loading />
+      );
+      expect(screen.queryByTestId("icon")).not.toBeInTheDocument();
+
+      rerender(<Button icon={<span data-testid="icon">★</span>} aria-label="Guardando" />);
+
+      expect(screen.getByTestId("icon")).toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
     test("icon respeta una shape explícita", () => {
       render(<Button icon={<span>★</span>} shape="circle" aria-label="Favorito" />);
 

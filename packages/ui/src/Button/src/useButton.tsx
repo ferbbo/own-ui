@@ -187,7 +187,12 @@ export function useButton(
     loaderProps,
     startIcon: isIconOnly ? undefined : startIcon,
     endIcon: isIconOnly ? undefined : endIcon,
-    content: isIconOnly ? icon : children,
+    // Un boton icon-only que carga muestra SOLO el spinner: `.btn-square` mide
+    // lo mismo que de alto (`--size`), asi que spinner + icono no caben sin
+    // deformar el boton. En un boton con texto el spinner si acompana al
+    // contenido (es el arreglo de AGENTS.md §9.5); aqui lo sustituye porque el
+    // icono no aporta informacion que el spinner tape.
+    content: isIconOnly ? (loading ? null : icon) : children,
   };
 }
 

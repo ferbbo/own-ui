@@ -802,7 +802,9 @@ la interacción bloqueada mientras carga. El spinner hereda el tamaño (mapa
 `ButtonSize → LoaderSize`) y el color: usa `color="current"`, la clase `.loader-current` que el
 lote 5 añadió a `loader.css` (`--loader-color: currentColor`), de modo que toma `--btn-fg` —el
 token `-content` del rol— y contrasta en los 10 temas. `icon` define un botón icon-only con
-`aria-label` obligatorio por tipos y `.btn-square` implícito.
+`aria-label` obligatorio por tipos y `.btn-square` implícito; ese caso es la **única** excepción
+al "spinner junto al contenido": mientras carga muestra sólo el spinner, porque un `.btn-square`
+mide lo mismo de ancho que de alto y no caben los dos.
 
 ### 9.6 ✅ `--color-base-100` no existía — *corregido en el lote 4*
 `dropdown.css` lo referenciaba 3 veces como color de superficie, y `rootColors.ts` sólo definía

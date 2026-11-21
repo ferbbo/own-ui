@@ -27,7 +27,8 @@ Button: `variant` aplica clase, `loading` conserva el contenido e iconos reales 
 - `startIcon` / `endIcon` ahora son `ReactNode` (antes estaban tipados `boolean`) y **se
   renderizan**, en el orden `[spinner] [startIcon] [children] [endIcon]`.
 - `icon` define un botón icon-only: es el único contenido, exige `aria-label` en TypeScript y
-  aplica `.btn-square` salvo que se pida otra `shape`.
+  aplica `.btn-square` salvo que se pida otra `shape`. Con `loading`, un botón icon-only muestra
+  sólo el spinner (en un `.btn-square` no caben spinner e icono).
 - Modificadores de layout que el CSS ya tenía: `shape` (`square`/`circle`), `width`
   (`wide`/`block`) y `active`.
 

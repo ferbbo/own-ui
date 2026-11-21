@@ -386,4 +386,14 @@ export const LoadingWithVariants: Story = {
       <Button icon={<Star />} aria-label="Guardando" loading />
     </div>
   ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "El último es icon-only: mientras carga muestra **sólo** el spinner, porque un " +
+          "`.btn-square` mide lo mismo de ancho que de alto y no caben los dos. En los " +
+          "botones con texto el spinner acompaña al contenido.",
+      },
+    },
+  },
 };

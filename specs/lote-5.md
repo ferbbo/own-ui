@@ -7,7 +7,7 @@
 | Lote            | **L5** — Button: contrato, loading e iconos (`@docs/BUILD-BATCHES.md` §L5)         |
 | Rama base       | `develop` (en `0afe779`, que ya integra los lotes 0–4)                             |
 | Rama de trabajo | `claude/lote-5`                                                                    |
-| Estado general  | **COMPLETO** — 7 tasks, 0 bloqueadas, 11/11 criterios cumplidos                     |
+| Estado general  | **COMPLETO** — 8 tasks, 0 bloqueadas, 12/12 criterios cumplidos                     |
 | Fecha           | 2026-11-20                                                                         |
 
 > **Nota sobre el número de lote.** El prompt programado llegó por **quinta** vez con el
@@ -58,6 +58,7 @@ Criterios adicionales que el lote arrastra por gaps abiertos en lotes previos (v
 | AC9 | **G-02**: `as="a"` + `href` expone el rol `link`, no `button`                                             |
 | AC10 | **G-05**: `useButton` sigue devolviendo `domRef` y el forwarding de ref sigue cubierto por test           |
 | AC11 | El spinner del botón hereda tamaño y color del botón (no es siempre `primary`/`md`)                       |
+| AC12 | Un botón icon-only con `loading` muestra **sólo** el spinner (respuesta del dueño a Q-03)                 |
 
 ---
 
@@ -80,6 +81,7 @@ Criterios adicionales que el lote arrastra por gaps abiertos en lotes previos (v
 | S13 | Tests de Button: variantes, themes, loading, iconos, modificadores, fuga de props, rol del ancla | AC1–AC6, AC8–AC11 | `packages/ui/src/Button/__test__/Button.test.tsx` | S08–S12 | HECHO |
 | S14 | Stories: `AllVariants`, `AllSizes`, `WithIcons`, `IconOnly`, `Modifiers`, `Loading`; + limpieza de los ~40 warnings de Prettier preexistentes (**G-07**) | AC7 | `packages/ui/src/Button/src/Button.stories.tsx` | S07–S12 | HECHO |
 | S15 | Documentación: `AGENTS.md` §4.7, §5.6, §9.4, §9.5 y §9.10 al día + changesets | — | `AGENTS.md`, `.changeset/*` | S01–S14 | HECHO |
+| S16 | Un botón icon-only con `loading` renderiza sólo el spinner (sin el icono) | AC12 | `packages/ui/src/Button/src/useButton.tsx`, `__test__/Button.test.tsx`, `Button.stories.tsx`, `AGENTS.md` | S12 | HECHO |
 
 ---
 
@@ -93,7 +95,8 @@ Criterios adicionales que el lote arrastra por gaps abiertos en lotes previos (v
 | T4 | S07–S13 | T1, T2 | **SECUENCIAL**, y **reagrupada** respecto al plan inicial (ver **D-03**): tipos, hook, render y tests van en un commit porque el retorno del hook *es* el contrato del componente. Partirlos dejaba un commit intermedio en el que `Button.tsx` ignoraba la mitad de lo que el hook devuelve: un commit que no pasa sus propios criterios. | `aa0c03d` | HECHO |
 | T5 | S14 | T4 | **SECUENCIAL**: las stories consumen la API final. | `b752486` | HECHO |
 | T6 | S15 (docs) | T5 | **SECUENCIAL**: cierre documental con la evidencia de todo lo anterior. | `82a5cf4` | HECHO |
-| T7 | S15 (spec + changesets) | T6 | **SECUENCIAL**: cierre de la spec con la verificación final de la suite completa. | este commit | HECHO |
+| T7 | S15 (spec + changesets) | T6 | **SECUENCIAL**: cierre de la spec con la verificación final de la suite completa. | `74b3204` | HECHO |
+| T8 | S16 | T7 | **SECUENCIAL**: toca `useButton`/tests/stories, los mismos archivos de T4–T6. Abierta **después** del PR, al responder el dueño las tres preguntas de §8. | este commit | HECHO |
 
 ---
 
@@ -116,6 +119,7 @@ con la suite completa en verde: **193 tests unitarios** (11 suites), **119 e2e**
 | AC9 | ✅ CUMPLIDO | `aa0c03d` · "as=\"a\" renderiza un `<a>` con href y expone el rol link" → `getByRole("link")` + `not.toHaveAttribute("role")`, y el ancla sigue accionable con Enter. |
 | AC10 | ✅ CUMPLIDO | `aa0c03d` · `describe("ref")`: ref al `<button>` y al `<a>`. El hook sigue devolviendo `domRef` y `Button.tsx` lo monta. |
 | AC11 | ✅ CUMPLIDO | `aa0c03d` · `test.each` del mapa `size → loader-*` (5 casos) + "el spinner hereda el color de contenido del botón". Y `a095548` lo mide **en Chromium**: dentro de un `.btn-primary`, el `border-top-color` del spinner es igual al `color` del botón (`--btn-fg`), no al relleno. |
+| AC12 | ✅ CUMPLIDO | T8 · `Button.test.tsx` → "un botón icon-only que carga muestra sólo el spinner" (el nodo del icono no está en el DOM, el botón tiene un único hijo y `aria-busy="true"`) y "al dejar de cargar, el botón icon-only recupera su icono". |
 
 ### Comandos de verificación
 
@@ -144,6 +148,7 @@ grep -rn "button.theme\[variant\]" packages/ui   # sin resultados
 | D-08 | Tamaño del spinner dentro del botón. | (a) Un tamaño fijo; (b) mapa explícito `ButtonSize → LoaderSize`. | **(b)**: `xs→2xs, sm→xs, md→sm, lg→md, xl→lg`. | Las dos escalas son independientes (el botón va en múltiplos de `--size-field`, el loader en `rem` propios): un `loader-md` (24 px) no cabe en un `btn-xs` (24 px de alto). Con mapa explícito el desajuste se ve en una tabla y se testea. | Trivial. |
 | D-09 | La versión de Playwright del repo busca un build de Chromium que este contenedor no tiene (trae uno preinstalado en otra ruta). | (a) `playwright install` (prohibido en este entorno); (b) tocar `e2e/playwright.config.ts`; (c) config de override fuera del repo. | **(c)**: config en el scratchpad que extiende la del repo y fija `executablePath`. | (b) metería configuración de esta máquina en el repo y rompería CI, que instala su propio Chromium. La suite e2e se ejecutó completa y sin modificar nada versionado. | No aplica (nada versionado cambió). |
 | D-10 | Impacto de versión de `@ownui/button`: el lote retira `variant="solid"`/`"ghost"` y retipa `startIcon`/`endIcon`. | (a) `minor` (el proyecto se declara pre-1.0 en `AGENTS.md`); (b) `major` (los paquetes están publicados en 1.x). | **(b) `major`**. | El `package.json` dice `1.0.0` y el workflow publica; con una versión 1.x, retirar valores de una prop es un cambio incompatible. Si el dueño prefiere tratar la línea 1.x como pre-release, el changeset se edita en un minuto. | Trivial (una palabra en `.changeset/lote-5-button-api.md`). **Decisión que conviene confirmar.** |
+| D-12 | **Respuesta del dueño a Q-03**: ¿el botón icon-only con `loading` debe ocultar el icono? | (a) Mantener spinner + icono; (b) sólo spinner. | **(b) sólo spinner** (decisión del dueño, 2026-11-21). | En un `.btn-square` el ancho es igual a la altura (`--size`): spinner e icono no caben sin deformar el botón, y el icono no aporta nada que el spinner tape. Es la única excepción a D-05: en un botón con texto el spinner sigue acompañando al contenido. | Trivial: una expresión ternaria en el retorno del hook. |
 | D-11 | `@docs/BUILD-BATCHES.md` no lleva marcas de lote cerrado. | (a) Marcar L5 como hecho allí; (b) dejarlo como backlog y reflejar el estado en `AGENTS.md`. | **(b)**, igual que los lotes 0–4. | Un backlog con estado duplicado se desincroniza; `AGENTS.md` §9 ya es el registro de deuda viva. | Trivial. |
 
 ---
@@ -156,13 +161,13 @@ grep -rn "button.theme\[variant\]" packages/ui   # sin resultados
 
 ## 8. Preguntas abiertas, objeciones y gaps
 
-### Preguntas (necesitan decisión del dueño, no bloquean)
+### Preguntas — **las tres respondidas por el dueño el 2026-11-21**
 
-| ID | Pregunta |
-| -- | -------- |
-| Q-01 | **¿`@ownui/button` sube a `2.0.0`?** Ver **D-10**. El lote retira `variant="solid"` y `variant="ghost"` (ninguno aplicaba clase: `solid` no existe en el CSS y `ghost` es un rol) y retipa `startIcon`/`endIcon` de `boolean` a `ReactNode`. Está marcado `major` en el changeset; si la línea 1.x se considera pre-release, basta cambiar una palabra. |
-| Q-02 | **¿`active` es la API correcta para un botón de estado?** Hoy es un booleano que emite `.btn-active`. Un toggle de verdad querría `aria-pressed`, que es semántica distinta (y la decide el consumidor). Propuesta: dejar `active` como modificador visual y tratar el toggle accesible en el lote de `ToggleButton`, si llega. |
-| Q-03 | **¿El botón icon-only con `loading` debería ocultar el icono?** Hoy muestra spinner + icono dentro de un `.btn-square`, que queda justo de espacio. Alternativa: con `icon` + `loading`, renderizar sólo el spinner. No se tocó porque el backlog no lo pide. |
+| ID | Pregunta | Respuesta | Efecto |
+| -- | -------- | --------- | ------ |
+| Q-01 | **¿`@ownui/button` sube a `2.0.0`?** El lote retira `variant="solid"` y `variant="ghost"` (ninguno aplicaba clase: `solid` no existe en el CSS y `ghost` es un rol) y retipa `startIcon`/`endIcon` de `boolean` a `ReactNode`. | **Sí, `major`.** | Ninguno: `.changeset/lote-5-button-api.md` ya lo declaraba `major` (**D-10**, ahora confirmada). |
+| Q-02 | **¿`active` es la API correcta para un botón de estado?** Es un booleano que emite `.btn-active`; un toggle accesible querría `aria-pressed`, que es semántica distinta y la decide el consumidor. | **Sí: se queda como modificador visual**, y `aria-pressed` se trata en un futuro `ToggleButton`. | Ninguno en el código. Queda anotado como **G-10** para que el lote de `ToggleButton` no lo reinvente. |
+| Q-03 | **¿El botón icon-only con `loading` debería ocultar el icono?** Mostraba spinner + icono dentro de un `.btn-square`, que queda justo de espacio. | **Sólo spinner.** | Implementado en **T8** (**D-12**), con dos tests y la story documentada. |
 
 ### Gaps (fuera del alcance de este lote)
 
@@ -176,6 +181,7 @@ grep -rn "button.theme\[variant\]" packages/ui   # sin resultados
 | G-06 | `Loader.variants.ts` sigue vacío (el contrato vive en `@ownui/tw-theme/variants`). Borrarlo o usarlo. | L8 |
 | G-07 | `@ownui/ui` sigue importando los componentes por ruta relativa sin declarar `@ownui/loader` ni `@ownui/dom-utils` en sus `dependencies` (§9.10). | L9 |
 | G-08 | `AGENTS.md` no pasa `prettier --check` (ya era así). Reformatearlo es un commit de formato aparte. | L9 |
+| G-10 | **`active` es sólo visual, a propósito** (respuesta a Q-02): no emite `aria-pressed`. Un botón de estado accesible necesita esa semántica, y es decisión del consumidor. Si llega un `ToggleButton`, que parta de aquí en vez de redefinir `active`. | Lote de `ToggleButton` |
 | G-09 | El botón no expone todavía `.btn-noise` ni los tokens `--btn-gap`/`--btn-font-weight` como props; el CSS los tiene parametrizados. No hace falta hasta que haya un caso. | — |
 
 ---
@@ -208,3 +214,8 @@ grep -rn "button.theme\[variant\]" packages/ui   # sin resultados
   los 4 errores preexistentes del Dropdown. Reescritos dos comentarios que contenían la cadena
   literal `button.theme[variant]` para que el criterio AC6 se verifique con el `grep` de la
   ficha. Changeset de `@ownui/button` pasado a `major` (**D-10**).
+- **2026-11-21 · T8.** El dueño respondió las tres preguntas de §8: `major` confirmado (Q-01),
+  `active` se queda visual (Q-02) y el botón icon-only con `loading` muestra **sólo** el spinner
+  (Q-03). Lo único que requería código era Q-03: una ternaria en el retorno del hook, dos tests
+  nuevos (56 en la suite de Button, 195 en el repo) y la story `LoadingWithVariants`
+  documentada. Q-02 queda registrada como **G-10** para el futuro `ToggleButton`.
