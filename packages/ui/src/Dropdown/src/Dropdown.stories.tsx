@@ -11,7 +11,7 @@ import {
 /**
  * Las variantes, tamaños y variantes de estilo se listan desde los tipos, que
  * son la misma fuente que cruza el test de contrato del plugin
- * (`packages/tw-theme/src/css/__tests__/dropdown-contract.test.ts`): si mañana
+ * (`packages/tw-theme/src/__tests__/dropdown-contract.test.ts`): si mañana
  * se añade un rol al tipo y no al CSS, falla ese test, no estas stories.
  */
 const VARIANTS: readonly DropdownVariant[] = [

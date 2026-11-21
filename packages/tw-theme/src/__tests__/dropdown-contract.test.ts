@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import dropdown from "../../variants/dropdown.js";
+import dropdown from "../variants/dropdown.js";
 
 /**
  * Test de contrato del Dropdown (lote 6).

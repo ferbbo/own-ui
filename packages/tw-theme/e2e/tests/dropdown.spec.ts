@@ -9,7 +9,7 @@ import { test, expect } from "@playwright/test";
  * existia ni un selector** para ninguna de ellas. El menu salia en el flujo
  * del documento, sin posicionamiento, elevacion ni transicion.
  *
- * El test de contrato (`src/css/__tests__/dropdown-contract.test.ts`) ya
+ * El test de contrato (`src/__tests__/dropdown-contract.test.ts`) ya
  * garantiza que cada clase emitida tiene selector. Lo que se comprueba aqui es
  * lo que un test de texto no puede: que esas reglas **pintan y posicionan** de
  * verdad en un navegador.

@@ -13,7 +13,7 @@
  * `useDropdown.tsx` emiten la variante y el tamano en DOS niveles: en el
  * wrapper (`dropdown-primary`) y en el panel (`dropdown-menu-primary`).
  *
- * `src/css/__tests__/dropdown-contract.test.ts` cruza este archivo contra el
+ * `src/__tests__/dropdown-contract.test.ts` cruza este archivo contra el
  * CSS y contra los literales del hook: si los tres dejan de decir lo mismo,
  * falla la suite.
  */

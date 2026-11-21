@@ -346,7 +346,10 @@ size:    { xs: "btn-xs", …, xl: "btn-xl" }
 Este archivo es **la fuente de verdad del contrato** entre React y CSS. Cuando una prop de
 componente, una entrada de `variants/` y un selector en `css/` se desalinean, aparecen bugs
 silenciosos de "la clase no se aplica" — exactamente lo que pasa hoy con `Button.variant`
-(§9.4) y con `dropdown-menu` (§9.7).
+(§9.4). El Dropdown tuvo el mismo problema con `dropdown-menu` hasta el lote 6, que lo cerró
+y lo fijó con un test: `src/__tests__/dropdown-contract.test.ts` cruza las tres capas
+(literales de `useDropdown.tsx` ⇄ `variants/dropdown.ts` ⇄ `css/dropdown.css`) y falla tanto
+si una clase emitida se queda sin CSS como si el CSS define clases que nadie declara.
 
 ### 4.8 Convención CSS por componente — `src/css/*.css`
 
@@ -391,7 +394,7 @@ Clases existentes hoy:
 | Archivo | Selectores |
 |---|---|
 | `button.css` (306 ln) | `.btn`, `.btn-active`, 8 semánticos, `.btn-ghost`, `.btn-link`, `.btn-outline`, `.btn-dash`, `.btn-soft`, `.btn-{xs..xl}`, `.btn-square`, `.btn-circle`, `.btn-wide`, `.btn-block` |
-| `dropdown.css` (224 ln) | `.dropdown`, `.dropdown-item` (+ selected/disabled), `.dropdown-{primary,secondary,accent,neutral}`, `.dropdown-{xs..xl}`, `.dropdown-{ghost,bordered,compact}`, `.dropdown-item-text` |
+| `dropdown.css` (567 ln) | `.dropdown` (wrapper), `.dropdown-open`, `.dropdown-trigger` (+ `-active`), `.dropdown-menu` (+ `-open`/`-closed`), `.dropdown-item` (+ selected/disabled/text), **8** semánticos, `.dropdown-{xs..xl}`, `.dropdown-{ghost,bordered,compact}`, y los mismos tres grupos repetidos con prefijo `.dropdown-menu-*`, más un bloque `prefers-reduced-motion` |
 | `loader.css` (110 ln) | `.loader`, `.loader-spinner`, `@keyframes loader-spin`, `.loader-{2xs..lg}`, 8 colores, soporte `prefers-reduced-motion` |
 | `index.css` | agregador: `@import` de los tres anteriores. Es el destino de `@ownui/tw-theme/css` |
 
@@ -407,7 +410,30 @@ estática, porque `loader.css` usa `@apply` y hace falta que pasen por su build 
 ```
 
 `menu.css` existía vacío (0 líneas) y se eliminó en el lote 1: no hay componente `Menu` ni
-`variants/menu.ts`. Las clases `.dropdown-menu*` que el Dropdown emite siguen sin CSS (§9.7).
+`variants/menu.ts`. Las clases `.dropdown-menu*` que el Dropdown emite **ya tienen CSS** desde
+el lote 6 (§9.7).
+
+#### Los tres niveles del Dropdown (lote 6)
+
+El Dropdown es el único componente con cascada en tres niveles, y la regla de dónde se declara
+cada token no es opcional: los hooks ponen la variante **dos veces**, en el wrapper
+(`.dropdown-primary`) y en el panel (`.dropdown-menu-primary`). Como una custom property
+declarada en el mismo elemento que la consume gana siempre a la heredada, el patrón es:
+
+| Nivel | Clase | Rol |
+|---|---|---|
+| wrapper | `.dropdown` | `position: relative`, **sin superficie propia**. Declara TODOS los defaults de token |
+| panel | `.dropdown-menu` | absoluto bajo el trigger, elevado, con superficie y radio. **No declara defaults** |
+| fila | `.dropdown-item` | estados por `color-mix`. **No declara defaults** |
+
+- Los hijos consumen con cadena de fallback (`var(--dropdown-menu-bg, var(--dropdown-color,
+  var(--color-base-100)))`), así que siguen resolviendo sin wrapper.
+- Cada variante se declara con lista de selectores (`.dropdown-x, .dropdown-menu-x`) para
+  funcionar desde cualquiera de los dos niveles.
+- Los defaults **compuestos** (sombra, `border-color` derivado) van en el fallback del `var()`
+  que los consume, no como token: así `color-mix` se evalúa en el elemento final.
+- El bloque `prefers-reduced-motion` va **al final del archivo**: tiene la misma especificidad
+  que las reglas que anula y sólo gana por orden de aparición.
 
 ---
 
@@ -788,12 +814,19 @@ El lote 4 movió la escala a `light.ts`/`dark.ts`, la completó con `base-100`/`
 Queda fijado por `src/__tests__/surfaces.test.ts` (contrato token↔CSS + WCAG AA) y por el
 fixture e2e `base-surfaces/` (18 tests sobre estilos computados en Chromium).
 
-### 9.7 🟠 Dropdown: clases generadas sin CSS
-Los hooks emiten `dropdown-trigger`, `dropdown-trigger-active`, `dropdown-open`,
-`dropdown-menu`, `dropdown-menu-{variant|size|styleVariant}`, `dropdown-menu-open/closed`.
-En `dropdown.css` **no hay un solo selector `.dropdown-menu*` ni `.dropdown-trigger*`**: el
-menú no tiene posicionamiento, elevación ni transición. Además los semánticos sólo cubren
-`primary/secondary/accent/neutral`, pero `DropdownVariant` permite los 8.
+### 9.7 ✅ Dropdown: clases generadas sin CSS — *resuelto en el lote 6*
+Los hooks emitían `dropdown-trigger`, `dropdown-trigger-active`, `dropdown-open`,
+`dropdown-menu`, `dropdown-menu-{variant|size|styleVariant}` y `dropdown-menu-open/closed`, y
+en `dropdown.css` **no había un solo selector** para ninguna: el menú salía en el flujo del
+documento, sin posicionamiento, elevación ni transición, y los semánticos sólo cubrían
+`primary/secondary/accent/neutral` de los 8 que permite `DropdownVariant`.
+
+El lote 6 escribió el CSS de trigger y panel, completó los 8 roles en los dos niveles, movió la
+superficie del wrapper al panel (**cambio observable**, ver `specs/lote-6.md` D-02) y alineó
+`variants/dropdown.ts`, que declaraba tres clases inexistentes heredadas de `button`. Queda
+fijado por `src/__tests__/dropdown-contract.test.ts` (contrato de las tres capas) y por el
+fixture e2e `dropdown/` (23 tests sobre estilos computados en Chromium). Ver §4.8 y
+`specs/lote-6.md`.
 
 ### 9.8 🟠 Dropdown: fuga de props al DOM y a11y incompleta
 `DropdownContainer` hace `{...restProps}` sobre un `<div>` incluyendo `variant`, `size`,
