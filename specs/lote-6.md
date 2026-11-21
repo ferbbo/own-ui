@@ -316,3 +316,7 @@ quien reproduzca la suite en otra máquina sepa a qué se debe.
   `pnpm test` (131), `pnpm --filter @ownui/tw-theme e2e` (139), `pnpm build` (6/6 paquetes) y
   `tsc --noEmit` del paquete Dropdown. Push y PR.
 - **2026-11-21 ~20:20** — PR [#33](https://github.com/ferbbo/own-ui/pull/33) abierto hacia `develop`, listo para revisión. Sin merge: el gate es humano.
+- **2026-11-21 ~20:35** — **CI en verde** sobre `d384c3a`:
+  [run 32](https://github.com/ferbbo/own-ui/actions/runs/44939111735) (`conclusion: success`).
+  Confirma la suite en el runner y no sólo en la sesión: es el único sitio donde los tests e2e
+  corren con el navegador que instala el propio workflow, sin el symlink local de G-07.
