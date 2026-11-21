@@ -288,16 +288,6 @@
   pointer-events: none;
 }
 
-/* ─── Movimiento reducido: se anula la transición (no se acorta).
-   Un menú es un disclosure: lo correcto es que aparezca ya puesto. ─── */
-@media (prefers-reduced-motion: reduce) {
-  .dropdown-menu,
-  .dropdown-trigger,
-  .dropdown-item {
-    transition: none;
-  }
-}
-
 /* =========================================================
    3) Item: .dropdown-item
    ========================================================= */
@@ -552,4 +542,26 @@
   --dropdown-gap: 0;
   --dropdown-item-py: 0.25rem;
   --dropdown-item-radius: 0.25rem;
+}
+
+/* =========================================================
+   7) Movimiento reducido
+
+   Se anula la transición entera (no se acorta): un menú es un
+   disclosure, y lo correcto es que aparezca ya puesto.
+
+   El bloque va **al final del archivo a propósito**: las tres reglas
+   tienen la misma especificidad que `.dropdown-menu` / `.dropdown-trigger`
+   / `.dropdown-item`, así que sólo gana por orden de aparición. Puesto
+   más arriba, la declaración `transition` del item lo pisaba y la
+   transición seguía activa con `reduce` (lo cazó el spec e2e, no la
+   revisión a ojo).
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-menu,
+  .dropdown-trigger,
+  .dropdown-item {
+    transition: none;
+  }
 }

@@ -173,7 +173,7 @@ test.describe("E2E-8: Base surfaces scale", () => {
     });
   });
 
-  test.describe("AC-3: el .dropdown tiene fondo", () => {
+  test.describe("AC-3: el panel del dropdown tiene fondo", () => {
     test("background-color no es transparent (era el bug de --color-base-100)", async ({
       page,
     }) => {
@@ -183,7 +183,7 @@ test.describe("E2E-8: Base surfaces scale", () => {
       expect(bg).toBe(LIGHT.base100);
     });
 
-    test("el fondo del dropdown sigue al tema", async ({ page }) => {
+    test("el fondo del panel sigue al tema", async ({ page }) => {
       const bg = await page.evaluate(() => window.getElementBgColor("dropdown-dark"));
 
       expect(TRANSPARENT).not.toContain(bg);

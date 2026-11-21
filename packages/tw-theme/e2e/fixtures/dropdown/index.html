@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dropdown menu and trigger Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+    /* Deja sitio al panel, que ahora flota: sin esto los menus abiertos se
+       solapan entre secciones y las medidas de posicion son ilegibles de leer
+       en el informe de Playwright (no afectan al estilo computado). */
+    .test-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-bottom: 8rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dropdown E2E Test</h1>
+  <p>
+    Valida el CSS de <code>trigger</code> y <code>menu</code> del lote 6:
+    que el panel se posicione y se eleve, que las 8 variantes semanticas pinten
+    distinto, y que la transicion se anule con <code>prefers-reduced-motion</code>.
+    El HTML reproduce lo que emiten los hooks de <code>useDropdown.tsx</code>.
+  </p>
+
+  <!-- 🔽 Menu abierto: el caso del criterio AC1 -->
+  <div class="test-section">
+    <h2>🔽 Menu abierto (light)</h2>
+    <div class="test-row">
+      <div id="dd-open" class="dropdown dropdown-md dropdown-open">
+        <button id="dd-open-trigger" class="dropdown-trigger dropdown-trigger-active" type="button"
+                aria-expanded="true" aria-haspopup="menu">Abierto</button>
+        <div id="dd-open-menu" class="dropdown-menu dropdown-menu-md dropdown-menu-open" role="menu">
+          <div id="dd-open-item" class="dropdown-item" role="menuitem">
+            <span class="dropdown-item-text">Item 1</span>
+          </div>
+          <div id="dd-open-item-selected" class="dropdown-item dropdown-item-selected" role="menuitem">
+            <span class="dropdown-item-text">Seleccionado</span>
+          </div>
+          <div id="dd-open-item-disabled" class="dropdown-item dropdown-item-disabled" role="menuitem"
+               aria-disabled="true">
+            <span class="dropdown-item-text">Deshabilitado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔼 Menu cerrado: el React de hoy lo desmonta, pero la clase existe -->
+  <div class="test-section">
+    <h2>🔼 Menu cerrado</h2>
+    <div class="test-row">
+      <div id="dd-closed" class="dropdown dropdown-md">
+        <button id="dd-closed-trigger" class="dropdown-trigger" type="button"
+                aria-expanded="false" aria-haspopup="menu">Cerrado</button>
+        <div id="dd-closed-menu" class="dropdown-menu dropdown-menu-md dropdown-menu-closed" role="menu"
+             aria-hidden="true">
+          <div class="dropdown-item" role="menuitem">Item</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎨 Las 8 variantes semanticas, en los dos niveles que emiten los hooks -->
+  <div class="test-section">
+    <h2>🎨 Variantes semanticas (8)</h2>
+    <div class="test-row">
+      <div class="dropdown dropdown-md dropdown-primary dropdown-open">
+        <button id="trigger-primary" class="dropdown-trigger" type="button">primary</button>
+        <div id="menu-primary" class="dropdown-menu dropdown-menu-md dropdown-menu-primary dropdown-menu-open" role="menu">
+          <div id="item-primary" class="dropdown-item" role="menuitem">primary</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-secondary dropdown-open">
+        <button id="trigger-secondary" class="dropdown-trigger" type="button">secondary</button>
+        <div id="menu-secondary" class="dropdown-menu dropdown-menu-md dropdown-menu-secondary dropdown-menu-open" role="menu">
+          <div id="item-secondary" class="dropdown-item" role="menuitem">secondary</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-accent dropdown-open">
+        <button id="trigger-accent" class="dropdown-trigger" type="button">accent</button>
+        <div id="menu-accent" class="dropdown-menu dropdown-menu-md dropdown-menu-accent dropdown-menu-open" role="menu">
+          <div id="item-accent" class="dropdown-item" role="menuitem">accent</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-neutral dropdown-open">
+        <button id="trigger-neutral" class="dropdown-trigger" type="button">neutral</button>
+        <div id="menu-neutral" class="dropdown-menu dropdown-menu-md dropdown-menu-neutral dropdown-menu-open" role="menu">
+          <div id="item-neutral" class="dropdown-item" role="menuitem">neutral</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-info dropdown-open">
+        <button id="trigger-info" class="dropdown-trigger" type="button">info</button>
+        <div id="menu-info" class="dropdown-menu dropdown-menu-md dropdown-menu-info dropdown-menu-open" role="menu">
+          <div id="item-info" class="dropdown-item" role="menuitem">info</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-success dropdown-open">
+        <button id="trigger-success" class="dropdown-trigger" type="button">success</button>
+        <div id="menu-success" class="dropdown-menu dropdown-menu-md dropdown-menu-success dropdown-menu-open" role="menu">
+          <div id="item-success" class="dropdown-item" role="menuitem">success</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-warning dropdown-open">
+        <button id="trigger-warning" class="dropdown-trigger" type="button">warning</button>
+        <div id="menu-warning" class="dropdown-menu dropdown-menu-md dropdown-menu-warning dropdown-menu-open" role="menu">
+          <div id="item-warning" class="dropdown-item" role="menuitem">warning</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-error dropdown-open">
+        <button id="trigger-error" class="dropdown-trigger" type="button">error</button>
+        <div id="menu-error" class="dropdown-menu dropdown-menu-md dropdown-menu-error dropdown-menu-open" role="menu">
+          <div id="item-error" class="dropdown-item" role="menuitem">error</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📐 Tamanos: el trigger sigue la escala de .btn -->
+  <div class="test-section">
+    <h2>📐 Tamanos</h2>
+    <div class="test-row">
+      <div class="dropdown dropdown-xs dropdown-open">
+        <button id="trigger-xs" class="dropdown-trigger" type="button">xs</button>
+        <div id="menu-xs" class="dropdown-menu dropdown-menu-xs dropdown-menu-open" role="menu">
+          <div id="item-xs" class="dropdown-item" role="menuitem">xs</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-sm dropdown-open">
+        <button id="trigger-sm" class="dropdown-trigger" type="button">sm</button>
+        <div id="menu-sm" class="dropdown-menu dropdown-menu-sm dropdown-menu-open" role="menu">
+          <div id="item-sm" class="dropdown-item" role="menuitem">sm</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-lg dropdown-open">
+        <button id="trigger-lg" class="dropdown-trigger" type="button">lg</button>
+        <div id="menu-lg" class="dropdown-menu dropdown-menu-lg dropdown-menu-open" role="menu">
+          <div id="item-lg" class="dropdown-item" role="menuitem">lg</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-xl dropdown-open">
+        <button id="trigger-xl" class="dropdown-trigger" type="button">xl</button>
+        <div id="menu-xl" class="dropdown-menu dropdown-menu-xl dropdown-menu-open" role="menu">
+          <div id="item-xl" class="dropdown-item" role="menuitem">xl</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🧩 Variantes de estilo: se aplican al panel, no al wrapper -->
+  <div class="test-section">
+    <h2>🧩 Variantes de estilo</h2>
+    <div class="test-row">
+      <div class="dropdown dropdown-md dropdown-ghost dropdown-open">
+        <button id="trigger-ghost" class="dropdown-trigger" type="button">ghost</button>
+        <div id="menu-ghost" class="dropdown-menu dropdown-menu-md dropdown-menu-ghost dropdown-menu-open" role="menu">
+          <div id="item-ghost" class="dropdown-item" role="menuitem">ghost</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-bordered dropdown-open">
+        <button id="trigger-bordered" class="dropdown-trigger" type="button">bordered</button>
+        <div id="menu-bordered" class="dropdown-menu dropdown-menu-md dropdown-menu-bordered dropdown-menu-open" role="menu">
+          <div id="item-bordered" class="dropdown-item" role="menuitem">bordered</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-compact dropdown-open">
+        <button id="trigger-compact" class="dropdown-trigger" type="button">compact</button>
+        <div id="menu-compact" class="dropdown-menu dropdown-menu-md dropdown-menu-compact dropdown-menu-open" role="menu">
+          <div id="item-compact" class="dropdown-item" role="menuitem">compact</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌙 El mismo panel bajo un ambito data-theme="dark" -->
+  <div class="test-section" data-theme="dark" id="dark-scope">
+    <h2>🌙 Menu abierto (data-theme="dark")</h2>
+    <div class="test-row">
+      <div class="dropdown dropdown-md dropdown-open">
+        <button id="dd-dark-trigger" class="dropdown-trigger" type="button">Abierto</button>
+        <div id="dd-dark-menu" class="dropdown-menu dropdown-menu-md dropdown-menu-open" role="menu">
+          <div id="dd-dark-item" class="dropdown-item" role="menuitem">Item</div>
+        </div>
+      </div>
+      <div class="dropdown dropdown-md dropdown-primary dropdown-open">
+        <button id="dd-dark-trigger-primary" class="dropdown-trigger" type="button">primary</button>
+        <div id="dd-dark-menu-primary" class="dropdown-menu dropdown-menu-md dropdown-menu-primary dropdown-menu-open" role="menu">
+          <div class="dropdown-item" role="menuitem">Item</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚫 Control negativo: wrapper sin superficie propia -->
+  <div class="test-section">
+    <h2>🚫 Control: el wrapper no pinta</h2>
+    <div class="test-row">
+      <div id="dd-wrapper-only" class="dropdown dropdown-md">
+        <button id="dd-wrapper-trigger" class="dropdown-trigger" type="button">Sin menu</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.getComputedProp = (id, prop) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).getPropertyValue(prop).trim() : null;
+    };
+
+    window.getElementBgColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).backgroundColor : null;
+    };
+
+    window.getElementTextColor = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).color : null;
+    };
+
+    window.getCSSVariable = (selector, varName) => {
+      const el = document.querySelector(selector);
+      return el ? getComputedStyle(el).getPropertyValue(varName).trim() : null;
+    };
+
+    /** Rectangulo del elemento, para comprobar que el panel flota bajo el trigger. */
+    window.getRect = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const { top, left, width, height } = el.getBoundingClientRect();
+      return { top, left, width, height };
+    };
+
+    window.setTheme = (theme) => {
+      if (theme === null) {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    };
+  </script>
+</body>
+</html>
