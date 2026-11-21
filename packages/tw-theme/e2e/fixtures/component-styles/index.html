@@ -68,6 +68,32 @@
     </div>
   </div>
 
+  <!-- .loader-current: hereda el `color` del contexto (lote 5).
+       Dos casos: un color arbitrario en el contenedor, y el caso real
+       (spinner dentro de un .btn, donde debe tomar --btn-fg). -->
+  <div class="test-section">
+    <h2>🎨 .loader-current hereda currentColor</h2>
+    <div id="current-scope" style="color: rgb(12, 34, 56)">
+      <div id="loader-current" class="loader loader-md loader-current" role="status" aria-label="Cargando">
+        <div id="loader-current-spinner" class="loader-spinner"></div>
+      </div>
+    </div>
+
+    <button id="btn-with-loader" class="btn btn-primary btn-md" type="button">
+      <span class="loader loader-sm loader-current" role="status" aria-label="Guardando">
+        <span id="btn-loader-spinner" class="loader-spinner"></span>
+      </span>
+      Guardando
+    </button>
+
+    <!-- Control: el mismo spinner con un rol semantico NO hereda -->
+    <div id="semantic-scope" style="color: rgb(12, 34, 56)">
+      <div id="loader-semantic" class="loader loader-md loader-error" role="status" aria-label="Cargando">
+        <div id="loader-semantic-spinner" class="loader-spinner"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- .dropdown: tercer componente del agregador -->
   <div class="test-section">
     <h2>📂 .dropdown</h2>

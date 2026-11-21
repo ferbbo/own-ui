@@ -4,16 +4,20 @@ import { ElementType } from "react";
 // Tamaños disponibles basados en el diseño de Figma
 export type LoaderSize = "2xs" | "xs" | "sm" | "md" | "lg";
 
-// Colores disponibles basados en el sistema de colores semánticos
-export type LoaderColor = 
-  | "primary" 
-  | "secondary" 
-  | "accent" 
-  | "neutral" 
-  | "info" 
-  | "success" 
-  | "warning" 
-  | "error";
+// Colores disponibles basados en el sistema de colores semánticos.
+// `current` no es un rol: hereda el `color` del contexto (`currentColor`), que
+// es lo que necesita un spinner dentro de un botón para contrastar con su
+// relleno sin duplicar el mapa rol -> color.
+export type LoaderColor =
+  | "primary"
+  | "secondary"
+  | "accent"
+  | "neutral"
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "current";
 
 // Props base del Loader
 export interface LoaderBaseProps {

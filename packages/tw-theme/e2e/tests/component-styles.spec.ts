@@ -176,6 +176,43 @@ test.describe("E2E-7: Component styles from the published CSS", () => {
     });
   });
 
+  test.describe("S-09b: .loader-current hereda el color del contexto (lote 5)", () => {
+    const INHERITED = "rgb(12, 34, 56)";
+    const LIGHT_ERROR = "rgb(239, 68, 68)"; // #ef4444
+
+    test("el spinner toma el color del contenedor, no un token semantico", async ({ page }) => {
+      const borderTop = await page.evaluate(() =>
+        window.getComputedProp("loader-current-spinner", "border-top-color")
+      );
+
+      expect(borderTop).toBe(INHERITED);
+    });
+
+    test("dentro de un .btn-primary el spinner pinta con --btn-fg", async ({ page }) => {
+      // Es el caso que motiva la clase: antes el spinner del Button era
+      // siempre `loader-primary`, o sea azul sobre azul en un btn-primary.
+      const spinner = await page.evaluate(() =>
+        window.getComputedProp("btn-loader-spinner", "border-top-color")
+      );
+      const buttonFg = await page.evaluate(() => window.getElementTextColor("btn-with-loader"));
+
+      expect(spinner).toBe(buttonFg);
+      expect(spinner).toBe(PRIMARY_CONTENT);
+      expect(spinner).not.toBe(LIGHT_PRIMARY);
+    });
+
+    test("control: un rol semantico ignora el color heredado", async ({ page }) => {
+      // Sin este caso el test anterior no distinguiria "hereda" de
+      // "el navegador pinta asi los bordes por defecto".
+      const borderTop = await page.evaluate(() =>
+        window.getComputedProp("loader-semantic-spinner", "border-top-color")
+      );
+
+      expect(borderTop).toBe(LIGHT_ERROR);
+      expect(borderTop).not.toBe(INHERITED);
+    });
+  });
+
   test.describe("El agregador publica los tres componentes", () => {
     test(".dropdown recibe las reglas de dropdown.css", async ({ page }) => {
       const position = await page.evaluate(() => window.getComputedProp("dropdown", "position"));

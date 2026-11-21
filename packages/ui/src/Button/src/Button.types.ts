@@ -1,16 +1,16 @@
 // Button.types.ts
-import {
-  ButtonHTMLAttributes,
-  AnchorHTMLAttributes,
-} from "react";
+import { ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode } from "react";
 
 /**
- * Variantes permitidas para el botón (coinciden con las clases CSS definidas).
+ * Tratamientos permitidos. Coinciden una a una con `variant` del contrato
+ * (`@ownui/tw-theme/variants`) y con los selectores de `css/button.css`.
+ *
+ * No hay `solid`: el botón sólido es la **ausencia** de tratamiento (el
+ * `.btn` base ya pinta `--btn-bg: var(--btn-color)`), y `.btn-solid` nunca
+ * existió en el CSS. Tampoco hay `ghost`: es un rol (`theme="ghost"`), porque
+ * fija el color de texto desde `--btn-color`.
  */
-export type ButtonVariant =
-  | "outline"
-  | "dash"
-  | "soft";
+export type ButtonVariant = "outline" | "dash" | "soft";
 
 export type ButtonTheme =
   | "primary"
@@ -27,26 +27,59 @@ export type ButtonTheme =
 /**
  * Tamaños permitidos para el botón (coinciden con las clases CSS definidas).
  */
-export type ButtonSize =
-  | "xs"
-  | "sm"
-  | "md"
-  | "lg"
-  | "xl";
+export type ButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
+
+/** Forma: ancho igual a la altura (`--size`). Para botones icon-only. */
+export type ButtonShape = "square" | "circle";
+
+/** Ancho: fijo (16rem) o el del contenedor. */
+export type ButtonWidth = "wide" | "block";
 
 /**
- * Props comunes a ambos elementos (<button> y <a>), excepto `children` y atributos nativos.
+ * Props comunes a ambos elementos (<button> y <a>), excepto `children` y
+ * atributos nativos.
  */
 interface ButtonBaseProps {
+  /** Tratamiento: `outline`, `dash` o `soft`. Omitirlo = botón sólido. */
   variant?: ButtonVariant;
+  /** Rol semántico: de qué familia de color tira el botón. */
   theme?: ButtonTheme;
   size?: ButtonSize;
+  /** `square` o `circle`: ancho = altura. Implícito con `icon`. */
+  shape?: ButtonShape;
+  /** `wide` (16rem) o `block` (100%). */
+  width?: ButtonWidth;
+  /** Fuerza el aspecto de pulsado sin depender de `:active`. */
+  active?: boolean;
   className?: string;
   disabled?: boolean;
-  icon?: React.ReactNode;
+  /**
+   * Muestra un spinner **junto** al contenido y bloquea la interacción.
+   * El spinner hereda el tamaño del botón y el color de contenido del tema.
+   */
   loading?: boolean;
-  startIcon?: boolean;
-  endIcon?: boolean;
+}
+
+/** Botón con contenido: admite `children` y iconos a los lados. */
+interface ButtonWithContentProps {
+  /** Nodo antes del contenido. */
+  startIcon?: ReactNode;
+  /** Nodo después del contenido. */
+  endIcon?: ReactNode;
+  icon?: never;
+}
+
+/**
+ * Botón icon-only: `icon` es el único contenido, así que **exige**
+ * `aria-label` (sin texto visible no hay nombre accesible) y aplica
+ * `.btn-square` salvo que se pida otra `shape`.
+ */
+interface ButtonIconOnlyProps {
+  icon: ReactNode;
+  "aria-label": string;
+  children?: never;
+  startIcon?: never;
+  endIcon?: never;
 }
 
 /**
@@ -74,12 +107,16 @@ export interface ButtonAsAnchorProps
 }
 
 /**
- * ButtonProps es unión discriminada:
- * - Si `as` es "a", usa ButtonAsAnchorProps.
- * - Si `as` no está o es "button", usa ButtonAsButtonProps.
- * En ambos casos, `children` proviene de la interfaz HTML respectiva.
+ * ButtonProps cruza dos uniones discriminadas:
+ * - el elemento (`as: "button" | "a"`), que decide `type` vs `href`;
+ * - el contenido (`children` + iconos laterales, o `icon` + `aria-label`).
+ *
+ * El cruce es explícito —y no `ButtonElementProps & ButtonContentProps`—
+ * porque TypeScript solo estrecha correctamente las props prohibidas
+ * (`never`) cuando cada combinación es un miembro de la unión.
  */
-export type ButtonProps = ButtonAsButtonProps | ButtonAsAnchorProps;
-
-
-
+export type ButtonProps =
+  | (ButtonAsButtonProps & ButtonWithContentProps)
+  | (ButtonAsButtonProps & ButtonIconOnlyProps)
+  | (ButtonAsAnchorProps & ButtonWithContentProps)
+  | (ButtonAsAnchorProps & ButtonIconOnlyProps);
