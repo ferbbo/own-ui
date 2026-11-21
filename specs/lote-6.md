@@ -5,7 +5,7 @@
 | Campo           | Valor                                                                           |
 | --------------- | ------------------------------------------------------------------------------- |
 | Lote            | **L6** — Dropdown: CSS de menu y trigger (`@docs/BUILD-BATCHES.md` §L6)         |
-| Rama base       | `develop` (en `0afe779`, "Merge pull request #31 from ferbbo/claude/lote-4")     |
+| Rama base       | `develop` (en `0afe779`, lote 4). **Integrado después `0366c3d`**, que trae el lote 5 |
 | Rama de trabajo | `claude/lote-6`                                                                 |
 | Estado general  | **COMPLETO** — 7 tasks, 0 bloqueadas, 5/5 criterios cumplidos. Incluye las dos decisiones de la revisión (D-08, D-09) |
 | Fecha           | 2026-11-21                                                                      |
@@ -318,7 +318,7 @@ quien reproduzca la suite en otra máquina sepa a qué se debe.
 | G-08 | `pnpm lint` tenía **4 errores** en `develop`, todos en `Dropdown.stories.tsx` (`useState` dentro de `render`). Al tocar ese archivo en T4 se arreglaron, así que `pnpm lint` ya sale en verde. Quedan **228 avisos** repo-wide, ninguno de este lote | L9 o un lote de higiene |
 | G-09 | `AGENTS.md` no pasa `prettier --check` en `develop` (ya ocurría antes de este lote; `pnpm format` sólo cubre `src/**`) | L9 |
 | G-11 | **`button.css` no tiene bloque `prefers-reduced-motion`.** El Dropdown se lo presta a su trigger (el bloque de `dropdown.css` incluye `.dropdown-trigger`), pero un `.btn` suelto sigue animando con `reduce` | Un lote de higiene del Button |
-| G-12 | D-08 deja el Dropdown atado al contrato del Button. Si el **lote 5** (PR #32, aún sin mergear) cambia `theme` o `size` en `variants/button.ts`, hay que revalidar: hoy su diff los conserva, y el test de contrato lo cazaría | L7, al integrar |
+| G-12 | ✅ **Resuelto.** D-08 ata el Dropdown al contrato del Button, y el lote 5 se mergeó en `develop` mientras este lote estaba en revisión. Integrado y revalidado: conserva `theme` y `size`, el test de contrato pasa y la suite entera también. Queda como aviso para el futuro: cualquier cambio en esos dos mapas afecta al trigger del Dropdown | — |
 | G-10 | **El build copia `src/css` → `dist/css` entero**, sin filtrar. Cualquier archivo que caiga en `src/css/` acaba publicado: lo descubrí al meter ahí el test de contrato (resuelto moviéndolo, ver §9). Convendría que el script de copia filtrase por extensión, o un test que compruebe el contenido de `dist/css` | L9, o el lote que vuelva a tocar el empaquetado |
 
 ### Preguntas abiertas (no bloquean; decididas con criterio y reversibles)
@@ -399,3 +399,17 @@ Texto original de las preguntas:
   Un fallo durante T6, corregido antes del commit: el assert de contraste nuevo usaba
   `window.contrastRatio`, que sólo existía en el fixture de `base-surfaces`; se añadieron los
   dos helpers al fixture del dropdown.
+- **2026-11-21 ~21:30** — **El lote 5 se mergeó en `develop` (`0366c3d`, PR #32) mientras este
+  lote estaba en revisión**, que es exactamente el riesgo anotado en G-12. Integrado en la rama
+  con `git merge origin/develop`: **un conflicto, en `AGENTS.md`**, en dos pasajes donde los dos
+  lotes describían el mismo contrato:
+    · §4.7 — el lote 5 escribió que «`dropdown` queda fuera del test a propósito: hoy promete
+      clases que su CSS no define, y repararlo es el lote 6». Resuelto combinando: ahora se
+      documentan **los dos** tests de contrato y por qué el Dropdown necesita uno aparte
+      (plantillas en vez de mapa, y contrato cruzado con `button.css`).
+    · §4.8 — la tabla de clases: se queda la fila de `dropdown.css` de este lote (540 ln, tras
+      el recorte de D-08) y la de `loader.css` del lote 5 (119 ln, con `.loader-current`).
+  Actualizado también el comentario de `variants/__tests__/contract.test.ts` (del lote 5), que
+  seguía diciendo que el Dropdown está fuera porque §9.7 estaba sin arreglar.
+  Revalidación completa sobre el merge: **211** unitarios, **147** e2e, lint en código 0,
+  build 6/6. El contrato cruzado del trigger sigue en pie: el lote 5 conserva `theme` y `size`.

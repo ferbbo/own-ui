@@ -337,19 +337,38 @@ Mapa `prop de React → clase CSS`, consumido por los hooks de los componentes v
 `import { button } from "@ownui/tw-theme/variants"`:
 
 ```ts
-// variants/button.ts
-theme:   { primary: "btn-primary", …, ghost: "btn-ghost", link: "btn-link" }
-variant: { outline: "btn-outline", solid: "btn-solid", ghost: "btn-ghost" }
+// variants/button.ts  (estado tras el lote 5)
+theme:   { primary: "btn-primary", …, ghost: "btn-ghost", link: "btn-link" }  // 10 roles
+variant: { outline: "btn-outline", dash: "btn-dash", soft: "btn-soft" }       // 3 tratamientos
 size:    { xs: "btn-xs", …, xl: "btn-xl" }
+shape:   { square: "btn-square", circle: "btn-circle" }
+width:   { wide: "btn-wide", block: "btn-block" }
+state:   { active: "btn-active", disabled: "btn-disabled" }
 ```
 
 Este archivo es **la fuente de verdad del contrato** entre React y CSS. Cuando una prop de
 componente, una entrada de `variants/` y un selector en `css/` se desalinean, aparecen bugs
-silenciosos de "la clase no se aplica" — exactamente lo que pasa hoy con `Button.variant`
-(§9.4). El Dropdown tuvo el mismo problema con `dropdown-menu` hasta el lote 6, que lo cerró
-y lo fijó con un test: `src/__tests__/dropdown-contract.test.ts` cruza las tres capas
-(literales de `useDropdown.tsx` ⇄ `variants/dropdown.ts` ⇄ `css/dropdown.css`) y falla tanto
-si una clase emitida se queda sin CSS como si el CSS define clases que nadie declara.
+silenciosos de "la clase no se aplica" — es lo que pasaba con `Button.variant` (§9.4, resuelto
+en el lote 5) y con `dropdown-menu` (§9.7, resuelto en el lote 6).
+
+Desde el lote 5 la regla **se verifica**, y hay dos tests que lo hacen:
+
+- `packages/tw-theme/src/variants/__tests__/contract.test.ts` (lote 5) cruza cada clase
+  declarada en `variants/{button,loader}.ts` contra los selectores de `css/{button,loader}.css`.
+  Añadir una prop sin su CSS —o borrar una clase que el contrato promete— rompe la suite.
+- `packages/tw-theme/src/__tests__/dropdown-contract.test.ts` (lote 6) hace lo propio con el
+  Dropdown, que necesita su propio test por dos motivos: sus hooks construyen las clases con
+  plantillas (`dropdown-${variant}`) en vez de leer el mapa, así que el test las expande desde
+  las uniones de `Dropdown.types.ts`; y su trigger es un `.btn`, así que el contrato es
+  **cruzado** y hay que validarlo también contra `button.css`. Cuando el lote 5 escribió su
+  test, `dropdown` quedó fuera a propósito porque prometía clases que su CSS no definía.
+
+Dos aclaraciones del contrato de `button`, porque la intuición falla:
+
+- **No existe `variant="solid"`.** El botón sólido es la *ausencia* de tratamiento: el `.btn`
+  base ya pinta `--btn-bg: var(--btn-color)`. `.btn-solid` nunca existió en el CSS.
+- **`ghost` es un rol, no un tratamiento** (`theme="ghost"`): fija el color de texto desde
+  `--btn-color`. Estaba duplicado en los dos mapas hasta el lote 5.
 
 ### 4.8 Convención CSS por componente — `src/css/*.css`
 
@@ -394,8 +413,8 @@ Clases existentes hoy:
 | Archivo | Selectores |
 |---|---|
 | `button.css` (306 ln) | `.btn`, `.btn-active`, 8 semánticos, `.btn-ghost`, `.btn-link`, `.btn-outline`, `.btn-dash`, `.btn-soft`, `.btn-{xs..xl}`, `.btn-square`, `.btn-circle`, `.btn-wide`, `.btn-block` |
-| `dropdown.css` (567 ln) | `.dropdown` (wrapper), `.dropdown-open`, `.dropdown-trigger` (+ `-active`), `.dropdown-menu` (+ `-open`/`-closed`), `.dropdown-item` (+ selected/disabled/text), **8** semánticos, `.dropdown-{xs..xl}`, `.dropdown-{ghost,bordered,compact}`, y los mismos tres grupos repetidos con prefijo `.dropdown-menu-*`, más un bloque `prefers-reduced-motion` |
-| `loader.css` (110 ln) | `.loader`, `.loader-spinner`, `@keyframes loader-spin`, `.loader-{2xs..lg}`, 8 colores, soporte `prefers-reduced-motion` |
+| `dropdown.css` (540 ln) | `.dropdown` (wrapper), `.dropdown-open`, `.dropdown-trigger` (+ `-active`, sobre `.btn`), `.dropdown-menu` (+ `-open`/`-closed`), `.dropdown-item` (+ selected/disabled/text), **8** semánticos, `.dropdown-{xs..xl}`, `.dropdown-{ghost,bordered,compact}`, y los mismos tres grupos repetidos con prefijo `.dropdown-menu-*`, más un bloque `prefers-reduced-motion` |
+| `loader.css` (119 ln) | `.loader`, `.loader-spinner`, `@keyframes loader-spin`, `.loader-{2xs..lg}`, 8 colores + `.loader-current` (hereda `currentColor`, L5), soporte `prefers-reduced-motion` |
 | `index.css` | agregador: `@import` de los tres anteriores. Es el destino de `@ownui/tw-theme/css` |
 
 Estos archivos **sí llegan al paquete publicado** desde el lote 1: el build los copia a
@@ -565,9 +584,9 @@ distintos coexistiendo**; conviene unificar (ver lote 5 del plan).
 
 | Paquete | Patrón | Props públicas | Tests | Stories | Estado |
 |---|---|---|---|---|---|
-| `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ✅ 30 reales (L2) | 337 ln | **parcial**: `variant` roto, `loading` tapa children, `icon`/`startIcon`/`endIcon` declarados y no implementados |
+| `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `shape`(2), `width`(2), `active`, `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ✅ 39 reales (L5) | 15 stories | **completo** (L5): contrato alineado, `loading` con `aria-busy`, iconos reales, sin fuga de props |
 | `@ownui/dropdown` | Provider | `variant`(8), `size`(5), `styleVariant`(3), `open`/`defaultOpen`/`onOpenChange` + `.Trigger`/`.Menu`/`.Item` | ✅ reales | 296 ln | **parcial**: sin CSS para menu/trigger, sin navegación por teclado, fuga de props al DOM |
-| `@ownui/loader` | Composición | `as`, `color`(8), `size`(5), `aria-label`, `id` | ✅ reales | 121 ln | **el más sano**; `Loader.variants.ts` vacío |
+| `@ownui/loader` | Composición | `as`, `color`(8 + `current`), `size`(5), `aria-label`, `id` | ✅ reales | 121 ln | sano; `color="current"` desde L5 (hereda `currentColor`); `Loader.variants.ts` vacío |
 | `@ownui/dom-utils` | — | `useDOMRef` | ✅ 6 reales (L2) | — | ok |
 | `@ownui/tw-theme` | — | ver §4 | ✅ 3 suites + 6 fixtures e2e | — | **maduro** |
 
@@ -810,19 +829,33 @@ Hoy `pnpm build` es `turbo build` y la tarea `build` declara `dependsOn: ["^buil
 dependencias internas de `@ownui/ui` declaradas para que el grafo exista. Verificado en limpio:
 6/6 `dist/`. Ver `specs/lote-3.md`.
 
-### 9.4 🟠 `Button.variant` no aplica ninguna clase
-`useButton.tsx` resuelve `const variantCls = button.theme[variant]` — busca la variante en el
-mapa de **themes**. Además `variants/button.ts` declara `variant: {outline, solid, ghost}`
-mientras `ButtonVariant` es `"outline" | "dash" | "soft"` y el CSS define
-`.btn-outline`/`.btn-dash`/`.btn-soft` (no existe `.btn-solid`). Resultado: `variant="dash"` y
-`variant="soft"` se pierden; `variant="outline"` sólo funciona por coincidencia de nombre.
+### 9.4 ✅ `Button.variant` no aplicaba ninguna clase — *resuelto en el lote 5*
+`useButton.tsx` resolvía `button.theme[variant]`: consultaba el mapa de **roles** con una clave
+de **tratamiento**, así que `variant="dash"` y `variant="soft"` se perdían y `variant="outline"`
+sólo funcionaba por coincidencia de nombre entre los dos mapas. Las tres capas discrepaban
+además entre sí (`variants/button.ts` declaraba `solid` y `ghost`; el CSS tiene
+`dash`/`soft`/`outline`).
 
-### 9.5 🟠 `Button loading` descarta el contenido
-`{loading ? <Loader /> : <>{children}</>}` sustituye el label por el spinner, y el `<Loader />`
-se renderiza sin `size`/`color` derivados del botón (siempre `primary`/`md`), lo que rompe el
-contraste en botones no-primary. Lo esperable es spinner **junto** al contenido, heredando
-tamaño y usando el color `-content` del tema. Las props `icon`, `startIcon`, `endIcon` están
-en los tipos pero **no se usan en el render**.
+Ahora el hook resuelve `button.variant[variant]`, `ButtonVariant` es
+`"outline" | "dash" | "soft"` y el contrato está cubierto por el test que lo cruza contra el CSS
+(§4.7). De paso, `disabled` dejó de emitir `opacity-50 cursor-not-allowed` —utilidades de
+Tailwind que el consumidor no genera, porque no escanea nuestro bundle— y emite `.btn-disabled`,
+que es el estado final del CSS.
+
+### 9.5 ✅ `Button loading` descartaba el contenido — *resuelto en el lote 5*
+`{loading ? <Loader /> : <>{children}</>}` sustituía el label por el spinner, y el `<Loader />`
+se renderizaba sin `size`/`color` derivados del botón (siempre `primary`/`md`): azul sobre azul
+en un `btn-primary`. Las props `icon`, `startIcon`, `endIcon` estaban en los tipos y no se
+usaban en el render, y `startIcon`/`endIcon` estaban tipadas `boolean`.
+
+El render es ahora `[spinner] [startIcon] [children | icon] [endIcon]`, con `aria-busy="true"` y
+la interacción bloqueada mientras carga. El spinner hereda el tamaño (mapa
+`ButtonSize → LoaderSize`) y el color: usa `color="current"`, la clase `.loader-current` que el
+lote 5 añadió a `loader.css` (`--loader-color: currentColor`), de modo que toma `--btn-fg` —el
+token `-content` del rol— y contrasta en los 10 temas. `icon` define un botón icon-only con
+`aria-label` obligatorio por tipos y `.btn-square` implícito; ese caso es la **única** excepción
+al "spinner junto al contenido": mientras carga muestra sólo el spinner, porque un `.btn-square`
+mide lo mismo de ancho que de alto y no caben los dos.
 
 ### 9.6 ✅ `--color-base-100` no existía — *corregido en el lote 4*
 `dropdown.css` lo referenciaba 3 veces como color de superficie, y `rootColors.ts` sólo definía
@@ -902,9 +935,10 @@ click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigge
   Era una comparación contra el literal `"string"` donde se pretendía `typeof`, así que
   `--prefersdark` se ignoraba y todo tema custom se registraba como `--default`. Cubierto con
   10 tests en `src/__tests__/theme.test.ts`.
-- `variants/button.ts` declara `ghost` **dos veces**: en `theme` y en `variant`. Es la razón
-  por la que `variant="ghost"` parece funcionar pese al bug de §9.4 (el lookup cae en `theme`
-  y encuentra la clave por coincidencia).
+- ✅ `variants/button.ts` declaraba `ghost` **dos veces**, en `theme` y en `variant`: era la
+  razón por la que `variant="ghost"` parecía funcionar pese al bug de §9.4 (el lookup caía en
+  `theme` y encontraba la clave por coincidencia). **Resuelto en el lote 5**: `ghost` es sólo un
+  rol, y el test de contrato impide que vuelva a duplicarse.
 - **Contraste fuera de norma, ya medido**: `node scripts/check-contrast.mjs` audita los dos
   temas y **15 de los 32 pares relleno/`-content` suspenden AA (4.5:1)**. En el tema claro
   fallan 11, por el patrón `-content: #ffffff` uniforme sobre rellenos claros (`warning`
@@ -1045,8 +1079,9 @@ pendiente para quien siga:
   `rootColors.ts` definía `--color-base-200: #000000`, y el `button.css` que entró en el lote 0
   lo usa como relleno del botón neutro por defecto, así que ese botón salía negro en tema claro.
   La escala vive ahora en los temas (§4.2) y `rootColors.ts` ya no existe.
-- **Lote 5** sigue intacto: el bug de `Button.variant` (§9.4) no estaba arreglado en ninguna
-  rama, y el lote 0 no tocó el contrato de clases (el conjunto de selectores de `button.css`
-  es idéntico al anterior).
+- **Lote 5** ✅ **hecho**. Ninguna rama traía el arreglo: el diff de `useButton.tsx` en
+  `components` era sólo reformateo de Prettier. Se reimplementó sobre `develop` (§9.4, §9.5), sin
+  tocar el conjunto de selectores de `button.css` que dejó el lote 0: la única clase nueva del
+  lote está en `loader.css` (`.loader-current`).
 - **Decisiones de producto abiertas**: la paleta de marca (P-02) y la semántica de los temas
   custom `--default` (P-01). Ambas en `specs/lote-0.md` §9.

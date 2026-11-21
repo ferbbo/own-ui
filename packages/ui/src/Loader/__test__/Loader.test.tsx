@@ -24,6 +24,16 @@ describe("Loader", () => {
     expect(loader).toHaveClass("loader-success");
   });
 
+  // `current` no es un rol semantico: hereda el `color` del contexto via
+  // `currentColor`. Es lo que usa el spinner del Button (lote 5) para
+  // contrastar con el relleno de cualquiera de los 10 temas.
+  test('color="current" aplica loader-current y no un rol semantico', () => {
+    render(<Loader color="current" />);
+    const loader = screen.getByRole("status");
+    expect(loader).toHaveClass("loader", "loader-current");
+    expect(loader).not.toHaveClass("loader-primary");
+  });
+
   test("renders with custom aria-label", () => {
     render(<Loader aria-label="Guardando datos..." />);
     const loader = screen.getByRole("status");
