@@ -99,7 +99,9 @@ export const AllVariants: Story = {
         story:
           "Las 8 variantes semánticas del tema. Antes del lote 6 sólo cuatro " +
           "(primary/secondary/accent/neutral) tenían CSS: info, success, warning " +
-          "y error se emitían como clase sin ninguna regla detrás.",
+          "y error se emitían como clase sin ninguna regla detrás. El rol pinta " +
+          "el trigger (que es un `.btn`) y la fila activa; el panel se queda " +
+          "neutro a propósito, para que el texto del menú pase WCAG AA en las ocho.",
       },
     },
   },

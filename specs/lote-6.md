@@ -7,7 +7,7 @@
 | Lote            | **L6** — Dropdown: CSS de menu y trigger (`@docs/BUILD-BATCHES.md` §L6)         |
 | Rama base       | `develop` (en `0afe779`, "Merge pull request #31 from ferbbo/claude/lote-4")     |
 | Rama de trabajo | `claude/lote-6`                                                                 |
-| Estado general  | **COMPLETO** — 5 tasks, 0 bloqueadas, 5/5 criterios cumplidos                    |
+| Estado general  | **COMPLETO** — 7 tasks, 0 bloqueadas, 5/5 criterios cumplidos. Incluye las dos decisiones de la revisión (D-08, D-09) |
 | Fecha           | 2026-11-21                                                                      |
 | PR              | [#33 → `develop`](https://github.com/ferbbo/own-ui/pull/33) — listo para revisión |
 
@@ -69,6 +69,9 @@ Reglas de oro de `@docs/BUILD-BATCHES.md` que condicionan este lote:
 | S14 | Stories: `AllVariants` con las 8, `AllSizes` con las 5, nueva `StyleVariants`                  | AC5 | `Dropdown.stories.tsx` | S05–S07 | HECHO |
 | S15 | `AGENTS.md` al día (§4.8 y §9.7)                                                              | — | `AGENTS.md` | S01–S13 | HECHO |
 | S16 | Changeset con el impacto de versión                                                           | — | `.changeset/lote-6-*.md` | S01–S15 | HECHO |
+| S17 | **D-09** El rol semántico pasa a ser acento: panel neutro, color sólo en el item activo        | AC3 | `src/css/dropdown.css`, `src/__tests__/dropdown-contract.test.ts`, `e2e/fixtures/dropdown/`, `e2e/tests/dropdown.spec.ts` | S01–S12 | HECHO |
+| S18 | **D-08** El trigger reutiliza `.btn`                                                           | AC2, AC3 | `useDropdown.tsx`, `src/css/dropdown.css`, `src/css/index.css`, test de contrato, fixture y spec e2e, `Dropdown.test.tsx` | S01–S12 | HECHO |
+| S19 | Documentación de las dos decisiones (`AGENTS.md`, changeset, stories, spec)                   | — | `AGENTS.md`, `.changeset/`, `Dropdown.stories.tsx`, `specs/lote-6.md` | S17, S18 | HECHO |
 
 ---
 
@@ -80,7 +83,9 @@ Reglas de oro de `@docs/BUILD-BATCHES.md` que condicionan este lote:
 | T2  | S09, S10      | T1          | **SECUENCIAL** — el test cruza los selectores que escribe T1; sin T1 fallaría por construcción | `ecd566b` | HECHO |
 | T3  | S11, S12, S13 | T1          | **PARALELO posible** con T2 y T4 — analizado: T2 toca `src/variants` y `src/__tests__`, T3 sólo `e2e/`, T4 sólo `packages/ui`; cero archivos en común y cero imports entre ellas. Ejecutadas en serie por un único agente (una task = un commit, y el coste de coordinar worktrees supera el de esperar ~20 s de suite) | `e89d0ba` | HECHO |
 | T4  | S14           | T1          | **PARALELO posible** con T2 y T3 (único archivo, en otro paquete) — misma justificación que T3 | `2f1ac9b` | HECHO |
-| T5  | S15, S16      | T1–T4       | **SECUENCIAL** — documenta y versiona el resultado de las cuatro | `(este commit)` | HECHO |
+| T5  | S15, S16      | T1–T4       | **SECUENCIAL** — documenta y versiona el resultado de las cuatro | `594e0c1` | HECHO |
+| T6  | S17, S18      | T5          | **SECUENCIAL** — las dos decisiones de la revisión se cruzan en los mismos cuatro archivos (`dropdown.css`, test de contrato, fixture y spec e2e); separarlas daría dos commits que no compilan por sí solos | `4caeacd` | HECHO |
+| T7  | S19           | T6          | **SECUENCIAL** — documenta el resultado de T6 | `(este commit)` | HECHO |
 
 ---
 
@@ -90,7 +95,7 @@ Reglas de oro de `@docs/BUILD-BATCHES.md` que condicionan este lote:
 | --- | -------- | ------ | --------- |
 | AC1 | Menú abierto: `position` = `absolute` y `box-shadow` ≠ `none` | ✅ **CUMPLIDO** | `e89d0ba` — `e2e/tests/dropdown.spec.ts`, bloque «AC-1: el panel abierto se posiciona y se eleva» (6 tests). Mide `position`, `box-shadow`, `z-index` resuelto, que el panel flote bajo el trigger (`getBoundingClientRect`) y que el wrapper no crezca. Fixture `e2e/fixtures/dropdown/`. Verificado en Chromium: 23/23 en verde |
 | AC2 | Ninguna clase emitida por los hooks carece de selector | ✅ **CUMPLIDO** | `ecd566b` — `src/__tests__/dropdown-contract.test.ts`. No usa lista escrita a mano: extrae los literales de `useDropdown.tsx` y expande las 6 plantillas `dropdown-${…}` con las uniones reales de `Dropdown.types.ts` (40 clases), y las cruza contra los selectores de `dropdown.css` **y** contra `variants/dropdown.ts`. Incluye la comprobación inversa (CSS que nadie declara) |
-| AC3 | Las 8 variantes semánticas aplican color distinto | ✅ **CUMPLIDO** | `e8aa686` (CSS) + `e89d0ba` (spec) — bloque «AC-3» del spec e2e: cada panel pinta el token de su rol (comparado contra `--color-{role}` leído del `:root`, no contra un hex escrito en el test), los 8 fondos son distintos entre sí (`new Set(...).size === 8`), el item usa su `-content` y el trigger hereda el rol |
+| AC3 | Las 8 variantes semánticas aplican color distinto | ✅ **CUMPLIDO** | `e8aa686` (CSS) + `e89d0ba` (spec), **revisado en `4caeacd`** — tras D-09 el rol es acento: el bloque «AC-3» mide el **item activo** de cada rol (pinta su token leído del `:root`, los 8 distintos entre sí, texto con su `-content`) y el trigger de cada rol (`btn-{rol}`). Se añade el bloque «D-09», que comprueba lo contrario para el panel: los 8 paneles pintan `--color-base-100`, son iguales al panel sin variante, y el texto del item **pasa WCAG AA en las ocho** |
 | AC4 | Con `prefers-reduced-motion: reduce` la transición se anula | ✅ **CUMPLIDO** | `e89d0ba` — bloque «AC-4»: con `emulateMedia({ reducedMotion: "reduce" })`, `transition-duration` es `0s` en panel, trigger e item, y el panel sigue visible. Este criterio **cazó una regresión real**: el bloque estaba antes de las reglas del item y perdía por orden de aparición (ver §9, log) |
 | AC5 | Story `AllVariants` muestra las 8 | ✅ **CUMPLIDO** | `2f1ac9b` — `Dropdown.stories.tsx`: `AllVariants` itera `VARIANTS`, derivado de `DropdownVariant` (8). `AllSizes` pasa de 3 a 5 y se añade `StyleVariants` |
 
@@ -103,7 +108,8 @@ Reglas de oro de `@docs/BUILD-BATCHES.md` que condicionan este lote:
 | Variantes de estilo aplicadas al panel | `e89d0ba` — `ghost` sin superficie ni sombra, `bordered` con borde en el panel y no en el wrapper, `compact` con menos relleno |
 | Escala de tamaños del trigger igual a la de `.btn` | `e89d0ba` — 24/32/40/48/56 px |
 | `data-theme="dark"` cambia el panel | `e89d0ba` — 2 tests (superficie y rol primary) |
-| Suite completa en verde | 131 unitarios (122 en la línea base + 9), 139 e2e (116 + 23), `pnpm lint` en **código 0** (en `develop` salía 1), `pnpm build` de los 6 paquetes |
+| El trigger se pinta con `button.css` (D-08) | `4caeacd` — bloque «D-08» del spec e2e: altura 40px, relleno 16px y radio 6px vienen de `btn-md`, y `dropdown.css` sólo añade `justify-content: space-between` y el ancho del wrapper. Más el bloque «D-08» del test de contrato, que cruza las clases que el trigger emite contra `button.css` |
+| Suite completa en verde | **138** unitarios (122 en la línea base), **144** e2e (116 en la base), `pnpm lint` en **código 0** (en `develop` salía 1), `pnpm build` de los 6 paquetes |
 
 ---
 
@@ -215,6 +221,54 @@ Reglas de oro de `@docs/BUILD-BATCHES.md` que condicionan este lote:
   que falla si se separan.
 - **Reversibilidad.** Total; queda anotado como gap **G-06** para el lote 7.
 
+### D-08 — El trigger reutiliza `.btn` *(decisión del usuario en la revisión)*
+
+- **Contexto.** Pregunta abierta 3 del PR #33: `.dropdown-trigger` reimplementaba superficie,
+  tamaños y foco que `button.css` ya resuelve. Respuesta: **sí**, reutilizarlo.
+- **Opciones de implementación.** (a) Exigir al consumidor que añada `btn` a mano en el
+  trigger: rompe a quien ya lo usa y deja el estilo a medias por defecto. (b) Que
+  `dropdown.css` copie las reglas de `.btn` con otro nombre: es lo que había. (c) Que el hook
+  emita las clases del Button leyendo su contrato.
+- **Decisión.** (c): `useDropdownTrigger` emite
+  `btn btn-{rol} btn-{tamaño} dropdown-trigger`, y `dropdown.css` se queda sólo con
+  `width: 100%`, `justify-content: space-between` y `.dropdown-trigger-active`, que remapea
+  los tokens `--btn-*`.
+- **Razón.** Es la única que no duplica CSS ni pide trabajo al consumidor, y arregla de paso
+  G-01 de `specs/lote-2.md` (el trigger no heredaba ningún estilo semántico). ~80 líneas menos.
+- **Consecuencias que acepto explícitamente.** (1) El contrato del Dropdown pasa a ser
+  **cruzado** con el del Button: cubierto por el bloque «D-08» del test de contrato.
+  (2) El orden de los `@import` de `index.css` pasa a ser funcional: cubierto por el spec e2e.
+  (3) Contradice D-07 de este mismo lote (no tocar el hook), que decidí para no chocar con el
+  lote 7 — pero la decisión del usuario manda y el lote 7 tendrá que partir de aquí.
+- **Reversibilidad.** Media: volver atrás es restaurar el bloque de trigger en `dropdown.css`
+  y el `triggerClasses` anterior, los dos en el historial de este lote.
+
+### D-09 — El rol semántico es acento, no superficie *(decisión del usuario en la revisión)*
+
+- **Contexto.** Pregunta abierta 2 del PR #33: el panel se pintaba entero del color del rol.
+  Respuesta: **panel neutro, con el rol sólo en el item activo.**
+- **Decisión.** Las 8 variantes fijan `--dropdown-role` / `--dropdown-role-content` /
+  `--dropdown-focus-color` y dejan de tocar `--dropdown-color` (la superficie). El acento lo
+  consumen el item activo, el anillo de foco y el trigger (vía su `btn-{rol}`). Sin variante,
+  el item activo cae al realce neutro por `color-mix` que ya existía.
+- **Razón, además de la estética.** Resuelve la objeción **O-01** de este lote sin tocar la
+  paleta: con panel sólido, `warning` y `success` ponían texto blanco sobre relleno claro
+  (≈2.15:1 y ≈2.28:1, por debajo del 4.5:1 de AA) y el CSS no podía arreglarlo. Con panel
+  neutro el texto del menú es `--color-base-content` sobre `--color-base-100` y **pasa AA en
+  las ocho variantes**, medido en Chromium. El par rol/`-content` sólo queda expuesto en la
+  fila activa, que es una superficie pequeña; el arreglo de fondo sigue siendo el lote 22.
+- **Reversibilidad.** Total: son 8 bloques de variante.
+
+### D-10 — `@ownui/dropdown` sube de `patch` a `minor`
+
+- **Contexto.** El usuario aprobó «minor + patch» (D-05) cuando el paquete `@ownui/dropdown`
+  no tenía cambio de código, sólo stories. D-08 cambia `useDropdown.tsx`.
+- **Decisión.** Mantener `@ownui/tw-theme` en `minor` (lo decidido) y subir `@ownui/dropdown`
+  a `minor` en el changeset nuevo. Changesets se queda con el bump más alto.
+- **Razón.** La premisa de aquel `patch` («su código no cambia») ya no se cumple; emitir
+  clases nuevas es comportamiento añadido, que en semver es `minor`.
+- **Reversibilidad.** Una línea de `.changeset/lote-6-trigger-btn-panel-neutro.md`.
+
 ---
 
 ## 7. Bloqueantes
@@ -235,7 +289,13 @@ quien reproduzca la suite en otra máquina sepa a qué se debe.
 
 ### Objeciones al lote tal como está especificado
 
-- **O-01 — El criterio «las 8 variantes aplican color distinto» no dice nada del contraste.**
+- **O-01 — ✅ RESUELTA por D-09.** El criterio «las 8 variantes aplican color distinto» no
+  decía nada del contraste, y con panel sólido el resultado era ilegible. Con el panel neutro,
+  el texto del menú pasa AA en las ocho y hay un test e2e que lo mide. Queda expuesto sólo el
+  par rol/`-content` de la fila activa, que sigue siendo cosa del lote 22. El texto original
+  de la objeción, por si hace falta el contexto:
+
+- **O-01 (original) — El criterio «las 8 variantes aplican color distinto» no dice nada del contraste.**
   Ya está cumplido, pero conviene saber qué significa: con la paleta actual, un panel
   `warning` o `success` lleva texto `#ffffff` encima de un relleno claro, y eso **no pasa
   WCAG AA** (`warning` ≈ 2.15:1, `success` ≈ 2.28:1, medidos en el lote 0). El CSS es
@@ -257,9 +317,20 @@ quien reproduzca la suite en otra máquina sepa a qué se debe.
 | G-07 | Desajuste de build de Chromium entre el `playwright` del repo y el preinstalado en el entorno de sesión (ver §7) | — (entorno, no repo) |
 | G-08 | `pnpm lint` tenía **4 errores** en `develop`, todos en `Dropdown.stories.tsx` (`useState` dentro de `render`). Al tocar ese archivo en T4 se arreglaron, así que `pnpm lint` ya sale en verde. Quedan **228 avisos** repo-wide, ninguno de este lote | L9 o un lote de higiene |
 | G-09 | `AGENTS.md` no pasa `prettier --check` en `develop` (ya ocurría antes de este lote; `pnpm format` sólo cubre `src/**`) | L9 |
+| G-11 | **`button.css` no tiene bloque `prefers-reduced-motion`.** El Dropdown se lo presta a su trigger (el bloque de `dropdown.css` incluye `.dropdown-trigger`), pero un `.btn` suelto sigue animando con `reduce` | Un lote de higiene del Button |
+| G-12 | D-08 deja el Dropdown atado al contrato del Button. Si el **lote 5** (PR #32, aún sin mergear) cambia `theme` o `size` en `variants/button.ts`, hay que revalidar: hoy su diff los conserva, y el test de contrato lo cazaría | L7, al integrar |
 | G-10 | **El build copia `src/css` → `dist/css` entero**, sin filtrar. Cualquier archivo que caiga en `src/css/` acaba publicado: lo descubrí al meter ahí el test de contrato (resuelto moviéndolo, ver §9). Convendría que el script de copia filtrase por extensión, o un test que compruebe el contenido de `dist/css` | L9, o el lote que vuelva a tocar el empaquetado |
 
 ### Preguntas abiertas (no bloquean; decididas con criterio y reversibles)
+
+Las tres se resolvieron en la revisión del PR #33 (2026-11-21). Se dejan con su respuesta:
+
+1. **¿`major` o `minor`?** → **`minor` + `patch`** (D-05 confirmada). Matiz posterior: D-08
+   obliga a subir `@ownui/dropdown` a `minor` (D-10).
+2. **¿Panel sólido del rol?** → **No: panel neutro, rol sólo en el item activo** (D-09).
+3. **¿`.dropdown-trigger` reutiliza `.btn`?** → **Sí** (D-08).
+
+Texto original de las preguntas:
 
 1. **¿`major` o `minor`?** Ver D-05. Es la decisión con más consecuencias del lote y la única
    que cambia con una línea.
@@ -320,3 +391,11 @@ quien reproduzca la suite en otra máquina sepa a qué se debe.
   [run 32](https://github.com/ferbbo/own-ui/actions/runs/44939111735) (`conclusion: success`).
   Confirma la suite en el runner y no sólo en la sesión: es el único sitio donde los tests e2e
   corren con el navegador que instala el propio workflow, sin el symlink local de G-07.
+- **2026-11-21 ~21:00** — **Revisión del usuario sobre el PR #33.** Tres respuestas:
+  `minor`+`patch`, panel neutro con el rol sólo en el item activo, y sí a reutilizar `.btn` en
+  el trigger. Implementadas como **T6** (`4caeacd`, D-08 y D-09) y documentadas en **T7**.
+  El contraste del panel, que era la objeción O-01, queda resuelto de paso.
+  Suite tras los cambios: 138 unitarios, 144 e2e, lint en código 0, build 6/6.
+  Un fallo durante T6, corregido antes del commit: el assert de contraste nuevo usaba
+  `window.contrastRatio`, que sólo existía en el fixture de `base-surfaces`; se añadieron los
+  dos helpers al fixture del dropdown.
