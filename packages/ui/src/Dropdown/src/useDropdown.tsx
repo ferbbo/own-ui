@@ -2,13 +2,14 @@
 import { useMemo, useCallback, RefObject, Ref } from "react";
 import { useButton } from "@react-aria/button";
 import { mergeProps } from "@react-aria/utils";
+import { button } from "@ownui/tw-theme/variants";
 import { useDropdownContext } from "./DropdownContext";
 import { useDOMRef } from "@ownui/dom-utils";
-import { 
-  DropdownProps, 
-  DropdownTriggerProps, 
+import {
+  DropdownProps,
+  DropdownTriggerProps,
   DropdownMenuProps,
-  DropdownItemProps
+  DropdownItemProps,
 } from "./Dropdown.types";
 
 export type ReactRef<T> = RefObject<T> | Ref<T>;
@@ -20,20 +21,17 @@ export type ReactRef<T> = RefObject<T> | Ref<T>;
   return innerRef;
 };*/
 
-
 /**
  * Hook principal del dropdown para generar clases CSS del contenedor.
  * El estado ahora se maneja en el DropdownProvider.
- * 
+ *
  * @param props - Props del componente Dropdown raíz
  * @returns Clases CSS para el contenedor
  */
 export function useDropdown(props: DropdownProps): {
   dropdownClasses: string;
 } {
-  const { 
-    className = ""
-  } = props;
+  const { className = "" } = props;
 
   // Obtener estado del contexto
   const { open, variant, size, styleVariant } = useDropdownContext();
@@ -45,7 +43,7 @@ export function useDropdown(props: DropdownProps): {
     const sizeClass = size ? `dropdown-${size}` : "";
     const styleClass = styleVariant ? `dropdown-${styleVariant}` : "";
     const openClass = open ? "dropdown-open" : "";
-    
+
     return [base, variantClass, sizeClass, styleClass, openClass, className]
       .filter((cls) => cls && cls.length > 0)
       .join(" ")
@@ -58,7 +56,13 @@ export function useDropdown(props: DropdownProps): {
 /**
  * Hook para el trigger del dropdown.
  * Integra react-aria para accesibilidad y obtiene el contexto automáticamente.
- * 
+ *
+ * El trigger **es un `.btn`** (lote 6, D-08): emite
+ * `btn btn-{rol} btn-{tamaño} dropdown-trigger` leyendo el contrato de
+ * `@ownui/tw-theme/variants`, en vez de reimplementar superficie, altura,
+ * hover y foco en `dropdown.css`. `dropdown-trigger` sólo aporta lo que el
+ * botón no puede saber: ancho del wrapper y reparto horizontal.
+ *
  * @param props - Props del DropdownTrigger
  * @param ref - Ref del elemento trigger
  * @returns Props y clases para el trigger
@@ -66,36 +70,32 @@ export function useDropdown(props: DropdownProps): {
 export function useDropdownTrigger(
   props: DropdownTriggerProps,
   ref: ReactRef<HTMLButtonElement | HTMLDivElement | null>
-): { 
-  triggerClasses: string; 
-  triggerProps: any; 
+): {
+  triggerClasses: string;
+  triggerProps: any;
   Comp: string;
 } {
-  const { 
-    as = "button",
-    className = "", 
-    onClick,
-    children,
-    ...restProps 
-  } = props;
+  const { as = "button", className = "", onClick, children, ...restProps } = props;
 
   // Obtener estado del contexto automáticamente
-  const { open, setOpen } = useDropdownContext();
+  const { open, setOpen, variant, size } = useDropdownContext();
 
-  // Generar clases CSS para el trigger
+  // Generar clases CSS para el trigger: el rol y el tamaño salen del
+  // contrato del Button, no de uno propio del Dropdown.
   const triggerClasses = useMemo(() => {
-    const base = "dropdown-trigger";
+    const themeClass = variant ? button.theme[variant] : "";
+    const sizeClass = size ? button.size[size] : "";
     const activeClass = open ? "dropdown-trigger-active" : "";
-    
-    return [base, activeClass, className]
+
+    return ["btn", themeClass, sizeClass, "dropdown-trigger", activeClass, className]
       .filter((cls) => cls && cls.length > 0)
       .join(" ")
       .trim();
-  }, [open, className]);
+  }, [variant, size, open, className]);
 
   // Configurar React Aria para accesibilidad
   const innerRef = useDOMRef(ref);
-  
+
   const handlePress = useCallback(() => {
     setOpen(!open);
   }, [open, setOpen]);
@@ -108,11 +108,14 @@ export function useDropdownTrigger(
   const { buttonProps: ariaProps } = useButton(ariaOptions, innerRef);
 
   // Combinar handlers de click
-  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
-    if (onClick) {
-      onClick(event as any);
-    }
-  }, [onClick]);
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
+      if (onClick) {
+        onClick(event as any);
+      }
+    },
+    [onClick]
+  );
 
   // Props combinadas para el trigger
   const triggerProps = mergeProps(
@@ -126,26 +129,24 @@ export function useDropdownTrigger(
   );
 
   const Comp = as;
-  
+
   return { triggerClasses, triggerProps, Comp };
 }
 
 /**
  * Hook para el menú del dropdown.
  * Obtiene el contexto automáticamente.
- * 
+ *
  * @param props - Props del DropdownMenu
  * @returns Props y clases para el menú
  */
-export function useDropdownMenu(
-  props: DropdownMenuProps
-): { 
-  menuClasses: string; 
+export function useDropdownMenu(props: DropdownMenuProps): {
+  menuClasses: string;
   menuProps: any;
   isVisible: boolean;
 } {
   const { className = "", ...restProps } = props;
-  
+
   // Obtener estado del contexto automáticamente
   const { open, size, variant, styleVariant } = useDropdownContext();
 
@@ -156,7 +157,7 @@ export function useDropdownMenu(
     const sizeClass = size ? `dropdown-menu-${size}` : "";
     const styleClass = styleVariant ? `dropdown-menu-${styleVariant}` : "";
     const visibleClass = open ? "dropdown-menu-open" : "dropdown-menu-closed";
-    
+
     return [base, variantClass, sizeClass, styleClass, visibleClass, className]
       .filter((cls) => cls && cls.length > 0)
       .join(" ")
@@ -176,21 +177,19 @@ export function useDropdownMenu(
 /**
  * Hook que encapsula la lógica de estilos para los elementos del dropdown.
  * Obtiene el contexto automáticamente.
- * 
+ *
  * @param props - Props del DropdownItem
  * @returns Objeto con las clases CSS y props del elemento
  */
-export function useDropdownItem(
-  props: DropdownItemProps
-) {
-  const { 
-    children, 
-    selected = false, 
-    disabled = false, 
-    className = "", 
+export function useDropdownItem(props: DropdownItemProps) {
+  const {
+    children,
+    selected = false,
+    disabled = false,
+    className = "",
     onSelect,
     onClick,
-    ...restProps 
+    ...restProps
   } = props;
 
   // Obtener estado del contexto automáticamente
@@ -201,7 +200,7 @@ export function useDropdownItem(
     const base = "dropdown-item";
     const selectedClass = selected ? "dropdown-item-selected" : "";
     const disabledClass = disabled ? "dropdown-item-disabled" : "";
-    
+
     return [base, selectedClass, disabledClass, className]
       .filter((cls) => cls && cls.length > 0)
       .join(" ")
@@ -209,20 +208,23 @@ export function useDropdownItem(
   }, [selected, disabled, className]);
 
   // Combinar handlers de click
-  const handleClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (disabled) return;
-    
-    if (onSelect) {
-      onSelect();
-    }
-    
-    // Cerrar el dropdown después de seleccionar un item
-    setOpen(false);
-    
-    if (onClick) {
-      onClick(event);
-    }
-  }, [disabled, onSelect, setOpen, onClick]);
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (disabled) return;
+
+      if (onSelect) {
+        onSelect();
+      }
+
+      // Cerrar el dropdown después de seleccionar un item
+      setOpen(false);
+
+      if (onClick) {
+        onClick(event);
+      }
+    },
+    [disabled, onSelect, setOpen, onClick]
+  );
 
   // Props combinadas para el elemento
   const itemProps = {

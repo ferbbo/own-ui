@@ -8,13 +8,28 @@
    selector** para ninguna de ellas. El menú salía en el flujo del
    documento, sin posicionamiento, elevación ni transición.
 
-   ── Semántica de los tres niveles (lote 6, D-02) ──────────────────
-   `.dropdown`       wrapper de posicionamiento. NO tiene superficie
-                     propia: sólo `position: relative` y los defaults de
-                     token del componente. Envuelve trigger + menú, igual
-                     que `DropdownRoot` en el árbol de React.
-   `.dropdown-menu`  el panel: absoluto, elevado, con superficie y radio.
-   `.dropdown-item`  la fila dentro del panel.
+   ── Semántica de los niveles (lote 6, D-02) ───────────────────────
+   `.dropdown`        wrapper de posicionamiento. NO tiene superficie
+                      propia: sólo `position: relative` y los defaults de
+                      token del componente. Envuelve trigger + menú, igual
+                      que `DropdownRoot` en el árbol de React.
+   `.dropdown-trigger` **es un `.btn`** (D-08): el componente emite
+                      `btn btn-{rol} btn-{tamaño} dropdown-trigger`, y aquí
+                      sólo queda lo que el botón no resuelve (ancho completo,
+                      reparto horizontal y el estado "abierto").
+   `.dropdown-menu`   el panel: absoluto, elevado, con superficie y radio.
+                      Su superficie es **siempre neutra** (D-09).
+   `.dropdown-item`   la fila dentro del panel. El color del rol aparece
+                      **sólo en el item activo** (D-09).
+
+   ── El rol semántico (lote 6, D-09) ───────────────────────────────
+   `--dropdown-color` es la SUPERFICIE del panel, y es neutra en las ocho
+   variantes. El acento del rol vive en `--dropdown-role` /
+   `--dropdown-role-content`, y lo consumen sólo tres sitios: el item
+   seleccionado, el anillo de foco y el trigger (vía las clases `btn-*`).
+   Así el panel pasa WCAG AA siempre — texto `--color-base-content` sobre
+   `--color-base-100` — en vez de depender de que el `-content` del rol
+   contraste con su relleno.
 
    ── Dónde vive cada default (lote 6, D-03 y D-04) ─────────────────
    Los hooks ponen la variante en los DOS niveles (`.dropdown-primary` en
@@ -23,7 +38,7 @@
    heredada, así que:
 
      · TODOS los defaults de token se declaran sólo en `.dropdown`.
-     · Los hijos (`-trigger`, `-menu`, `-item`) nunca declaran un default:
+     · Los hijos (`-menu`, `-item`) nunca declaran un default:
        lo consumen con cadena de fallback, de modo que siguen resolviendo
        incluso sin wrapper (necesario el día que el menú se portalice).
      · Cada variante se declara con lista de selectores
@@ -60,10 +75,11 @@
   /* ─────────────────────────────────────────
      CONTRATO DE VARIABLES
      ─────────────────────────────────────────
-     Fuente (ROL):  --dropdown-color / --dropdown-fg / --dropdown-focus-color
+     Superficie:    --dropdown-color / --dropdown-fg
+     Acento (ROL):  --dropdown-role / --dropdown-role-content
+                    --dropdown-focus-color
      Panel:         --dropdown-menu-bg / -fg / -shadow / -border-width
                     --dropdown-menu-offset / -min-width / -z
-     Trigger:       --dropdown-trigger-bg / -fg / -border / -size / -p
      Item:          --dropdown-item-bg / -fg / -px / -py / -radius
      Geometría:     --dropdown-p / --dropdown-gap / --dropdown-radius
      Estados:       --dropdown-hover-depth / --dropdown-active-depth
@@ -72,13 +88,14 @@
      Focus ring:    --dropdown-outline-width / --dropdown-outline-offset
    ───────────────────────────────────────── */
 
-  /* === Fuente (ROL) — defaults neutrales === */
+  /* === Superficie — no cambia con la variante (D-09) === */
   --dropdown-color: var(--color-base-100);
   --dropdown-fg: var(--color-base-content);
-  /* --dropdown-focus-color: NO se define aquí.
-     Sólo los roles semánticos lo setean (vía --color-{name}-focus), así
-     hover/active usan el color curado del tema cuando existe y caen al
-     algoritmo de color-mix cuando no. Mismo criterio que button.css. */
+  /* --dropdown-role / --dropdown-role-content / --dropdown-focus-color:
+     NO se definen aquí. Sólo los setean los roles semánticos, así el item
+     activo cae a un realce neutro cuando no hay variante, y hover/active
+     usan el color curado del tema cuando existe. Mismo criterio que el
+     --btn-focus-color de button.css. */
 
   /* === Geometría del panel === */
   --dropdown-p: 0.25rem;
@@ -89,14 +106,9 @@
   --dropdown-menu-z: 50;
   --dropdown-menu-border-width: 0px;
 
-  /* === Trigger === */
-  --dropdown-trigger-size: var(--size, calc(var(--size-field, 0.25rem) * 10));
-  --dropdown-trigger-p: var(--paragraph, 1rem);
+  /* === Trigger: lo resuelve `.btn` (D-08). Aquí sólo el hueco entre
+     el label y el indicador, que el botón centra en vez de repartir. === */
   --dropdown-trigger-gap: 0.5rem;
-  --dropdown-trigger-radius: var(--radius-field, 0.375rem);
-  --dropdown-trigger-border-width: var(--border, 1px);
-  --dropdown-trigger-font-weight: 500;
-  --dropdown-trigger-font-size: var(--fontsize, 0.875rem);
 
   /* === Item === */
   --dropdown-item-px: 0.75rem;
@@ -125,97 +137,40 @@
 }
 
 /* =========================================================
-   1) Trigger: .dropdown-trigger
+   1) Trigger: .dropdown-trigger — sobre `.btn` (D-08)
+
+   `useDropdownTrigger` emite `btn btn-{rol} btn-{tamaño} dropdown-trigger`,
+   así que superficie, altura, relleno, radio, hover, `:focus-visible` y
+   `:disabled` salen de `button.css` y no se reimplementan aquí. Lo que
+   queda es lo que un botón suelto no puede saber: que ocupa el ancho del
+   wrapper y que reparte label e indicador a los extremos.
+
+   ⚠️ Estas dos reglas pisan a `.btn` con la MISMA especificidad, así que
+   dependen del orden de los `@import` de `index.css` (button.css antes de
+   dropdown.css). El fixture e2e `dropdown/` lo fija midiendo
+   `justify-content` computado: si alguien invierte el orden, falla.
    ========================================================= */
 
 .dropdown-trigger {
-  /* estructura */
-  display: inline-flex;
-  align-items: center;
+  width: 100%;
   justify-content: space-between;
   gap: var(--dropdown-trigger-gap, 0.5rem);
-  flex-wrap: nowrap;
-  width: 100%;
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-  text-align: start;
-
-  /* geometría */
-  height: var(--dropdown-trigger-size, calc(var(--size-field, 0.25rem) * 10));
-  padding-inline: var(--dropdown-trigger-p, 1rem);
-  font-size: var(--dropdown-trigger-font-size, var(--fontsize, 0.875rem));
-  font-weight: var(--dropdown-trigger-font-weight, 500);
-  border-radius: var(--dropdown-trigger-radius, var(--radius-field, 0.375rem));
-
-  /* pintura */
-  background-color: var(--dropdown-trigger-bg, var(--dropdown-color, var(--color-base-100)));
-  color: var(--dropdown-trigger-fg, var(--dropdown-fg, var(--color-base-content)));
-  border-width: var(--dropdown-trigger-border-width, var(--border, 1px));
-  border-style: solid;
-  border-color: var(
-    --dropdown-trigger-border,
-    color-mix(
-      in oklab,
-      var(--dropdown-color, var(--color-base-100)),
-      #000 calc(var(--depth, 1) * 10%)
-    )
-  );
-
-  /* foco */
-  outline-offset: var(--dropdown-outline-offset, 2px);
-  outline-color: var(--dropdown-focus-color, var(--dropdown-color, currentColor));
-
-  transition:
-    color var(--dropdown-transition-duration, 0.2s),
-    background-color var(--dropdown-transition-duration, 0.2s),
-    border-color var(--dropdown-transition-duration, 0.2s);
 }
 
-/* ─── Hover: usa el --*-focus curado del tema si el rol lo trae,
-   y si no oscurece el color del rol por --dropdown-hover-depth ─── */
-@media (hover: hover) {
-  .dropdown-trigger:hover:not(:disabled, [disabled], [aria-disabled="true"]) {
-    --dropdown-trigger-bg: var(
-      --dropdown-focus-color,
-      color-mix(
-        in oklab,
-        var(--dropdown-color, var(--color-base-100)),
-        #000 var(--dropdown-hover-depth, 7%)
-      )
-    );
-  }
-}
-
-.dropdown-trigger:focus-visible {
-  outline: var(--dropdown-outline-width, 2px) solid
-    var(--dropdown-focus-color, var(--dropdown-color, currentColor));
-  isolation: isolate;
-}
-
-/* ─── Pulsado y abierto comparten tratamiento: un paso más de
-   profundidad que el hover, para que "abierto" se lea como hundido ─── */
-.dropdown-trigger:active:not(:disabled, [disabled], [aria-disabled="true"]),
+/* ─── Abierto: mismo tratamiento que `.btn-active`, escrito sobre los
+   tokens de button.css en vez de duplicar la receta de color ─── */
 .dropdown-trigger-active {
-  --dropdown-trigger-bg: color-mix(
+  --btn-bg: color-mix(
     in oklab,
-    var(--dropdown-focus-color, var(--dropdown-color, var(--color-base-100))),
-    #000 var(--dropdown-active-depth, 5%)
+    var(--btn-focus-color, var(--btn-color)),
+    #000 var(--btn-active-depth, 5%)
   );
-}
-
-.dropdown-trigger:is(:disabled, [disabled], [aria-disabled="true"]) {
-  cursor: not-allowed;
-  --dropdown-trigger-bg: color-mix(
+  --btn-border: color-mix(
     in oklab,
-    var(--dropdown-color, var(--color-base-100)) var(--disabled-bg-opacity, 60%),
-    #0000
+    var(--btn-focus-color, var(--btn-color)),
+    #000 calc(var(--btn-active-depth, 5%) + 2%)
   );
-  --dropdown-trigger-fg: color-mix(
-    in oklch,
-    var(--dropdown-fg, var(--color-base-content)) var(--dropdown-disabled-fg-opacity, 35%),
-    #0000
-  );
+  --btn-shadow: none;
 }
 
 /* =========================================================
@@ -314,13 +269,20 @@
 
 .dropdown-item:focus-visible {
   outline: var(--dropdown-outline-width, 2px) solid
-    var(--dropdown-focus-color, var(--dropdown-fg, var(--color-base-content)));
+    var(--dropdown-focus-color, var(--dropdown-role, var(--dropdown-fg, var(--color-base-content))));
   outline-offset: var(--dropdown-outline-offset, 2px);
   isolation: isolate;
 }
 
+/* ─── Hover y pulsado: realce NEUTRO sobre la superficie del panel.
+   El rol no entra aquí (D-09): entra en el item activo ─── */
 @media (hover: hover) {
-  .dropdown-item:hover:not(.dropdown-item-disabled, :disabled, [disabled]) {
+  .dropdown-item:hover:not(
+      .dropdown-item-selected,
+      .dropdown-item-disabled,
+      :disabled,
+      [disabled]
+    ) {
     --dropdown-item-bg: color-mix(
       in oklab,
       var(--dropdown-color, var(--color-base-100)),
@@ -329,7 +291,7 @@
   }
 }
 
-.dropdown-item:active:not(.dropdown-item-disabled, :disabled, [disabled]) {
+.dropdown-item:active:not(.dropdown-item-selected, .dropdown-item-disabled, :disabled, [disabled]) {
   --dropdown-item-bg: color-mix(
     in oklab,
     var(--dropdown-color, var(--color-base-100)),
@@ -337,13 +299,33 @@
   );
 }
 
+/* ─── Item activo: ÚNICO sitio del panel donde se ve el rol (D-09).
+   Sin variante no hay `--dropdown-role`, y el fallback deja el realce
+   neutro de antes, así que un dropdown sin rol sigue marcando selección ─── */
 .dropdown-item-selected {
-  --dropdown-item-bg: color-mix(
-    in oklab,
-    var(--dropdown-color, var(--color-base-100)),
-    #000 var(--dropdown-active-depth, 5%)
+  --dropdown-item-bg: var(
+    --dropdown-role,
+    color-mix(
+      in oklab,
+      var(--dropdown-color, var(--color-base-100)),
+      #000 var(--dropdown-active-depth, 5%)
+    )
   );
+  --dropdown-item-fg: var(--dropdown-role-content, var(--dropdown-fg, var(--color-base-content)));
   isolation: isolate;
+}
+
+@media (hover: hover) {
+  .dropdown-item-selected:hover:not(.dropdown-item-disabled, :disabled, [disabled]) {
+    --dropdown-item-bg: var(
+      --dropdown-focus-color,
+      color-mix(
+        in oklab,
+        var(--dropdown-role, var(--dropdown-color, var(--color-base-100))),
+        #000 var(--dropdown-hover-depth, 7%)
+      )
+    );
+  }
 }
 
 .dropdown-item-disabled,
@@ -382,68 +364,74 @@
    Antes sólo existían 4 (primary/secondary/accent/neutral) aunque
    `DropdownVariant` permite 8: info/success/warning/error se emitían sin
    CSS detrás (AGENTS.md §9.7).
+
+   Cada rol fija el ACENTO, no la superficie (D-09): el panel sigue siendo
+   `--color-base-100` en las ocho variantes, y el rol sólo aparece en el
+   item activo, en el anillo de foco y en el trigger (que es un `.btn` y
+   recibe su propio `btn-{rol}`).
    ========================================================= */
 
 .dropdown-primary,
 .dropdown-menu-primary {
-  --dropdown-color: var(--color-primary);
-  --dropdown-fg: var(--color-primary-content);
+  --dropdown-role: var(--color-primary);
+  --dropdown-role-content: var(--color-primary-content);
   --dropdown-focus-color: var(--color-primary-focus);
 }
 
 .dropdown-secondary,
 .dropdown-menu-secondary {
-  --dropdown-color: var(--color-secondary);
-  --dropdown-fg: var(--color-secondary-content);
+  --dropdown-role: var(--color-secondary);
+  --dropdown-role-content: var(--color-secondary-content);
   --dropdown-focus-color: var(--color-secondary-focus);
 }
 
 .dropdown-accent,
 .dropdown-menu-accent {
-  --dropdown-color: var(--color-accent);
-  --dropdown-fg: var(--color-accent-content);
+  --dropdown-role: var(--color-accent);
+  --dropdown-role-content: var(--color-accent-content);
   --dropdown-focus-color: var(--color-accent-focus);
 }
 
 .dropdown-neutral,
 .dropdown-menu-neutral {
-  --dropdown-color: var(--color-neutral);
-  --dropdown-fg: var(--color-neutral-content);
+  --dropdown-role: var(--color-neutral);
+  --dropdown-role-content: var(--color-neutral-content);
   --dropdown-focus-color: var(--color-neutral-focus);
 }
 
 .dropdown-info,
 .dropdown-menu-info {
-  --dropdown-color: var(--color-info);
-  --dropdown-fg: var(--color-info-content);
+  --dropdown-role: var(--color-info);
+  --dropdown-role-content: var(--color-info-content);
   --dropdown-focus-color: var(--color-info-focus);
 }
 
 .dropdown-success,
 .dropdown-menu-success {
-  --dropdown-color: var(--color-success);
-  --dropdown-fg: var(--color-success-content);
+  --dropdown-role: var(--color-success);
+  --dropdown-role-content: var(--color-success-content);
   --dropdown-focus-color: var(--color-success-focus);
 }
 
 .dropdown-warning,
 .dropdown-menu-warning {
-  --dropdown-color: var(--color-warning);
-  --dropdown-fg: var(--color-warning-content);
+  --dropdown-role: var(--color-warning);
+  --dropdown-role-content: var(--color-warning-content);
   --dropdown-focus-color: var(--color-warning-focus);
 }
 
 .dropdown-error,
 .dropdown-menu-error {
-  --dropdown-color: var(--color-error);
-  --dropdown-fg: var(--color-error-content);
+  --dropdown-role: var(--color-error);
+  --dropdown-role-content: var(--color-error-content);
   --dropdown-focus-color: var(--color-error-focus);
 }
 
 /* =========================================================
    5) Tamaños — en los dos niveles
 
-   La altura del trigger sigue la misma escala que `.btn`
+   Sólo geometría del panel y del item: la del trigger la pone su propio
+   `btn-{tamaño}` (D-08), que es de donde salía esta escala de todas formas
    (xs=6, sm=8, md=10, lg=12, xl=14 × --size-field).
    ========================================================= */
 
@@ -451,9 +439,6 @@
 .dropdown-menu-xs {
   --dropdown-p: 0.125rem;
   --dropdown-radius: 0.25rem;
-  --dropdown-trigger-size: calc(var(--size-field, 0.25rem) * 6);
-  --dropdown-trigger-p: 0.5rem;
-  --dropdown-trigger-font-size: 0.6875rem;
   --dropdown-item-px: 0.5rem;
   --dropdown-item-py: 0.25rem;
   --dropdown-item-radius: 0.25rem;
@@ -465,9 +450,6 @@
 .dropdown-menu-sm {
   --dropdown-p: 0.25rem;
   --dropdown-radius: 0.375rem;
-  --dropdown-trigger-size: calc(var(--size-field, 0.25rem) * 8);
-  --dropdown-trigger-p: 0.75rem;
-  --dropdown-trigger-font-size: 0.75rem;
   --dropdown-item-px: 0.625rem;
   --dropdown-item-py: 0.375rem;
   --dropdown-item-radius: 0.375rem;
@@ -479,9 +461,6 @@
 .dropdown-menu-md {
   --dropdown-p: 0.25rem;
   --dropdown-radius: var(--radius-field, 0.375rem);
-  --dropdown-trigger-size: calc(var(--size-field, 0.25rem) * 10);
-  --dropdown-trigger-p: 1rem;
-  --dropdown-trigger-font-size: 0.875rem;
   --dropdown-item-px: 0.75rem;
   --dropdown-item-py: 0.5rem;
   --dropdown-item-radius: 0.5rem;
@@ -493,9 +472,6 @@
 .dropdown-menu-lg {
   --dropdown-p: 0.375rem;
   --dropdown-radius: 0.625rem;
-  --dropdown-trigger-size: calc(var(--size-field, 0.25rem) * 12);
-  --dropdown-trigger-p: 1.25rem;
-  --dropdown-trigger-font-size: 1.125rem;
   --dropdown-item-px: 1rem;
   --dropdown-item-py: 0.75rem;
   --dropdown-item-radius: 0.625rem;
@@ -507,9 +483,6 @@
 .dropdown-menu-xl {
   --dropdown-p: 0.5rem;
   --dropdown-radius: 0.75rem;
-  --dropdown-trigger-size: calc(var(--size-field, 0.25rem) * 14);
-  --dropdown-trigger-p: 1.5rem;
-  --dropdown-trigger-font-size: 1.375rem;
   --dropdown-item-px: 1.25rem;
   --dropdown-item-py: 1rem;
   --dropdown-item-radius: 0.75rem;

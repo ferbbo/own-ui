@@ -54,7 +54,15 @@ const dropdown = {
     open: "dropdown-open",
   },
 
-  /** `Dropdown.Trigger`. */
+  /**
+   * `Dropdown.Trigger`.
+   *
+   * El trigger **es un `.btn`** (lote 6, D-08): `useDropdownTrigger` emite
+   * `btn btn-{rol} btn-{tamano} dropdown-trigger` leyendo los mapas `theme` y
+   * `size` del contrato de `button`. Aqui sólo se declaran las clases propias
+   * del dropdown; las `btn-*` las declara `variants/button.ts`, y que existan
+   * de verdad lo comprueba el mismo test de contrato.
+   */
   trigger: {
     base: "dropdown-trigger",
     active: "dropdown-trigger-active",

@@ -32,8 +32,10 @@
   <h1>Dropdown E2E Test</h1>
   <p>
     Valida el CSS de <code>trigger</code> y <code>menu</code> del lote 6:
-    que el panel se posicione y se eleve, que las 8 variantes semanticas pinten
-    distinto, y que la transicion se anule con <code>prefers-reduced-motion</code>.
+    que el panel se posicione y se eleve, que el panel quede NEUTRO en las 8
+    variantes y el rol aparezca solo en el item activo (D-09), que el trigger se
+    pinte como <code>.btn</code> (D-08), y que la transicion se anule con
+    <code>prefers-reduced-motion</code>.
     El HTML reproduce lo que emiten los hooks de <code>useDropdown.tsx</code>.
   </p>
 
@@ -42,13 +44,14 @@
     <h2>🔽 Menu abierto (light)</h2>
     <div class="test-row">
       <div id="dd-open" class="dropdown dropdown-md dropdown-open">
-        <button id="dd-open-trigger" class="dropdown-trigger dropdown-trigger-active" type="button"
+        <button id="dd-open-trigger" class="btn btn-md dropdown-trigger dropdown-trigger-active" type="button"
                 aria-expanded="true" aria-haspopup="menu">Abierto</button>
         <div id="dd-open-menu" class="dropdown-menu dropdown-menu-md dropdown-menu-open" role="menu">
           <div id="dd-open-item" class="dropdown-item" role="menuitem">
             <span class="dropdown-item-text">Item 1</span>
           </div>
-          <div id="dd-open-item-selected" class="dropdown-item dropdown-item-selected" role="menuitem">
+          <div id="dd-open-item-selected" class="dropdown-item dropdown-item-selected" role="menuitem"
+               aria-selected="true">
             <span class="dropdown-item-text">Seleccionado</span>
           </div>
           <div id="dd-open-item-disabled" class="dropdown-item dropdown-item-disabled" role="menuitem"
@@ -65,7 +68,7 @@
     <h2>🔼 Menu cerrado</h2>
     <div class="test-row">
       <div id="dd-closed" class="dropdown dropdown-md">
-        <button id="dd-closed-trigger" class="dropdown-trigger" type="button"
+        <button id="dd-closed-trigger" class="btn btn-md dropdown-trigger" type="button"
                 aria-expanded="false" aria-haspopup="menu">Cerrado</button>
         <div id="dd-closed-menu" class="dropdown-menu dropdown-menu-md dropdown-menu-closed" role="menu"
              aria-hidden="true">
@@ -80,51 +83,59 @@
     <h2>🎨 Variantes semanticas (8)</h2>
     <div class="test-row">
       <div class="dropdown dropdown-md dropdown-primary dropdown-open">
-        <button id="trigger-primary" class="dropdown-trigger" type="button">primary</button>
+        <button id="trigger-primary" class="btn btn-primary btn-md dropdown-trigger" type="button">primary</button>
         <div id="menu-primary" class="dropdown-menu dropdown-menu-md dropdown-menu-primary dropdown-menu-open" role="menu">
           <div id="item-primary" class="dropdown-item" role="menuitem">primary</div>
+          <div id="item-primary-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">primary activo</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-secondary dropdown-open">
-        <button id="trigger-secondary" class="dropdown-trigger" type="button">secondary</button>
+        <button id="trigger-secondary" class="btn btn-secondary btn-md dropdown-trigger" type="button">secondary</button>
         <div id="menu-secondary" class="dropdown-menu dropdown-menu-md dropdown-menu-secondary dropdown-menu-open" role="menu">
           <div id="item-secondary" class="dropdown-item" role="menuitem">secondary</div>
+          <div id="item-secondary-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">secondary activo</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-accent dropdown-open">
-        <button id="trigger-accent" class="dropdown-trigger" type="button">accent</button>
+        <button id="trigger-accent" class="btn btn-accent btn-md dropdown-trigger" type="button">accent</button>
         <div id="menu-accent" class="dropdown-menu dropdown-menu-md dropdown-menu-accent dropdown-menu-open" role="menu">
           <div id="item-accent" class="dropdown-item" role="menuitem">accent</div>
+          <div id="item-accent-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">accent activo</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-neutral dropdown-open">
-        <button id="trigger-neutral" class="dropdown-trigger" type="button">neutral</button>
+        <button id="trigger-neutral" class="btn btn-neutral btn-md dropdown-trigger" type="button">neutral</button>
         <div id="menu-neutral" class="dropdown-menu dropdown-menu-md dropdown-menu-neutral dropdown-menu-open" role="menu">
           <div id="item-neutral" class="dropdown-item" role="menuitem">neutral</div>
+          <div id="item-neutral-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">neutral activo</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-info dropdown-open">
-        <button id="trigger-info" class="dropdown-trigger" type="button">info</button>
+        <button id="trigger-info" class="btn btn-info btn-md dropdown-trigger" type="button">info</button>
         <div id="menu-info" class="dropdown-menu dropdown-menu-md dropdown-menu-info dropdown-menu-open" role="menu">
           <div id="item-info" class="dropdown-item" role="menuitem">info</div>
+          <div id="item-info-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">info activo</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-success dropdown-open">
-        <button id="trigger-success" class="dropdown-trigger" type="button">success</button>
+        <button id="trigger-success" class="btn btn-success btn-md dropdown-trigger" type="button">success</button>
         <div id="menu-success" class="dropdown-menu dropdown-menu-md dropdown-menu-success dropdown-menu-open" role="menu">
           <div id="item-success" class="dropdown-item" role="menuitem">success</div>
+          <div id="item-success-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">success activo</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-warning dropdown-open">
-        <button id="trigger-warning" class="dropdown-trigger" type="button">warning</button>
+        <button id="trigger-warning" class="btn btn-warning btn-md dropdown-trigger" type="button">warning</button>
         <div id="menu-warning" class="dropdown-menu dropdown-menu-md dropdown-menu-warning dropdown-menu-open" role="menu">
           <div id="item-warning" class="dropdown-item" role="menuitem">warning</div>
+          <div id="item-warning-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">warning activo</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-error dropdown-open">
-        <button id="trigger-error" class="dropdown-trigger" type="button">error</button>
+        <button id="trigger-error" class="btn btn-error btn-md dropdown-trigger" type="button">error</button>
         <div id="menu-error" class="dropdown-menu dropdown-menu-md dropdown-menu-error dropdown-menu-open" role="menu">
           <div id="item-error" class="dropdown-item" role="menuitem">error</div>
+          <div id="item-error-selected" class="dropdown-item dropdown-item-selected" role="menuitem" aria-selected="true">error activo</div>
         </div>
       </div>
     </div>
@@ -135,25 +146,25 @@
     <h2>📐 Tamanos</h2>
     <div class="test-row">
       <div class="dropdown dropdown-xs dropdown-open">
-        <button id="trigger-xs" class="dropdown-trigger" type="button">xs</button>
+        <button id="trigger-xs" class="btn btn-xs dropdown-trigger" type="button">xs</button>
         <div id="menu-xs" class="dropdown-menu dropdown-menu-xs dropdown-menu-open" role="menu">
           <div id="item-xs" class="dropdown-item" role="menuitem">xs</div>
         </div>
       </div>
       <div class="dropdown dropdown-sm dropdown-open">
-        <button id="trigger-sm" class="dropdown-trigger" type="button">sm</button>
+        <button id="trigger-sm" class="btn btn-sm dropdown-trigger" type="button">sm</button>
         <div id="menu-sm" class="dropdown-menu dropdown-menu-sm dropdown-menu-open" role="menu">
           <div id="item-sm" class="dropdown-item" role="menuitem">sm</div>
         </div>
       </div>
       <div class="dropdown dropdown-lg dropdown-open">
-        <button id="trigger-lg" class="dropdown-trigger" type="button">lg</button>
+        <button id="trigger-lg" class="btn btn-lg dropdown-trigger" type="button">lg</button>
         <div id="menu-lg" class="dropdown-menu dropdown-menu-lg dropdown-menu-open" role="menu">
           <div id="item-lg" class="dropdown-item" role="menuitem">lg</div>
         </div>
       </div>
       <div class="dropdown dropdown-xl dropdown-open">
-        <button id="trigger-xl" class="dropdown-trigger" type="button">xl</button>
+        <button id="trigger-xl" class="btn btn-xl dropdown-trigger" type="button">xl</button>
         <div id="menu-xl" class="dropdown-menu dropdown-menu-xl dropdown-menu-open" role="menu">
           <div id="item-xl" class="dropdown-item" role="menuitem">xl</div>
         </div>
@@ -166,19 +177,19 @@
     <h2>🧩 Variantes de estilo</h2>
     <div class="test-row">
       <div class="dropdown dropdown-md dropdown-ghost dropdown-open">
-        <button id="trigger-ghost" class="dropdown-trigger" type="button">ghost</button>
+        <button id="trigger-ghost" class="btn btn-md dropdown-trigger" type="button">ghost</button>
         <div id="menu-ghost" class="dropdown-menu dropdown-menu-md dropdown-menu-ghost dropdown-menu-open" role="menu">
           <div id="item-ghost" class="dropdown-item" role="menuitem">ghost</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-bordered dropdown-open">
-        <button id="trigger-bordered" class="dropdown-trigger" type="button">bordered</button>
+        <button id="trigger-bordered" class="btn btn-md dropdown-trigger" type="button">bordered</button>
         <div id="menu-bordered" class="dropdown-menu dropdown-menu-md dropdown-menu-bordered dropdown-menu-open" role="menu">
           <div id="item-bordered" class="dropdown-item" role="menuitem">bordered</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-compact dropdown-open">
-        <button id="trigger-compact" class="dropdown-trigger" type="button">compact</button>
+        <button id="trigger-compact" class="btn btn-md dropdown-trigger" type="button">compact</button>
         <div id="menu-compact" class="dropdown-menu dropdown-menu-md dropdown-menu-compact dropdown-menu-open" role="menu">
           <div id="item-compact" class="dropdown-item" role="menuitem">compact</div>
         </div>
@@ -191,13 +202,13 @@
     <h2>🌙 Menu abierto (data-theme="dark")</h2>
     <div class="test-row">
       <div class="dropdown dropdown-md dropdown-open">
-        <button id="dd-dark-trigger" class="dropdown-trigger" type="button">Abierto</button>
+        <button id="dd-dark-trigger" class="btn btn-md dropdown-trigger" type="button">Abierto</button>
         <div id="dd-dark-menu" class="dropdown-menu dropdown-menu-md dropdown-menu-open" role="menu">
           <div id="dd-dark-item" class="dropdown-item" role="menuitem">Item</div>
         </div>
       </div>
       <div class="dropdown dropdown-md dropdown-primary dropdown-open">
-        <button id="dd-dark-trigger-primary" class="dropdown-trigger" type="button">primary</button>
+        <button id="dd-dark-trigger-primary" class="btn btn-primary btn-md dropdown-trigger" type="button">primary</button>
         <div id="dd-dark-menu-primary" class="dropdown-menu dropdown-menu-md dropdown-menu-primary dropdown-menu-open" role="menu">
           <div class="dropdown-item" role="menuitem">Item</div>
         </div>
@@ -210,7 +221,7 @@
     <h2>🚫 Control: el wrapper no pinta</h2>
     <div class="test-row">
       <div id="dd-wrapper-only" class="dropdown dropdown-md">
-        <button id="dd-wrapper-trigger" class="dropdown-trigger" type="button">Sin menu</button>
+        <button id="dd-wrapper-trigger" class="btn btn-md dropdown-trigger" type="button">Sin menu</button>
       </div>
     </div>
   </div>
@@ -242,6 +253,27 @@
       if (!el) return null;
       const { top, left, width, height } = el.getBoundingClientRect();
       return { top, left, width, height };
+    };
+
+    /** Luminancia relativa WCAG 2.1 de un color computado. */
+    window.relativeLuminance = (rgbString) => {
+      const parts = rgbString.match(/\d+(\.\d+)?/g);
+      if (!parts || parts.length < 3) return null;
+      const [r, g, b] = parts.slice(0, 3).map(Number).map((channel) => {
+        const srgb = channel / 255;
+        return srgb <= 0.03928 ? srgb / 12.92 : Math.pow((srgb + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+
+    /** Ratio de contraste WCAG 2.1 entre dos colores computados. */
+    window.contrastRatio = (fg, bg) => {
+      const lf = window.relativeLuminance(fg);
+      const lb = window.relativeLuminance(bg);
+      if (lf === null || lb === null) return null;
+      const lighter = Math.max(lf, lb);
+      const darker = Math.min(lf, lb);
+      return (lighter + 0.05) / (darker + 0.05);
     };
 
     window.setTheme = (theme) => {

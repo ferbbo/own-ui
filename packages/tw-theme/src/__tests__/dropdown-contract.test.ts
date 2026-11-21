@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import button from "../variants/button.js";
 import dropdown from "../variants/dropdown.js";
 
 /**
@@ -32,10 +33,16 @@ import dropdown from "../variants/dropdown.js";
 const resolveFirst = (...candidates: string[]): string | undefined =>
   candidates.find((candidate) => existsSync(candidate));
 
-const CSS_FILE = resolveFirst(
-  join(process.cwd(), "packages", "tw-theme", "src", "css", "dropdown.css"),
-  join(process.cwd(), "src", "css", "dropdown.css")
-);
+const cssFile = (name: string): string | undefined =>
+  resolveFirst(
+    join(process.cwd(), "packages", "tw-theme", "src", "css", name),
+    join(process.cwd(), "src", "css", name)
+  );
+
+const CSS_FILE = cssFile("dropdown.css");
+
+/** El trigger se pinta con `button.css` desde el lote 6 (D-08). */
+const BUTTON_CSS_FILE = cssFile("button.css");
 
 /** El Dropdown de React vive en otro paquete: `@ownui/dropdown`. */
 const DROPDOWN_SRC = resolveFirst(
@@ -62,14 +69,16 @@ const flattenContract = (node: unknown): string[] => {
  * computados en Chromium. Aquí sólo se verifica que ninguna clase emitida se
  * quede sin CSS detrás.
  */
-const cssSelectors = (): Set<string> => {
+const selectorsIn = (file: string | undefined, prefix: string): Set<string> => {
   // Los comentarios se quitan antes de buscar: la cabecera del archivo cita
   // clases de ejemplo (`.dropdown-x, .dropdown-menu-x`) que no son selectores.
-  const contents = CSS_FILE ? read(CSS_FILE).replace(/\/\*[\s\S]*?\*\//g, "") : "";
-  const matches = contents.match(/\.(dropdown[a-z0-9-]*)/g) ?? [];
+  const contents = file ? read(file).replace(/\/\*[\s\S]*?\*\//g, "") : "";
+  const matches = contents.match(new RegExp(`\\.(${prefix}[a-z0-9-]*)`, "g")) ?? [];
 
   return new Set(matches.map((match) => match.slice(1)));
 };
+
+const cssSelectors = (): Set<string> => selectorsIn(CSS_FILE, "dropdown");
 
 /** Miembros de una unión de literales de `Dropdown.types.ts`. */
 const typeUnion = (types: string, name: string): string[] => {
@@ -118,8 +127,9 @@ const emittedClasses = (): { classes: Set<string>; templates: number } => {
 };
 
 describe("Contrato de clases del Dropdown", () => {
-  it("encuentra los tres archivos del contrato", () => {
+  it("encuentra los archivos del contrato", () => {
     expect(CSS_FILE).toBeDefined();
+    expect(BUTTON_CSS_FILE).toBeDefined();
     expect(DROPDOWN_SRC).toBeDefined();
   });
 
@@ -194,7 +204,84 @@ describe("Contrato de clases del Dropdown", () => {
         expect(match).not.toBeNull();
         expect(match?.[1]).toContain(`var(--color-${role})`);
         expect(match?.[1]).toContain(`var(--color-${role}-content)`);
+        expect(match?.[1]).toContain(`var(--color-${role}-focus)`);
       });
+    });
+  });
+
+  describe("D-08: el trigger compone clases de `.btn`", () => {
+    /**
+     * El trigger dejó de tener superficie propia en `dropdown.css` y ahora
+     * emite `btn btn-{rol} btn-{tamaño}`. Eso convierte el contrato en
+     * **cruzado**: si alguien retira un rol o un tamaño de `button.css` o de
+     * `variants/button.ts`, el trigger del Dropdown se queda sin estilo sin
+     * que nada en `dropdown.css` cambie. Este bloque es el que lo caza.
+     */
+    const triggerButtonClasses = (): string[] => {
+      const types = DROPDOWN_SRC ? read(join(DROPDOWN_SRC, "Dropdown.types.ts")) : "";
+      const roles = typeUnion(types, "DropdownVariant");
+      const sizes = typeUnion(types, "DropdownSize");
+
+      return [
+        "btn",
+        ...roles.map((role) => button.theme[role as keyof typeof button.theme]),
+        ...sizes.map((size) => button.size[size as keyof typeof button.size]),
+      ];
+    };
+
+    it("el hook emite `btn` y lee los mapas del contrato de button", () => {
+      const hook = DROPDOWN_SRC ? read(join(DROPDOWN_SRC, "useDropdown.tsx")) : "";
+
+      expect(hook).toContain('"btn"');
+      expect(hook).toContain("button.theme[variant]");
+      expect(hook).toContain("button.size[size]");
+    });
+
+    it("cada rol y tamaño del Dropdown existe en el contrato de button", () => {
+      const missing = triggerButtonClasses().filter((cls) => !cls);
+
+      expect(missing).toEqual([]);
+    });
+
+    it("todas esas clases tienen selector en button.css", () => {
+      const selectors = selectorsIn(BUTTON_CSS_FILE, "btn");
+      const missing = triggerButtonClasses().filter((cls) => !selectors.has(cls));
+
+      expect(missing).toEqual([]);
+    });
+
+    it("dropdown.css ya no reimplementa la superficie del trigger", () => {
+      const contents = CSS_FILE ? read(CSS_FILE) : "";
+
+      // Si vuelven los tokens propios del trigger es que se duplicó `.btn`.
+      expect(contents).not.toContain("--dropdown-trigger-bg");
+      expect(contents).not.toContain("--dropdown-trigger-size");
+    });
+  });
+
+  describe("D-09: el rol es acento, no superficie", () => {
+    it("ninguna variante redefine la superficie del panel", () => {
+      const contents = CSS_FILE ? read(CSS_FILE).replace(/\/\*[\s\S]*?\*\//g, "") : "";
+
+      Object.entries(dropdown.theme).forEach(([role, cls]) => {
+        const block = new RegExp(
+          `\\.${cls},\\s*\\.${dropdown.menu.theme[role as "primary"]}\\s*\\{([^}]+)\\}`
+        );
+        const body = block.exec(contents)?.[1] ?? "";
+
+        expect(body).toContain("--dropdown-role:");
+        // La superficie (`--dropdown-color`) tiene que quedarse neutra.
+        expect(body).not.toContain("--dropdown-color:");
+      });
+    });
+
+    it("el item activo consume el acento con caída a realce neutro", () => {
+      const contents = CSS_FILE ? read(CSS_FILE) : "";
+      const block = /\.dropdown-item-selected \{([^@]+?)\n\}/.exec(contents);
+
+      expect(block).not.toBeNull();
+      expect(block?.[1]).toContain("var(\n    --dropdown-role,");
+      expect(block?.[1]).toContain("--dropdown-role-content");
     });
   });
 

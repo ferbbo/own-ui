@@ -423,6 +423,7 @@ declarada en el mismo elemento que la consume gana siempre a la heredada, el pat
 | Nivel | Clase | Rol |
 |---|---|---|
 | wrapper | `.dropdown` | `position: relative`, **sin superficie propia**. Declara TODOS los defaults de token |
+| trigger | `.dropdown-trigger` | **es un `.btn`** (ver abajo): aquí sólo ancho completo y reparto horizontal |
 | panel | `.dropdown-menu` | absoluto bajo el trigger, elevado, con superficie y radio. **No declara defaults** |
 | fila | `.dropdown-item` | estados por `color-mix`. **No declara defaults** |
 
@@ -433,7 +434,29 @@ declarada en el mismo elemento que la consume gana siempre a la heredada, el pat
 - Los defaults **compuestos** (sombra, `border-color` derivado) van en el fallback del `var()`
   que los consume, no como token: así `color-mix` se evalúa en el elemento final.
 - El bloque `prefers-reduced-motion` va **al final del archivo**: tiene la misma especificidad
-  que las reglas que anula y sólo gana por orden de aparición.
+  que las reglas que anula y sólo gana por orden de aparición. Cubre también al trigger, que
+  siendo un `.btn` no tendría ninguna reducción de movimiento (`button.css` no trae ese bloque).
+
+**El rol semántico es acento, no superficie.** `--dropdown-color` es la superficie del panel y
+**no cambia** con la variante: las 8 variantes fijan `--dropdown-role` /
+`--dropdown-role-content` / `--dropdown-focus-color`, y ese acento lo consumen sólo el item
+activo, el anillo de foco y el trigger (vía su `btn-{rol}`). Así el panel pasa WCAG AA siempre
+(`--color-base-content` sobre `--color-base-100`) en vez de depender de que el `-content` de
+cada rol contraste con su relleno — que con la paleta actual no ocurre en `warning` ni en
+`success` (§9.10). Sin variante, el item activo cae a un realce neutro por `color-mix`.
+
+**El trigger es un `.btn`.** `useDropdownTrigger` emite
+`btn btn-{rol} btn-{tamaño} dropdown-trigger`, leyendo `theme` y `size` de
+`variants/button.ts`. Superficie, altura, relleno, radio, hover, `:focus-visible` y `:disabled`
+salen de `button.css`; `dropdown.css` sólo añade `width: 100%`, `justify-content: space-between`
+y `.dropdown-trigger-active`, que remapea los tokens `--btn-*` en vez de duplicar la receta de
+color. Dos consecuencias que hay que tener presentes:
+
+1. **El contrato del Dropdown es cruzado.** Retirar un rol o un tamaño de `button.css` o de
+   `variants/button.ts` deja el trigger sin estilo sin que `dropdown.css` cambie. Lo cubre el
+   bloque «D-08» de `src/__tests__/dropdown-contract.test.ts`.
+2. **El orden de los `@import` de `index.css` es funcional**, no cosmético: `button.css` antes
+   de `dropdown.css`. Lo fija el fixture e2e midiendo `justify-content`.
 
 ---
 

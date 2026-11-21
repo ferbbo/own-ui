@@ -13,6 +13,11 @@ import { test, expect } from "@playwright/test";
  * garantiza que cada clase emitida tiene selector. Lo que se comprueba aqui es
  * lo que un test de texto no puede: que esas reglas **pintan y posicionan** de
  * verdad en un navegador.
+ *
+ * Incluye las dos decisiones tomadas en la revision del PR #33:
+ *   · **D-08** el trigger es un `.btn` — contrato cruzado entre los dos CSS.
+ *   · **D-09** el rol es acento y no superficie: el panel se queda neutro y el
+ *     color del rol sale solo en el item activo.
  */
 
 /** Umbral de tolerancia en px para comparar geometria. */
@@ -30,6 +35,9 @@ const hexToRgb = (hex: string): string => {
 };
 
 const TRANSPARENT = ["rgba(0, 0, 0, 0)", "transparent"];
+
+/** Umbral de texto normal de WCAG 2.1 AA. */
+const AA_NORMAL_TEXT = 4.5;
 
 const ROLES = [
   "primary",
@@ -165,47 +173,58 @@ test.describe("E2E-9: Dropdown menu and trigger", () => {
   });
 
   test.describe("AC-3: las 8 variantes semanticas aplican color distinto", () => {
-    test("cada panel toma el token de su rol", async ({ page }) => {
-      const measured = await page.evaluate((roles) => {
-        return roles.map((role) => ({
-          role,
-          bg: window.getElementBgColor(`menu-${role}`),
-          token: window.getCSSVariable(":root", `--color-${role}`),
-        }));
-      }, ROLES);
+    /**
+     * D-09 (decision de revision del PR #33): el rol es **acento, no
+     * superficie**. El panel se queda neutro en las ocho variantes y el color
+     * del rol aparece solo en el item activo, en el anillo de foco y en el
+     * trigger. Por eso lo que aqui se mide es el item ACTIVO de cada rol, no
+     * el panel.
+     */
+    test("el item activo de cada rol toma el token de su rol", async ({ page }) => {
+      const measured = await page.evaluate(
+        (roles) =>
+          roles.map((role) => ({
+            role,
+            bg: window.getElementBgColor(`item-${role}-selected`),
+            token: window.getCSSVariable(":root", `--color-${role}`),
+          })),
+        ROLES
+      );
 
       for (const { role, bg, token } of measured) {
         expect(token, `--color-${role} debe existir`).toBeTruthy();
-        expect(bg, `el panel ${role} debe pintar su token`).toBe(hexToRgb(token!));
+        expect(bg, `el item activo ${role} debe pintar su token`).toBe(hexToRgb(token!));
       }
     });
 
-    test("los 8 fondos son distintos entre si", async ({ page }) => {
+    test("los 8 items activos son distintos entre si", async ({ page }) => {
       const backgrounds = await page.evaluate(
-        (roles) => roles.map((role) => window.getElementBgColor(`menu-${role}`)),
+        (roles) => roles.map((role) => window.getElementBgColor(`item-${role}-selected`)),
         ROLES
       );
 
       expect(new Set(backgrounds).size).toBe(ROLES.length);
     });
 
-    test("el texto del item usa el -content de su rol", async ({ page }) => {
+    test("el texto del item activo usa el -content de su rol", async ({ page }) => {
       const measured = await page.evaluate(
         (roles) =>
           roles.map((role) => ({
             role,
-            fg: window.getElementTextColor(`item-${role}`),
+            fg: window.getElementTextColor(`item-${role}-selected`),
             token: window.getCSSVariable(":root", `--color-${role}-content`),
           })),
         ROLES
       );
 
       for (const { role, fg, token } of measured) {
-        expect(fg, `el item ${role} debe usar --color-${role}-content`).toBe(hexToRgb(token!));
+        expect(fg, `el item activo ${role} debe usar --color-${role}-content`).toBe(
+          hexToRgb(token!)
+        );
       }
     });
 
-    test("el trigger hereda el rol del wrapper", async ({ page }) => {
+    test("el trigger de cada rol se pinta con su btn-{rol}", async ({ page }) => {
       const measured = await page.evaluate(
         (roles) =>
           roles.map((role) => ({
@@ -217,10 +236,94 @@ test.describe("E2E-9: Dropdown menu and trigger", () => {
       );
 
       // Antes del lote 6 el trigger no heredaba ningun estilo semantico
-      // (hallazgo registrado en specs/lote-2.md, G-01).
+      // (hallazgo de specs/lote-2.md, G-01). Se resolvio reutilizando `.btn`
+      // (D-08), asi que esto mide el contrato CRUZADO entre los dos CSS.
       for (const { role, bg, token } of measured) {
         expect(bg, `el trigger ${role} debe pintar su token`).toBe(hexToRgb(token!));
       }
+    });
+  });
+
+  test.describe("D-09: el panel se queda neutro en las 8 variantes", () => {
+    test("los 8 paneles pintan la superficie base, no el rol", async ({ page }) => {
+      const measured = await page.evaluate(
+        (roles) => ({
+          panels: roles.map((role) => window.getElementBgColor(`menu-${role}`)),
+          surface: window.getCSSVariable(":root", "--color-base-100"),
+          plain: window.getElementBgColor("dd-open-menu"),
+        }),
+        ROLES
+      );
+
+      for (const bg of measured.panels) {
+        expect(bg).toBe(hexToRgb(measured.surface!));
+      }
+      // Y son iguales al panel sin variante: la variante no toca la superficie.
+      expect(new Set([...measured.panels, measured.plain]).size).toBe(1);
+    });
+
+    test("el texto del item no activo es legible sobre el panel (WCAG AA)", async ({ page }) => {
+      const ratios = await page.evaluate(
+        (roles) =>
+          roles.map((role) => ({
+            role,
+            ratio: window.contrastRatio(
+              window.getElementTextColor(`item-${role}`) ?? "",
+              window.getElementBgColor(`item-${role}`) ?? ""
+            ),
+          })),
+        ROLES
+      );
+
+      // Es la ganancia real de D-09: el panel ya no depende de que el
+      // `-content` del rol contraste con su relleno (con la paleta actual,
+      // warning daba ~2.15:1 y success ~2.28:1).
+      for (const { role, ratio } of ratios) {
+        expect(ratio as number, `el item del panel ${role} debe pasar AA`).toBeGreaterThanOrEqual(
+          AA_NORMAL_TEXT
+        );
+      }
+    });
+
+    test("sin variante, el item activo cae a un realce neutro", async ({ page }) => {
+      const measured = await page.evaluate(() => ({
+        selected: window.getElementBgColor("dd-open-item-selected"),
+        plain: window.getElementBgColor("dd-open-item"),
+      }));
+
+      // Ni transparente ni igual al item normal: se distingue sin rol.
+      expect(TRANSPARENT).not.toContain(measured.selected);
+      expect(measured.selected).not.toBe(measured.plain);
+    });
+  });
+
+  test.describe("D-08: el trigger es un .btn", () => {
+    test("toma altura, relleno y radio de button.css", async ({ page }) => {
+      const computed = await page.evaluate(() => ({
+        height: window.getComputedProp("dd-open-trigger", "height"),
+        padding: window.getComputedProp("dd-open-trigger", "padding-left"),
+        radius: window.getComputedProp("dd-open-trigger", "border-radius"),
+      }));
+
+      expect(computed.height).toBe("40px"); // btn-md
+      expect(computed.padding).toBe("16px"); // --btn-p de btn-md
+      expect(computed.radius).toBe("6px"); // --radius-field
+    });
+
+    test("dropdown.css le anade ancho completo y reparto horizontal", async ({ page }) => {
+      const computed = await page.evaluate(() => ({
+        justify: window.getComputedProp("dd-open-trigger", "justify-content"),
+        trigger: window.getRect("dd-open-trigger"),
+        wrapper: window.getRect("dd-open"),
+      }));
+
+      // `.btn` centra; `.dropdown-trigger` reparte. Las dos reglas tienen la
+      // misma especificidad, asi que esto fija ademas el ORDEN de los @import
+      // de index.css: si button.css pasa despues de dropdown.css, falla.
+      expect(computed.justify).toBe("space-between");
+      expect(Math.abs(computed.trigger!.width - computed.wrapper!.width)).toBeLessThanOrEqual(
+        EPSILON
+      );
     });
   });
 
