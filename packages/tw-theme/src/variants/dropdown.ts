@@ -1,4 +1,27 @@
-export default {
+/**
+ * Contrato de clases del Dropdown: prop de React → clase CSS.
+ *
+ * Es la fuente de verdad entre `packages/ui/src/Dropdown` y
+ * `src/css/dropdown.css` (AGENTS.md §4.7). Reescrito en el lote 6: la version
+ * anterior era una copia del contrato de `button` y declaraba
+ * `dropdown-outline`, `dropdown-solid` y `dropdown-link`, tres clases que no
+ * existen en el CSS ni las emite ningun hook, mientras que las que si se
+ * emiten (`dropdown-trigger`, `dropdown-menu`, `dropdown-open`, los estados
+ * del item y las variantes de estilo) no estaban declaradas en ninguna parte.
+ *
+ * La estructura refleja los cuatro elementos del compound, porque los hooks de
+ * `useDropdown.tsx` emiten la variante y el tamano en DOS niveles: en el
+ * wrapper (`dropdown-primary`) y en el panel (`dropdown-menu-primary`).
+ *
+ * `src/__tests__/dropdown-contract.test.ts` cruza este archivo contra el
+ * CSS y contra los literales del hook: si los tres dejan de decir lo mismo,
+ * falla la suite.
+ */
+const dropdown = {
+  /** Wrapper de posicionamiento (`DropdownRoot`). */
+  base: "dropdown",
+
+  /** Variante semantica — `DropdownVariant`. */
   theme: {
     primary: "dropdown-primary",
     secondary: "dropdown-secondary",
@@ -8,14 +31,9 @@ export default {
     success: "dropdown-success",
     warning: "dropdown-warning",
     error: "dropdown-error",
-    ghost: "dropdown-ghost",
-    link: "dropdown-link",
   },
-  variant: {
-    outline: "dropdown-outline",
-    solid: "dropdown-solid",
-    ghost: "dropdown-ghost",
-  },
+
+  /** Tamano — `DropdownSize`. */
   size: {
     xs: "dropdown-xs",
     sm: "dropdown-sm",
@@ -23,4 +41,71 @@ export default {
     lg: "dropdown-lg",
     xl: "dropdown-xl",
   },
+
+  /** Variante de estilo — `DropdownStyleVariant`. */
+  styleVariant: {
+    ghost: "dropdown-ghost",
+    bordered: "dropdown-bordered",
+    compact: "dropdown-compact",
+  },
+
+  /** Estado del wrapper. */
+  state: {
+    open: "dropdown-open",
+  },
+
+  /**
+   * `Dropdown.Trigger`.
+   *
+   * El trigger **es un `.btn`** (lote 6, D-08): `useDropdownTrigger` emite
+   * `btn btn-{rol} btn-{tamano} dropdown-trigger` leyendo los mapas `theme` y
+   * `size` del contrato de `button`. Aqui sólo se declaran las clases propias
+   * del dropdown; las `btn-*` las declara `variants/button.ts`, y que existan
+   * de verdad lo comprueba el mismo test de contrato.
+   */
+  trigger: {
+    base: "dropdown-trigger",
+    active: "dropdown-trigger-active",
+  },
+
+  /** `Dropdown.Menu` — el panel. Repite variante/tamano/estilo por nivel. */
+  menu: {
+    base: "dropdown-menu",
+    theme: {
+      primary: "dropdown-menu-primary",
+      secondary: "dropdown-menu-secondary",
+      accent: "dropdown-menu-accent",
+      neutral: "dropdown-menu-neutral",
+      info: "dropdown-menu-info",
+      success: "dropdown-menu-success",
+      warning: "dropdown-menu-warning",
+      error: "dropdown-menu-error",
+    },
+    size: {
+      xs: "dropdown-menu-xs",
+      sm: "dropdown-menu-sm",
+      md: "dropdown-menu-md",
+      lg: "dropdown-menu-lg",
+      xl: "dropdown-menu-xl",
+    },
+    styleVariant: {
+      ghost: "dropdown-menu-ghost",
+      bordered: "dropdown-menu-bordered",
+      compact: "dropdown-menu-compact",
+    },
+    state: {
+      open: "dropdown-menu-open",
+      closed: "dropdown-menu-closed",
+    },
+  },
+
+  /** `Dropdown.Item`. */
+  item: {
+    base: "dropdown-item",
+    selected: "dropdown-item-selected",
+    disabled: "dropdown-item-disabled",
+    text: "dropdown-item-text",
+  },
 };
+
+export default dropdown;

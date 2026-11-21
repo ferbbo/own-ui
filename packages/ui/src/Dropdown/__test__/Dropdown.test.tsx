@@ -63,12 +63,11 @@ describe("Dropdown", () => {
   });
 
   // Test de variantes
-  // El contrato (variants/dropdown.ts + css/dropdown.css) coloca variante y
-  // tamaño en el CONTENEDOR como `dropdown-*`, no en el trigger como `btn-*`:
-  // el trigger sólo lleva `dropdown-trigger`. Las expectativas originales
-  // (`btn-primary` / `btn-lg` sobre el trigger) contradecían las tres capas del
-  // contrato, así que se corrigen aquí. Que el trigger no herede ningún estilo
-  // semántico es un hallazgo del lote 6 (ver specs/lote-2.md, G-01).
+  // El contrato coloca variante y tamaño en el CONTENEDOR como `dropdown-*`,
+  // y desde el lote 6 (D-08) el trigger **además** compone las clases del
+  // Button: `btn btn-{rol} btn-{tamaño} dropdown-trigger`. Era el hallazgo
+  // G-01 de specs/lote-2.md — el trigger no heredaba ningún estilo semántico —
+  // y se resolvió reutilizando `.btn` en vez de duplicar su superficie.
   test("applies variant classes correctly", () => {
     const { container } = render(
       <Dropdown variant="primary" defaultOpen>
@@ -81,7 +80,7 @@ describe("Dropdown", () => {
 
     expect(container.firstChild).toHaveClass("dropdown", "dropdown-primary");
     expect(screen.getByRole("menu")).toHaveClass("dropdown-menu-primary");
-    expect(screen.getByText("Menu")).toHaveClass("dropdown-trigger");
+    expect(screen.getByText("Menu")).toHaveClass("dropdown-trigger", "btn", "btn-primary");
   });
 
   // Test de tamaños
@@ -97,6 +96,23 @@ describe("Dropdown", () => {
 
     expect(container.firstChild).toHaveClass("dropdown", "dropdown-lg");
     expect(screen.getByRole("menu")).toHaveClass("dropdown-menu-lg");
+    // El tamaño del trigger sale del contrato del Button (D-08).
+    expect(screen.getByText("Menu")).toHaveClass("btn-lg");
+  });
+
+  // El estado abierto se marca en el trigger, para que `dropdown.css` pueda
+  // remapear los tokens de `.btn` sin duplicar la receta de color (D-08).
+  test("marks the trigger as active while the menu is open", () => {
+    render(
+      <Dropdown defaultOpen>
+        <Dropdown.Trigger>Menu</Dropdown.Trigger>
+        <Dropdown.Menu>
+          <Dropdown.Item>Option</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+
+    expect(screen.getByText("Menu")).toHaveClass("dropdown-trigger-active");
   });
 
   // Test de estado controlado

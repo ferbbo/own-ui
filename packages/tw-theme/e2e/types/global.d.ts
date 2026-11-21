@@ -44,6 +44,12 @@ declare global {
     getComputedProp(id: string, prop: string): string | null;
 
     /**
+     * Rectangulo del elemento (`getBoundingClientRect`), para comprobar
+     * posicionamiento: que el panel del dropdown flote bajo el trigger.
+     */
+    getRect(id: string): { top: number; left: number; width: number; height: number } | null;
+
+    /**
      * Establece el tema actual usando data-theme
      */
     setTheme(theme: string | null): void;

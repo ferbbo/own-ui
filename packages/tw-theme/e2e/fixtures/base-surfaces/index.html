@@ -24,7 +24,7 @@
   <p>
     Valida la escala de superficies <code>--color-base-100/200/300</code> del lote 4:
     que exista, que sea dependiente del tema y que sus tres consumidores
-    (utilidades, <code>.dropdown</code> y <code>.btn</code> sin variante) resuelvan.
+    (utilidades, <code>.dropdown-menu</code> y <code>.btn</code> sin variante) resuelvan.
   </p>
 
   <!-- ☀️ Utilidades de superficie en tema claro (por defecto) -->
@@ -47,18 +47,25 @@
     <p id="surface-content-dark" class="text-base-content">text-base-content</p>
   </div>
 
-  <!-- 📂 .dropdown: su fondo era `transparent` porque --color-base-100 no existia -->
+  <!-- 📂 .dropdown-menu: su fondo era `transparent` porque --color-base-100 no
+       existia. Desde el lote 6 la superficie vive en el panel (.dropdown-menu)
+       y no en el wrapper (.dropdown), que solo posiciona: por eso se mide aqui
+       el panel. Ver specs/lote-6.md D-02 y S13. -->
   <div class="test-section">
-    <h2>📂 .dropdown (light)</h2>
-    <div id="dropdown" class="dropdown dropdown-md">
-      <div id="dropdown-item" class="dropdown-item">Item</div>
+    <h2>📂 .dropdown-menu (light)</h2>
+    <div class="dropdown dropdown-md">
+      <div id="dropdown" class="dropdown-menu dropdown-menu-open">
+        <div id="dropdown-item" class="dropdown-item">Item</div>
+      </div>
     </div>
   </div>
 
   <div class="test-section" data-theme="dark">
-    <h2>📂 .dropdown (dark)</h2>
-    <div id="dropdown-dark" class="dropdown dropdown-md">
-      <div id="dropdown-item-dark" class="dropdown-item">Item</div>
+    <h2>📂 .dropdown-menu (dark)</h2>
+    <div class="dropdown dropdown-md">
+      <div id="dropdown-dark" class="dropdown-menu dropdown-menu-open">
+        <div id="dropdown-item-dark" class="dropdown-item">Item</div>
+      </div>
     </div>
   </div>
 

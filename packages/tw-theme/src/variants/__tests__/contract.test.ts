@@ -14,8 +14,12 @@ import loader from "../loader.js";
  * añade una prop sin su CSS, o borra una clase que el contrato promete,
  * falla aqui y no en silencio en el navegador del consumidor.
  *
- * El contrato de `dropdown` queda fuera a proposito: hoy declara clases que
- * `dropdown.css` no define (`AGENTS.md` §9.7) y repararlo es el lote 6.
+ * El contrato de `dropdown` queda fuera porque tiene su propio test desde el
+ * lote 6, que cerro §9.7: `src/__tests__/dropdown-contract.test.ts`. Necesita
+ * uno aparte por dos razones — sus hooks construyen las clases con plantillas
+ * (`dropdown-${variant}`) en vez de leer el mapa, asi que hay que expandirlas
+ * desde las uniones de `Dropdown.types.ts`; y su trigger es un `.btn`, asi que
+ * el contrato es cruzado y se valida tambien contra `button.css`.
  */
 
 /**

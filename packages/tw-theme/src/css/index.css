@@ -26,6 +26,13 @@
 
    Mantener esta lista alineada con `src/variants/index.ts`: cada
    contrato de clases declarado ahi debe tener su CSS aqui.
+
+   ⚠️ EL ORDEN IMPORTA: `button.css` va antes de `dropdown.css`. Desde el
+   lote 6 el trigger del Dropdown es un `.btn` y `dropdown.css` lo ajusta
+   (`width: 100%`, `justify-content: space-between`) con reglas de la MISMA
+   especificidad, asi que sólo ganan por venir despues. El fixture e2e
+   `dropdown/` mide `justify-content` computado para que invertir el orden
+   falle en CI en vez de en el navegador de alguien.
    ========================================================= */
 
 @import "./button.css";
