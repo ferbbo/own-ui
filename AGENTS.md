@@ -540,7 +540,8 @@ DropdownRoot (forwardRef)   ← separa contextProps de domProps EXPLÍCITAMENTE
     └── DropdownContainer     ← useDropdown()        → clases .dropdown*, ref del wrapper
         ├── Dropdown.Trigger  ← useDropdownTrigger() → btn + React Aria useButton,
         │                                              aria-expanded/-controls, flechas
-        ├── Dropdown.Menu     ← useDropdownMenu()    → role="menu"; null si !open;
+        ├── Dropdown.Menu     ← useDropdownMenu()    → role="menu"; SIEMPRE montado
+        │                                              (aria-hidden + inert si cerrado);
         │                                              teclado, foco inicial, click-outside
         └── Dropdown.Item     ← useDropdownItem()    → role="menuitem", Enter/Space
 ```
@@ -941,11 +942,21 @@ de teclado de la APG completo. Queda fijado por 21 tests de RTL, entre ellos uno
 `console.error` recibe **cualquier** aviso y otro que comprueba que el listener de documento
 no se registra con el menú cerrado y se retira al desmontar. Ver §5.3 y `specs/lote-7.md`.
 
-De paso salió un bug de refs que afecta también al Button y **sigue abierto ahí**: los
-componentes montan la ref *forwarded* en el DOM en vez de la `innerRef` que `useDOMRef`
-devuelve, así que `innerRef.current` es siempre `null`, React Aria trabaja sin nodo y la ref
-del consumidor resuelve a `null`. En el Dropdown se arregló (el retorno de foco lo necesitaba);
-en `Button.tsx` está igual que antes. Ver `specs/lote-7.md` G-01.
+De paso se arregló en el Dropdown el bug de refs que el lote 5 ya había corregido en el
+Button: el componente montaba la ref *forwarded* en vez de la `innerRef` que `useDOMRef`
+devuelve, así que `innerRef.current` era siempre `null`, React Aria trabajaba sin nodo y la ref
+del consumidor resolvía a `null`. **El patrón correcto es el que documenta §5.2**: el hook
+devuelve la ref que hay que montar (`domRef` / `triggerRef`) y el componente monta **esa**, no
+la que recibe por `forwardRef`. Es el error más fácil de reintroducir de todo el repo.
+
+Y el menú **dejó de desmontarse al cerrarse** (era el gap G-01 del lote 6): sin el panel en el
+DOM antes de abrir, el navegador no tiene estado inicial desde el que interpolar y la
+transición de `dropdown.css` no se veía nunca. Montado y cerrado no significa accesible:
+lleva `aria-hidden` (lo saca del árbol de accesibilidad) e `inert` (lo saca del foco y del
+puntero, sin depender del CSS), y el CSS lo oculta con `visibility: hidden`, que a diferencia
+de `display: none` sí es animable. Verificado en Chromium midiendo la opacidad a mitad de
+transición; el caso `prefers-reduced-motion` sirve de control negativo, porque ahí la misma
+medida da 1.
 
 ### 9.9 🟡 Documentación que miente
 - README: `apps/example-app`, `pnpm example`, `pnpm dev`, `pnpm storybook` en la raíz →

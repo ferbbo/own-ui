@@ -48,8 +48,11 @@ describe("Dropdown", () => {
 
     const trigger = screen.getByText("Open Menu");
 
-    // Menu debe estar oculto inicialmente
-    expect(screen.queryByText("Option 1")).not.toBeInTheDocument();
+    // Menu oculto inicialmente. Desde el lote 7 el panel se queda MONTADO
+    // cuando esta cerrado, para que la transicion de apertura se vea, asi que
+    // lo que se comprueba es que no esta *expuesto*: `queryByRole` respeta
+    // `aria-hidden`, igual que un lector de pantalla.
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 
     // Click en trigger debe abrir el menu
     fireEvent.click(trigger);
@@ -531,6 +534,68 @@ describe("Dropdown", () => {
       } finally {
         addSpy.mockRestore();
       }
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────
+  // Lote 7 (revisión) — el panel cerrado se queda montado
+  // ───────────────────────────────────────────────────────────────────────
+
+  describe("el menú cerrado sigue montado pero retirado", () => {
+    const renderClosed = () =>
+      render(
+        <Dropdown>
+          <Dropdown.Trigger>Menu</Dropdown.Trigger>
+          <Dropdown.Menu>
+            <Dropdown.Item>Uno</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      );
+
+    // Es la razón de ser del cambio: sin el panel en el DOM antes de abrir,
+    // el navegador no tiene un estado inicial desde el que interpolar y la
+    // transición de `dropdown.css` no se ve nunca (gap G-01 del lote 6).
+    test("está en el DOM antes de abrirse, con la clase de cerrado", () => {
+      const { container } = renderClosed();
+      const menu = container.querySelector(".dropdown-menu");
+
+      expect(menu).toBeInTheDocument();
+      expect(menu).toHaveClass("dropdown-menu-closed");
+      expect(menu).not.toHaveClass("dropdown-menu-open");
+    });
+
+    test("pero no está expuesto: aria-hidden e inert", () => {
+      const { container } = renderClosed();
+      const menu = container.querySelector(".dropdown-menu") as HTMLElement;
+
+      expect(menu).toHaveAttribute("aria-hidden", "true");
+      expect(menu.hasAttribute("inert")).toBe(true);
+      // Y por eso las consultas por rol no lo encuentran.
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
+
+    test("al abrirse cambia de clase y deja de estar retirado", () => {
+      const { container } = renderClosed();
+
+      fireEvent.click(screen.getByText("Menu"));
+
+      const menu = container.querySelector(".dropdown-menu") as HTMLElement;
+      expect(menu).toHaveClass("dropdown-menu-open");
+      expect(menu).toHaveAttribute("aria-hidden", "false");
+      expect(menu.hasAttribute("inert")).toBe(false);
+      expect(screen.getByRole("menu")).toBe(menu);
+    });
+
+    test("al cerrarse vuelve al estado retirado sin desmontarse", () => {
+      const { container } = renderOpenMenu();
+      const menu = container.querySelector(".dropdown-menu") as HTMLElement;
+
+      fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+
+      // El MISMO nodo sigue ahí: eso es lo que permite animar la salida.
+      expect(container.querySelector(".dropdown-menu")).toBe(menu);
+      expect(menu).toHaveClass("dropdown-menu-closed");
+      expect(menu.hasAttribute("inert")).toBe(true);
     });
   });
 });

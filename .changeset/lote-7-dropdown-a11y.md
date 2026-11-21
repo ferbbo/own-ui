@@ -1,5 +1,5 @@
 ---
-"@ownui/dropdown": major
+"@ownui/dropdown": minor
 ---
 
 Dropdown: navegación por teclado, gestión de foco y fin de la fuga de props al DOM (lote 7).
@@ -27,7 +27,11 @@ Dropdown: navegación por teclado, gestión de foco y fin de la fuga de props al
 - **`aria-controls` / `aria-labelledby`** generados con `useId`, enlazando trigger y menú en los
   dos sentidos.
 
-## ⚠️ Rompe
+- **El panel ya no se desmonta al cerrarse.** Se queda en el DOM con `aria-hidden` e `inert`,
+  que es lo que hace falta para que la transición de apertura que define `dropdown.css` se vea:
+  sin un estado inicial en el DOM, el navegador no tiene nada que interpolar.
+
+## ⚠️ Cambios observables
 
 - **`useDropdownItem` devuelve `itemClasses` aparte**, en vez de meter `className` dentro de
   `itemProps`. Era la única excepción entre los cuatro hooks del paquete. Si consumías el hook
@@ -36,6 +40,14 @@ Dropdown: navegación por teclado, gestión de foco y fin de la fuga de props al
 - **Los items pasan a `tabIndex={-1}`**, incluidos los habilitados. Es lo que pide el patrón de
   menú: el único punto de entrada por `Tab` es el trigger, y dentro del menú el foco se mueve
   con las flechas. Si dependías de tabular por los items, ese recorrido ya no existe.
+- **El menú cerrado está en el DOM.** Un `document.querySelector(".dropdown-menu")` ahora
+  encuentra el panel aunque esté cerrado, y los snapshots del HTML cambian. Lo que **no**
+  cambia es la accesibilidad: con `aria-hidden` e `inert`, un lector de pantalla y las
+  consultas por rol de Testing Library siguen sin verlo, igual que antes.
+
+Los tres van en un `minor` y no en un `major` por decisión explícita del mantenedor: los hooks
+se consideran API interna pese a estar exportados. Queda escrito aquí para que quien lea el
+CHANGELOG no se lo encuentre por sorpresa.
 
 ## Nota sobre React Aria
 

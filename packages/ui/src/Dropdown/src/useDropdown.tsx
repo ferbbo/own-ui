@@ -134,7 +134,8 @@ export function useDropdownTrigger(
    * Hasta el lote 7 el componente montaba la ref **forwarded** en vez de la
    * `innerRef` que este hook devuelve, así que `innerRef.current` era siempre
    * `null`: React Aria trabajaba sin nodo y la ref del consumidor resolvía a
-   * `null`. Mismo patrón, mismo bug, en `Button` (ver specs/lote-7.md, G-01).
+   * `null`. `Button` tenía el mismo bug y lo arregló el lote 5 (devuelve
+   * `domRef` y el componente lo monta); el Dropdown se había quedado atrás.
    */
   const triggerRef = useMemo(
     // El cast es por varianza, no por duda: el contexto guarda la ref como
@@ -352,13 +353,29 @@ export function useDropdownMenu(props: DropdownMenuProps): {
     [menuRef, setOpen, onKeyDown]
   );
 
-  // Props para el menú
+  /**
+   * Props del menú.
+   *
+   * El panel se queda montado al cerrarse (para que la transición de
+   * apertura se vea), así que hay que retirarlo de verdad en vez de
+   * confiar en que no se ve:
+   *
+   *   · `aria-hidden` lo saca del árbol de accesibilidad. Es además lo que
+   *     hace que las consultas por rol de Testing Library no lo encuentren,
+   *     igual que un lector de pantalla.
+   *   · `inert` lo saca del alcance del foco y del puntero, incluido todo su
+   *     subárbol. Sin esto, tabular podría aterrizar en un item de un menú
+   *     cerrado: `visibility: hidden` lo evita en un navegador, pero depende
+   *     del CSS, y el comportamiento no debe depender de que la hoja de
+   *     estilos haya cargado.
+   */
   const menuProps = {
     ...restProps,
     id: menuId,
     role: "menu",
     "aria-labelledby": triggerId,
     "aria-hidden": !open,
+    inert: !open,
     onKeyDown: handleKeyDown,
   };
 

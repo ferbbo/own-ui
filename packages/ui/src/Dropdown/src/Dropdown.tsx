@@ -89,15 +89,24 @@ const DropdownTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, DropdownT
 const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
   function DropdownMenu(props, ref) {
     const { children } = props;
-    const { menuClasses, menuProps, menuRef, isVisible } = useDropdownMenu(props);
+    const { menuClasses, menuProps, menuRef } = useDropdownMenu(props);
 
     const mergedRef = useMemo(() => mergeRefs(ref, menuRef), [ref, menuRef]);
 
-    // Solo renderizar el menú si está visible
-    if (!isVisible) {
-      return null;
-    }
-
+    /**
+     * El menú **se queda montado** cuando está cerrado.
+     *
+     * Antes devolvía `null`, y eso hacía que la transición de apertura que
+     * define `dropdown.css` no se viera nunca: el panel aparecía ya montado
+     * en su estado final, y al cerrarse desaparecía de golpe sin animar. Era
+     * el gap G-01 del lote 6.
+     *
+     * Montado y cerrado **no** significa accesible: `useDropdownMenu` le pone
+     * `aria-hidden` e `inert`, así que queda fuera del árbol de
+     * accesibilidad y fuera del alcance del foco y del puntero, y el CSS lo
+     * oculta con `visibility: hidden` (que, a diferencia de `display: none`,
+     * sí es animable).
+     */
     return (
       <div ref={mergedRef} className={menuClasses} {...menuProps}>
         {children}

@@ -7,7 +7,7 @@
 | Lote            | **L7** — Dropdown: accesibilidad e higiene de props (`@docs/BUILD-BATCHES.md` §L7) |
 | Rama base       | `develop` (en `368b3fe`, "Merge pull request #33 from ferbbo/claude/lote-6") |
 | Rama de trabajo | `claude/lote-7`                                                              |
-| Estado general  | **COMPLETO** — 2 tasks, 0 bloqueadas, 6/6 criterios cumplidos                |
+| Estado general  | **COMPLETO** — 3 tasks, 0 bloqueadas, 6/6 criterios cumplidos. Incluye las decisiones de la revisión (D-05, D-06) |
 | Fecha           | 2026-11-21                                                                   |
 
 > Parte del `develop` que ya tiene los lotes 0–6. El lote 6 dejó el CSS del menú y del
@@ -61,6 +61,8 @@ Reglas de `AGENTS.md` que condicionan este lote:
 | S08 | Tests de higiene: sin warnings de React y sin props de configuración en el DOM | AC1, AC2 | `__test__/Dropdown.test.tsx` | S01 | HECHO |
 | S09 | Tests de teclado, foco y click-outside, incluida la limpieza del listener | AC3, AC4, AC6 | `__test__/Dropdown.test.tsx` | S04–S07 | HECHO |
 | S10 | `AGENTS.md` (§5.3, §9.8), changeset y spec | — | `AGENTS.md`, `.changeset/`, `specs/lote-7.md` | S01–S09 | HECHO |
+| S11 | **D-06** El panel deja de desmontarse al cerrarse: queda montado con `aria-hidden` + `inert`, para que la transición se vea | — | `Dropdown.tsx`, `useDropdown.tsx`, `__test__/Dropdown.test.tsx`, `e2e/fixtures/dropdown/`, `e2e/tests/dropdown.spec.ts` | S01–S09 | HECHO |
+| S12 | **D-05** El impacto de versión baja a `minor` y se corrige el gap G-01, que era falso | — | `.changeset/`, `AGENTS.md`, `useDropdown.tsx`, `specs/lote-7.md` | S11 | HECHO |
 
 ---
 
@@ -69,7 +71,8 @@ Reglas de `AGENTS.md` que condicionan este lote:
 | ID  | Slices | Predecesora | Modo + justificación | Commit | Estado |
 | --- | ------ | ----------- | -------------------- | ------ | ------ |
 | T1  | S01–S09 | — | **SECUENCIAL** | `2eb5410` | HECHO |
-| T2  | S10 | T1 | **SECUENCIAL** — documenta el resultado | `(este commit)` | HECHO |
+| T2  | S10 | T1 | **SECUENCIAL** — documenta el resultado | `026dddb` | HECHO |
+| T3  | S11, S12 | T2 | **SECUENCIAL** — decisiones de la revisión; tocan los mismos archivos que T1 | `(este commit)` | HECHO |
 
 **Desviación del plan, registrada (D-02).** El plan abría con tres tasks: props+ids, teclado y
 documentación. Las dos primeras se fusionaron en T1 al ejecutarlas: el teclado necesita los
@@ -161,7 +164,15 @@ Es **la** decisión del lote, y el backlog pide tomarla con argumentos.
 Ver la nota bajo la tabla de tasks: fusionar props+ids con teclado era la opción con mejor
 relación coste/beneficio, porque la alternativa dejaba un commit que no compila.
 
-### D-03 — El menú sigue desmontándose al cerrar
+### D-03 — ⚠️ REVERTIDA en la revisión: el menú sigue desmontándose al cerrar
+
+> El mantenedor pidió arreglarlo. Ver **D-06**. El texto original se conserva porque el
+> razonamiento sigue siendo válido en una parte: el cambio *es* observable y necesitaba
+> decisión — lo que cambia es quién la toma.
+
+#### Texto original
+
+### D-03 (original) — El menú sigue desmontándose al cerrar
 
 - **Contexto.** El lote 6 dejó el gap **G-01**: `DropdownMenu` devuelve `null` cuando está
   cerrado, así que el panel se monta ya abierto y la transición de apertura que tiene el CSS no
@@ -177,7 +188,25 @@ relación coste/beneficio, porque la alternativa dejaba un commit que no compila
   cuyos seis criterios no lo piden.
 - **Reversibilidad.** Total: es el `if (!isVisible) return null;` de `Dropdown.tsx`.
 
-### D-04 — El arreglo de refs se limita al Dropdown
+### D-04 — ⚠️ CORREGIDA: el `Button` no tenía el bug
+
+> **Me equivoqué, y la corrección importa porque esto quedó escrito en `AGENTS.md`.** Afirmé
+> que `Button.tsx` monta la ref *forwarded* y que el bug «sigue abierto ahí». Es falso: el
+> **lote 5 ya lo arregló** — `useButton` devuelve `domRef: innerRef`, `Button.tsx` monta
+> `ref={domRef}` y hay un comentario en el hook explicando exactamente este fallo. Lo afirmé
+> por el patrón que describe `AGENTS.md` §5.2 sin abrir el archivo.
+>
+> `Loader` tampoco lo tiene: no usa `useDOMRef`, reenvía su ref directamente, que es correcto
+> porque no pasa por React Aria. Y `@ownui/dom-utils` **sí** tiene tests (6), contra lo que
+> dice §9.10.
+>
+> Corregido en `AGENTS.md` §9.8, en el comentario de `useDropdown.tsx` y en el gap G-01, que
+> queda eliminado. Lo que sí es cierto y se queda documentado es que **el Dropdown se había
+> quedado atrás** respecto al arreglo del lote 5.
+
+#### Texto original
+
+### D-04 (original) — El arreglo de refs se limita al Dropdown
 
 - **Contexto.** `useDOMRef` devuelve una `innerRef` que los componentes **no montan**: montan la
   ref *forwarded*. El resultado es que `innerRef.current` es siempre `null`, React Aria trabaja
@@ -189,11 +218,48 @@ relación coste/beneficio, porque la alternativa dejaba un commit que no compila
   (ref del consumidor, `onPress` de React Aria) que son un lote de Button, no de Dropdown.
 - **Reversibilidad.** Trivial, es una línea por componente.
 
+### D-05 — El impacto de versión baja a `minor` *(decisión del mantenedor)*
+
+- **Contexto.** Pregunta abierta 1: puse `major` porque `useDropdownItem` cambia su API
+  (exportada en `index.ts`) y los items pasan a `tabIndex={-1}`. Respuesta: **sí**, los hooks
+  cuentan como API interna → `minor`.
+- **Decisión.** `minor`, y los tres cambios observables listados **explícitamente** en el
+  changeset bajo su propio encabezado, con una línea que dice que van en `minor` por decisión
+  del mantenedor.
+- **Razón del matiz.** D-06 añade un cambio observable que no existía cuando se tomó la
+  decisión: el panel cerrado ahora está en el DOM, así que un `querySelector` lo encuentra y
+  los snapshots de HTML cambian. No lo subo a `major` por mi cuenta —la decisión es del
+  mantenedor— pero un `minor` silencioso sí sería un problema, así que la mitigación es que el
+  CHANGELOG lo diga sin eufemismos. La accesibilidad **no** cambia: con `aria-hidden` e `inert`
+  ni un lector de pantalla ni las consultas por rol lo ven.
+- **Reversibilidad.** Una línea del changeset.
+
+### D-06 — El panel cerrado se queda montado *(decisión del mantenedor)*
+
+- **Contexto.** Era el gap G-01 del lote 6 y la D-03 de este lote, que había decidido dejarlo
+  para más adelante. El mantenedor pidió arreglarlo.
+- **Decisión.** `DropdownMenu` deja de devolver `null`. El panel se queda montado con
+  `aria-hidden` (fuera del árbol de accesibilidad) e `inert` (fuera del foco y del puntero,
+  todo el subárbol incluido), y el CSS lo oculta con `visibility: hidden`.
+- **Por qué `inert` y no `hidden`.** `hidden` aplica `display: none`, que **mata la
+  transición**: es justo lo que había que evitar. `visibility: hidden` sí es animable, pero
+  depende de que la hoja de estilos haya cargado, y el comportamiento no debe depender de eso
+  — de ahí `inert`, que lo garantiza desde el DOM.
+- **Cómo se verificó.** En jsdom no hay transiciones, así que el mecanismo se prueba en los
+  tests unitarios (el **mismo nodo** persiste al cerrar, y las clases y los atributos cambian)
+  y la **interpolación real** en Chromium: se abre el panel y se mide la opacidad computada dos
+  frames después, que tiene que estar estrictamente entre 0 y 1. El caso
+  `prefers-reduced-motion` es el **control negativo**: la misma medida da exactamente 1, así
+  que el test no puede pasar por accidente.
+- **Coste aceptado.** Un nodo más en el DOM por dropdown montado, y el cambio observable de
+  D-05.
+- **Reversibilidad.** Total: es volver a poner el `if (!isVisible) return null;`.
+
 ---
 
 ## 7. Bloqueantes
 
-**Ninguno.** Las 2 tasks se completaron; ninguna necesitó un segundo intento.
+**Ninguno.** Las 3 tasks se completaron; ninguna necesitó un segundo intento.
 
 ---
 
@@ -211,14 +277,24 @@ relación coste/beneficio, porque la alternativa dejaba un commit que no compila
 
 | ID | Hallazgo | Dónde corresponde |
 | --- | --- | --- |
-| G-01 | **`Button` monta la ref equivocada.** Mismo bug que se arregló en el Dropdown: `Button.tsx` monta la ref *forwarded* en vez de la `innerRef` de `useDOMRef`, así que `innerRef.current` es `null`, React Aria trabaja sin nodo y la ref del consumidor resuelve a `null`. Arreglo conocido: montar `innerRef` (o un `mergeRefs`). Ver D-04 | Un lote de Button |
-| G-02 | **El menú no se ve aparecer**: sigue desmontándose al cerrar (D-03) | Decisión de producto propia |
+| ~~G-01~~ | ❌ **Retirado: era falso.** Afirmé que `Button` tenía el bug de refs sin abrir el archivo; el lote 5 ya lo había arreglado. Ver D-04 | — |
+| ~~G-02~~ | ✅ **Resuelto en la revisión.** El menú ya no se desmonta, así que la transición se ve. Ver D-06 | — |
+| G-07 | `AGENTS.md` §9.10 dice que `@ownui/dom-utils` «no tiene tests». **Tiene 6** desde el lote 5. Hay más entradas de §9.10 que pueden estar igual de desactualizadas: la lista merece una pasada completa contra el código, no parches sueltos | L9 (verdad en la documentación) |
 | G-03 | **`@ownui/dropdown` no declara las dependencias que importa**: `useDropdown.tsx` importa `@react-aria/button` y `@react-aria/utils`, que están en el `package.json` **raíz**, no en el del paquete. Funciona en el monorepo por el hoisting de pnpm y es frágil al publicar. Es el §9.10 de `AGENTS.md`, y este lote añade un import más (`mergeRefs`) a la cuenta | L9 o un lote de empaquetado |
 | G-04 | **Sin typeahead.** El patrón de menú de la APG incluye saltar al item que empieza por la letra pulsada. No está en los criterios del lote y es acumulativo (hace falta un buffer con temporizador) | L16 (Select) |
 | G-05 | **El menú no se reposiciona** si no cabe en el viewport (viene del lote 6, G-05): sigue abriéndose siempre hacia abajo | L15 / L16 |
 | G-06 | `@react-aria/menu` como motor, cuando el componente se rehaga con API de colección (D-01) | L16 |
 
 ### Preguntas abiertas
+
+Las tres se resolvieron en la revisión (2026-11-21):
+
+1. **¿`major` o `minor`?** → **`minor`**: los hooks cuentan como API interna (D-05).
+2. **¿`Tab` cierra?** → **ok**, se queda como está.
+3. **¿Arreglar lo que dejé fuera?** → **sí**: el menú ya no se desmonta (D-06); el bug del
+   `Button` no existía (D-04).
+
+Texto original de las preguntas:
 
 1. **¿`major` es el bump correcto?** Puse `major` en `@ownui/dropdown` por dos cambios que
    rompen: `useDropdownItem` devuelve `itemClasses` aparte (API pública del hook, exportado en
@@ -253,3 +329,18 @@ relación coste/beneficio, porque la alternativa dejaba un commit que no compila
   Los 21 tests pasaron a la primera, así que se verificaron por mutación antes de commitear.
 - **2026-11-21 ~22:10** — **T2**: `AGENTS.md` (§5.3 con el árbol, la tabla de teclas y las tres
   decisiones de implementación; §9.8 marcada como resuelta), changeset `major` y esta spec.
+- **2026-11-21 ~22:30** — **Revisión del mantenedor.** Tres respuestas: `minor` (D-05), `Tab`
+  se queda como está, y «arréglalo» a lo que había dejado fuera. Implementado como **T3**:
+    · **D-06** — el panel se queda montado con `aria-hidden` + `inert`. Falló, como estaba
+      previsto, el único test que afirmaba que los items **no** están en el documento con el
+      menú cerrado (lo escribió el lote 2): actualizado al contrato nuevo — lo que se comprueba
+      es que no está *expuesto*, y para eso `queryByRole` ya respeta `aria-hidden` igual que un
+      lector de pantalla. Los 21 tests del lote pasaron sin tocar nada por ese mismo motivo.
+      4 tests unitarios nuevos y 3 e2e, estos últimos midiendo la interpolación real en
+      Chromium.
+    · **D-04** — al ir a arreglar el bug de refs del `Button` resultó que **no existe**: el
+      lote 5 ya lo había corregido. Mi gap G-01 era falso y estaba escrito en `AGENTS.md`;
+      corregido ahí, en el comentario del hook y en la spec. De paso salió que §9.10 también
+      miente sobre los tests de `dom-utils` (G-07).
+  Suite tras los cambios: **236** unitarios (211 en la base), **150** e2e (147), lint en código
+  0, build 6/6.
