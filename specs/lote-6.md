@@ -9,6 +9,7 @@
 | Rama de trabajo | `claude/lote-6`                                                                 |
 | Estado general  | **COMPLETO** — 5 tasks, 0 bloqueadas, 5/5 criterios cumplidos                    |
 | Fecha           | 2026-11-21                                                                      |
+| PR              | [#33 → `develop`](https://github.com/ferbbo/own-ui/pull/33) — listo para revisión |
 
 > **Nota sobre el número de lote.** El prompt programado llegó de nuevo con el marcador
 > `{{N}}` sin sustituir. Se resuelve a **N = 6**. Justificación en **D-01**.
@@ -314,3 +315,4 @@ quien reproduzca la suite en otra máquina sepa a qué se debe.
   integrar ni conflictos que resolver. Suite completa en verde: `pnpm lint` (código 0),
   `pnpm test` (131), `pnpm --filter @ownui/tw-theme e2e` (139), `pnpm build` (6/6 paquetes) y
   `tsc --noEmit` del paquete Dropdown. Push y PR.
+- **2026-11-21 ~20:20** — PR [#33](https://github.com/ferbbo/own-ui/pull/33) abierto hacia `develop`, listo para revisión. Sin merge: el gate es humano.
