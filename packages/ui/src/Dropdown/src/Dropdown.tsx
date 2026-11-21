@@ -1,51 +1,64 @@
 // Dropdown.tsx
-import React, { forwardRef } from "react";
+import React, { forwardRef, useMemo } from "react";
+import { mergeRefs } from "@react-aria/utils";
 import { DropdownProvider } from "./DropdownContext";
-import { 
-  useDropdown, 
-  useDropdownTrigger, 
-  useDropdownMenu, 
-  useDropdownItem 
-} from "./useDropdown";
-import { 
-  DropdownProps, 
-  DropdownTriggerProps, 
+import { useDropdown, useDropdownTrigger, useDropdownMenu, useDropdownItem } from "./useDropdown";
+import {
+  DropdownProps,
+  DropdownDOMProps,
+  DropdownTriggerProps,
   DropdownMenuProps,
-  DropdownItemProps
+  DropdownItemProps,
 } from "./Dropdown.types";
+
+/** El contenedor recibe los atributos de DOM del root, más los hijos. */
+type DropdownContainerProps = DropdownDOMProps & { children: React.ReactNode };
 
 /**
  * Componente Dropdown principal que actúa como contenedor y provider del contexto.
- * Ahora usa el DropdownProvider para manejar el estado.
+ *
+ * Separa **explícitamente** las props de configuración (las que alimentan el
+ * contexto) de las props de DOM (las que van al `<div>`). Antes hacía
+ * `{...props}` sobre los dos, así que `variant`, `size`, `styleVariant`,
+ * `defaultOpen`, `open` y `onOpenChange` acababan como atributos del HTML y
+ * React avisaba por cada uno (`AGENTS.md` §9.8). El `...domProps` de aquí es
+ * seguro por construcción: lo que no se desestructura arriba es, por el tipo,
+ * un atributo de `<div>`.
  */
-const DropdownRoot = forwardRef<HTMLDivElement, DropdownProps>(
-  function Dropdown(props, ref) {
-    const { children, ...contextProps } = props;
-    
-    return (
-      <DropdownProvider {...contextProps}>
-        <DropdownContainer ref={ref} {...props}>
-          {children}
-        </DropdownContainer>
-      </DropdownProvider>
-    );
-  }
-);
+const DropdownRoot = forwardRef<HTMLDivElement, DropdownProps>(function Dropdown(props, ref) {
+  const { children, variant, size, styleVariant, defaultOpen, open, onOpenChange, ...domProps } =
+    props;
+
+  return (
+    <DropdownProvider
+      variant={variant}
+      size={size}
+      styleVariant={styleVariant}
+      defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <DropdownContainer ref={ref} {...domProps}>
+        {children}
+      </DropdownContainer>
+    </DropdownProvider>
+  );
+});
 
 /**
  * Contenedor interno del dropdown que consume el contexto para generar clases.
  */
-const DropdownContainer = forwardRef<HTMLDivElement, DropdownProps>(
-  function DropdownContainer(props, ref) {
-    const { children, ...restProps } = props;
-    const { dropdownClasses } = useDropdown(props);
+const DropdownContainer = forwardRef<HTMLDivElement, DropdownContainerProps>(
+  function DropdownContainer({ children, className, ...domProps }, ref) {
+    const { dropdownClasses, wrapperRef } = useDropdown({ className });
+
+    // El wrapper lleva dos refs: la que expone el consumidor y la del
+    // contexto, que es la que usa el click-outside para saber si un click
+    // cayó dentro o fuera del componente.
+    const mergedRef = useMemo(() => mergeRefs(ref, wrapperRef), [ref, wrapperRef]);
 
     return (
-      <div 
-        ref={ref} 
-        className={dropdownClasses}
-        {...restProps}
-      >
+      <div ref={mergedRef} className={dropdownClasses} {...domProps}>
         {children}
       </div>
     );
@@ -59,10 +72,10 @@ const DropdownContainer = forwardRef<HTMLDivElement, DropdownProps>(
 const DropdownTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, DropdownTriggerProps>(
   function DropdownTrigger(props, ref) {
     const { children } = props;
-    const { triggerClasses, triggerProps, Comp } = useDropdownTrigger(props, ref);
+    const { triggerClasses, triggerProps, triggerRef, Comp } = useDropdownTrigger(props, ref);
 
     return (
-      <Comp ref={ref} className={triggerClasses} {...triggerProps}>
+      <Comp ref={triggerRef} className={triggerClasses} {...triggerProps}>
         {children}
       </Comp>
     );
@@ -76,7 +89,9 @@ const DropdownTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, DropdownT
 const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
   function DropdownMenu(props, ref) {
     const { children } = props;
-    const { menuClasses, menuProps, isVisible } = useDropdownMenu(props);
+    const { menuClasses, menuProps, menuRef, isVisible } = useDropdownMenu(props);
+
+    const mergedRef = useMemo(() => mergeRefs(ref, menuRef), [ref, menuRef]);
 
     // Solo renderizar el menú si está visible
     if (!isVisible) {
@@ -84,7 +99,7 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
     }
 
     return (
-      <div ref={ref} className={menuClasses} {...menuProps}>
+      <div ref={mergedRef} className={menuClasses} {...menuProps}>
         {children}
       </div>
     );
@@ -98,10 +113,10 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(
 const DropdownItem = forwardRef<HTMLDivElement, DropdownItemProps>(
   function DropdownItem(props, ref) {
     const { children } = props;
-    const { itemProps } = useDropdownItem(props);
+    const { itemProps, itemClasses } = useDropdownItem(props);
 
     return (
-      <div ref={ref} {...itemProps}>
+      <div ref={ref} className={itemClasses} {...itemProps}>
         {children}
       </div>
     );
@@ -115,7 +130,9 @@ const MemoizedDropdownMenu = React.memo(DropdownMenu);
 const MemoizedDropdownItem = React.memo(DropdownItem);
 
 // Tipo para el componente compuesto
-interface DropdownCompoundComponent extends React.NamedExoticComponent<DropdownProps & React.RefAttributes<HTMLDivElement>> {
+interface DropdownCompoundComponent extends React.NamedExoticComponent<
+  DropdownProps & React.RefAttributes<HTMLDivElement>
+> {
   Trigger: typeof MemoizedDropdownTrigger;
   Menu: typeof MemoizedDropdownMenu;
   Item: typeof MemoizedDropdownItem;
@@ -128,8 +145,8 @@ Dropdown.Menu = MemoizedDropdownMenu;
 Dropdown.Item = MemoizedDropdownItem;
 
 export default Dropdown;
-export { 
-  MemoizedDropdownTrigger as DropdownTrigger, 
+export {
+  MemoizedDropdownTrigger as DropdownTrigger,
   MemoizedDropdownMenu as DropdownMenu,
-  MemoizedDropdownItem as DropdownItem 
+  MemoizedDropdownItem as DropdownItem,
 };
