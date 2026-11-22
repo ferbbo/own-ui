@@ -9,7 +9,7 @@
 | Rama de trabajo | `claude/lote-8`                                                                        |
 | Estado general  | **COMPLETO** — 3 tasks, 0 bloqueadas, 3/3 criterios cumplidos                          |
 | Fecha           | 2026-11-22                                                                             |
-| PR              | pendiente de enlazar (se añade al crearlo)                                             |
+| PR              | [#35 → `develop`](https://github.com/ferbbo/own-ui/pull/35) — listo para revisión      |
 
 > **Nota sobre el número de lote.** El prompt programado llegó otra vez con el marcador
 > `{{N}}` sin sustituir. Se resuelve a **N = 8**. Justificación en **D-01**.
