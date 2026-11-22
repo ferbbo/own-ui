@@ -49,6 +49,12 @@ declare global {
      */
     getRect(id: string): { top: number; left: number; width: number; height: number } | null;
 
+    /** Alterna las clases de apertura del panel del dropdown. */
+    toggleMenu(id: string): boolean | null;
+
+    /** Abre el panel y devuelve la opacidad computada dos frames despues. */
+    openAndSampleOpacity(id: string): Promise<number | null>;
+
     /**
      * Establece el tema actual usando data-theme
      */

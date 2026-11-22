@@ -216,6 +216,24 @@
     </div>
   </div>
 
+  <!-- 🎬 Transicion real: el panel arranca cerrado y MONTADO, y se abre
+       cambiando de clase. Es el escenario que el lote 7 habilito en React
+       (antes el menu se desmontaba, asi que nunca habia estado inicial desde
+       el que interpolar y la transicion no se veia). -->
+  <div class="test-section">
+    <h2>🎬 Transicion de apertura</h2>
+    <div class="test-row">
+      <div id="dd-anim" class="dropdown dropdown-md">
+        <button id="dd-anim-trigger" class="btn btn-md dropdown-trigger" type="button"
+                onclick="window.toggleMenu('dd-anim-menu')">Alternar</button>
+        <div id="dd-anim-menu" class="dropdown-menu dropdown-menu-md dropdown-menu-closed"
+             role="menu" aria-hidden="true" inert>
+          <div class="dropdown-item" role="menuitem">Item</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 🚫 Control negativo: wrapper sin superficie propia -->
   <div class="test-section">
     <h2>🚫 Control: el wrapper no pinta</h2>
@@ -275,6 +293,30 @@
       const darker = Math.min(lf, lb);
       return (lighter + 0.05) / (darker + 0.05);
     };
+
+    /** Alterna las clases de apertura del panel, como hace el hook en React. */
+    window.toggleMenu = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const open = el.classList.contains('dropdown-menu-open');
+      el.classList.toggle('dropdown-menu-open', !open);
+      el.classList.toggle('dropdown-menu-closed', open);
+      el.setAttribute('aria-hidden', String(open));
+      if (open) { el.setAttribute('inert', ''); } else { el.removeAttribute('inert'); }
+      return !open;
+    };
+
+    /**
+     * Abre el panel y devuelve la opacidad computada dos frames despues.
+     * Si hay transicion, el valor esta a medio camino; si no la hay, es 1 ya.
+     */
+    window.openAndSampleOpacity = (id) => new Promise((resolve) => {
+      window.toggleMenu(id);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const el = document.getElementById(id);
+        resolve(el ? parseFloat(getComputedStyle(el).opacity) : null);
+      }));
+    });
 
     window.setTheme = (theme) => {
       if (theme === null) {
