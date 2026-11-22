@@ -411,6 +411,50 @@ test.describe("E2E-9: Dropdown menu and trigger", () => {
     });
   });
 
+  test.describe("La transicion de apertura se ve de verdad", () => {
+    /**
+     * El lote 6 escribio la transicion y el lote 7 la hizo alcanzable: hasta
+     * entonces el componente desmontaba el menu al cerrarlo, asi que el panel
+     * aparecia ya montado en su estado final y no habia nada que interpolar.
+     * jsdom no anima, asi que esto solo se puede comprobar en un navegador.
+     */
+    test("al abrir, la opacidad esta a medio camino (hay interpolacion)", async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+
+      const opacity = await page.evaluate(() => window.openAndSampleOpacity("dd-anim-menu"));
+
+      expect(opacity).not.toBeNull();
+      expect(opacity as number).toBeGreaterThan(0);
+      expect(opacity as number).toBeLessThan(1);
+    });
+
+    test("y acaba en 1 cuando la transicion termina", async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await page.evaluate(() => window.toggleMenu("dd-anim-menu"));
+
+      // `--transition-duration` es 0.2s; se espera al valor final, no a un reloj.
+      await expect
+        .poll(() => page.evaluate(() => window.getComputedProp("dd-anim-menu", "opacity")), {
+          timeout: 2000,
+        })
+        .toBe("1");
+
+      const visibility = await page.evaluate(() =>
+        window.getComputedProp("dd-anim-menu", "visibility")
+      );
+      expect(visibility).toBe("visible");
+    });
+
+    test("con prefers-reduced-motion aparece ya puesto, sin interpolar", async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+
+      const opacity = await page.evaluate(() => window.openAndSampleOpacity("dd-anim-menu"));
+
+      // Sin transicion, dos frames despues ya esta en su valor final.
+      expect(opacity).toBe(1);
+    });
+  });
+
   test.describe("AC-4: prefers-reduced-motion anula la transicion", () => {
     test("con movimiento normal el panel tiene transicion", async ({ page }) => {
       await page.emulateMedia({ reducedMotion: "no-preference" });

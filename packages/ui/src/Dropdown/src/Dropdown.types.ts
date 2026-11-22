@@ -1,9 +1,5 @@
 // Dropdown.types.ts
-import {
-  HTMLAttributes,
-  ReactNode,
-  ButtonHTMLAttributes,
-} from "react";
+import { HTMLAttributes, ReactNode, ButtonHTMLAttributes, RefObject } from "react";
 
 /**
  * Variantes semánticas permitidas para el dropdown (coinciden con las clases CSS definidas).
@@ -125,6 +121,28 @@ export interface DropdownItemProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
+ * Props de configuración del Dropdown: las que alimentan el contexto y que
+ * **nunca** deben llegar al `<div>` del contenedor.
+ *
+ * Existe como tipo propio para que separar `contextProps` de `domProps` sea
+ * una operación tipada y no un rest spread a ciegas, que era el bug del
+ * lote 7 (`AGENTS.md` §9.8): `variant`, `size`, `defaultOpen`... acababan
+ * como atributos inválidos en el HTML servido.
+ */
+export type DropdownConfigPropNames =
+  | "variant"
+  | "size"
+  | "styleVariant"
+  | "defaultOpen"
+  | "open"
+  | "onOpenChange";
+
+/**
+ * Props del contenedor que sí son atributos DOM válidos.
+ */
+export type DropdownDOMProps = Omit<DropdownProps, DropdownConfigPropNames | "children">;
+
+/**
  * Contexto del Dropdown para compartir estado entre componentes.
  */
 export interface DropdownContextValue {
@@ -134,8 +152,13 @@ export interface DropdownContextValue {
   open: boolean;
   /**
    * Función para cambiar el estado de apertura.
+   *
+   * @param open - Nuevo estado.
+   * @param options.returnFocus - Si al cerrar hay que devolver el foco al
+   *   trigger. Verdadero para `Esc` y para la selección de un item; falso
+   *   para un click fuera, donde robar el foco sería hostil.
    */
-  setOpen: (open: boolean) => void;
+  setOpen: (open: boolean, options?: { returnFocus?: boolean }) => void;
   /**
    * Variante del dropdown.
    */
@@ -148,4 +171,25 @@ export interface DropdownContextValue {
    * Variante de estilo del dropdown.
    */
   styleVariant?: DropdownStyleVariant;
+  /**
+   * `id` del menú, generado con `useId`. Enlaza `aria-controls` del trigger
+   * con el panel.
+   */
+  menuId: string;
+  /**
+   * `id` del trigger, para el `aria-labelledby` del menú.
+   */
+  triggerId: string;
+  /**
+   * Ref al elemento del trigger, para devolverle el foco al cerrar.
+   */
+  triggerRef: RefObject<HTMLElement | null>;
+  /**
+   * Ref al elemento del menú, para mover el foco entre sus items.
+   */
+  menuRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Ref al wrapper, para distinguir un click dentro de uno fuera.
+   */
+  wrapperRef: RefObject<HTMLDivElement | null>;
 }

@@ -536,12 +536,15 @@ exige y el `Ref` que `forwardRef` entrega, usando `useImperativeHandle`.
 Umbral de decisión (de la guía): **3+ subcomponentes, estado compartido, o prop drilling >2 niveles.**
 
 ```
-DropdownRoot (forwardRef)
-└── DropdownProvider          ← estado: open/setOpen + variant/size/styleVariant
-    └── DropdownContainer     ← useDropdown()        → clases .dropdown*
-        ├── Dropdown.Trigger  ← useDropdownTrigger() → React Aria useButton + aria-expanded
-        ├── Dropdown.Menu     ← useDropdownMenu()    → role="menu"; devuelve null si !open
-        └── Dropdown.Item     ← useDropdownItem()    → role="menuitem", cierra al seleccionar
+DropdownRoot (forwardRef)   ← separa contextProps de domProps EXPLÍCITAMENTE
+└── DropdownProvider          ← estado (open/setOpen) + config + ids (useId) + refs
+    └── DropdownContainer     ← useDropdown()        → clases .dropdown*, ref del wrapper
+        ├── Dropdown.Trigger  ← useDropdownTrigger() → btn + React Aria useButton,
+        │                                              aria-expanded/-controls, flechas
+        ├── Dropdown.Menu     ← useDropdownMenu()    → role="menu"; SIEMPRE montado
+        │                                              (aria-hidden + inert si cerrado);
+        │                                              teclado, foco inicial, click-outside
+        └── Dropdown.Item     ← useDropdownItem()    → role="menuitem", Enter/Space
 ```
 
 - **Controlado vs no controlado**: `isControlled = controlledOpen !== undefined`; `setOpen`
@@ -550,6 +553,48 @@ DropdownRoot (forwardRef)
   `const Dropdown = MemoizedDropdown as DropdownCompoundComponent; Dropdown.Trigger = …`
 - `useDropdownContext()` lanza error si se usa fuera del provider (fail-fast intencional).
 - Los subcomponentes **no reciben props de configuración**: las leen del contexto.
+- **El root separa props de configuración y props de DOM con una desestructuración
+  explícita**, nunca con rest spread del objeto completo. Lo que no se desestructura es, por el
+  tipo (`DropdownDOMProps`), un atributo válido del `<div>`. Hacerlo al revés fue el bug §9.8.
+- **El provider es el dueño de la identidad y de las refs**, no los hooks: los `id` (`useId`)
+  enlazan trigger y menú por ARIA en los dos sentidos (`aria-controls` / `aria-labelledby`), y
+  las refs del trigger, del menú y del wrapper las comparten tres subcomponentes (retorno de
+  foco, movimiento del foco y click-outside).
+- **`setOpen(open, { returnFocus })`**: no todos los cierres son iguales. `Esc` y la selección
+  devuelven el foco al trigger (si no, se queda en un nodo que acaba de desmontarse); un click
+  fuera **no**, porque ahí el usuario va a otra parte y robarle el foco es hostil.
+
+#### Teclado del menú (patrón de la APG, lote 7)
+
+| Tecla | Dónde | Efecto |
+|---|---|---|
+| `Enter` / `Space` | trigger | abre/cierra (lo da React Aria `useButton`) |
+| `ArrowDown` / `ArrowUp` | trigger | abre y mete el foco en el primer/último item |
+| `ArrowDown` / `ArrowUp` | menú | mueven el foco, con vuelta circular, **saltando deshabilitados** |
+| `Home` / `End` | menú | primer / último item habilitado |
+| `Enter` / `Space` | item | selecciona, cierra y devuelve el foco |
+| `Esc` | menú | cierra y devuelve el foco al trigger |
+| `Tab` | menú | cierra **sin** `preventDefault`: el foco sigue su camino natural |
+
+Dos decisiones de implementación que conviene no deshacer sin leer `specs/lote-7.md`:
+
+1. **El handler vive en el menú, no en cada item.** Los eventos de los items burbujean, así que
+   un único `onKeyDown` cubre la lista entera.
+2. **Los items se consultan al DOM en el momento de la pulsación**
+   (`[role="menuitem"]:not([aria-disabled="true"])`), no con un registro de refs: son hijos
+   libres del compound y pueden aparecer, desaparecer o reordenarse, así que cualquier índice
+   guardado se queda obsoleto. El filtro del selector es además lo que hace que las flechas
+   salten los deshabilitados sin lógica extra.
+3. **`tabIndex` es -1 en todos los items**, incluidos los habilitados: el único punto de entrada
+   por `Tab` es el trigger.
+
+**Dónde NO se usa React Aria, y por qué.** `@react-aria/menu` trabaja sobre el modelo de
+colecciones de React Stately: los items tendrían que ser `<Item>` de
+`@react-stately/collections` en vez de JSX libre. Migrar no es cambiar de motor de teclado, es
+romper la API pública del compound. Se decidió implementar el patrón de la APG en los hooks y
+revisarlo cuando el componente se rehaga como `Select` con API de colección (L16). El trigger
+**sí** pasa por React Aria (`@react-aria/button`). Es una desviación consciente de §8.5,
+registrada en `specs/lote-7.md` D-01.
 
 ### 5.4 Convenciones de tipado
 
@@ -933,11 +978,34 @@ fijado por `src/__tests__/dropdown-contract.test.ts` (contrato de las tres capas
 fixture e2e `dropdown/` (23 tests sobre estilos computados en Chromium). Ver §4.8 y
 `specs/lote-6.md`.
 
-### 9.8 🟠 Dropdown: fuga de props al DOM y a11y incompleta
-`DropdownContainer` hace `{...restProps}` sobre un `<div>` incluyendo `variant`, `size`,
-`styleVariant`, `defaultOpen`, `open`, `onOpenChange` ⇒ warnings de React y atributos
-inválidos en el HTML. Falta además: navegación por flechas, `Esc` para cerrar, cierre por
-click-outside, focus trap/retorno de foco, `aria-controls`/`id` enlazando trigger y menú.
+### 9.8 ✅ Dropdown: fuga de props al DOM y a11y incompleta — *resuelto en el lote 7*
+`DropdownContainer` hacía `{...restProps}` sobre un `<div>` incluyendo `variant`, `size`,
+`styleVariant`, `defaultOpen`, `open` y `onOpenChange` ⇒ warnings de React y atributos
+inválidos en el HTML servido. Y la a11y estaba a medias: `role="menu"` y `role="menuitem"`
+sin navegación por flechas, sin `Esc`, sin click-outside, sin retorno de foco y sin
+`aria-controls`.
+
+El lote 7 cerró las dos mitades: separación explícita de `contextProps` y `domProps` (tipada,
+con `DropdownDOMProps`), `useId` para enlazar trigger y menú en los dos sentidos, y el patrón
+de teclado de la APG completo. Queda fijado por 21 tests de RTL, entre ellos uno que falla si
+`console.error` recibe **cualquier** aviso y otro que comprueba que el listener de documento
+no se registra con el menú cerrado y se retira al desmontar. Ver §5.3 y `specs/lote-7.md`.
+
+De paso se arregló en el Dropdown el bug de refs que el lote 5 ya había corregido en el
+Button: el componente montaba la ref *forwarded* en vez de la `innerRef` que `useDOMRef`
+devuelve, así que `innerRef.current` era siempre `null`, React Aria trabajaba sin nodo y la ref
+del consumidor resolvía a `null`. **El patrón correcto es el que documenta §5.2**: el hook
+devuelve la ref que hay que montar (`domRef` / `triggerRef`) y el componente monta **esa**, no
+la que recibe por `forwardRef`. Es el error más fácil de reintroducir de todo el repo.
+
+Y el menú **dejó de desmontarse al cerrarse** (era el gap G-01 del lote 6): sin el panel en el
+DOM antes de abrir, el navegador no tiene estado inicial desde el que interpolar y la
+transición de `dropdown.css` no se veía nunca. Montado y cerrado no significa accesible:
+lleva `aria-hidden` (lo saca del árbol de accesibilidad) e `inert` (lo saca del foco y del
+puntero, sin depender del CSS), y el CSS lo oculta con `visibility: hidden`, que a diferencia
+de `display: none` sí es animable. Verificado en Chromium midiendo la opacidad a mitad de
+transición; el caso `prefers-reduced-motion` sirve de control negativo, porque ahí la misma
+medida da 1.
 
 ### 9.9 🟡 Documentación que miente
 - README: `apps/example-app`, `pnpm example`, `pnpm dev`, `pnpm storybook` en la raíz →
