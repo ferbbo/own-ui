@@ -5,11 +5,11 @@
 | Campo           | Valor                                                                                 |
 | --------------- | ------------------------------------------------------------------------------------- |
 | Lote            | **L8** — Generador de componentes y plantillas (`@docs/BUILD-BATCHES.md` §L8)          |
-| Rama base       | `develop` (en `368b3fe`, merge del PR #33 / lote 6)                                    |
+| Rama base       | `develop` (en `368b3fe`, merge del PR #33 / lote 6). Reintegrado al cerrar: `43b10e3` (PR #34, lote 7) |
 | Rama de trabajo | `claude/lote-8`                                                                        |
-| Estado general  | EN CURSO                                                                               |
+| Estado general  | **COMPLETO** — 3 tasks, 0 bloqueadas, 3/3 criterios cumplidos                          |
 | Fecha           | 2026-11-22                                                                             |
-| PR              | pendiente                                                                              |
+| PR              | pendiente de enlazar (se añade al crearlo)                                             |
 
 > **Nota sobre el número de lote.** El prompt programado llegó otra vez con el marcador
 > `{{N}}` sin sustituir. Se resuelve a **N = 8**. Justificación en **D-01**.
@@ -66,10 +66,10 @@ Reglas de oro de `@docs/BUILD-BATCHES.md` que condicionan este lote:
 | S15 | CLI del generador: `--prefix`, `--dry-run`, `--force`, `--help` y mensajes de próximos pasos | AC1 | `scripts/create-component.mjs` | S10–S14 | HECHO |
 | S16 | Script raíz `pnpm create-component` | AC1 | `package.json` | S15 | HECHO |
 | S17 | Tests del generador: genera sobre un árbol temporal y el resultado pasa `check:contract` | AC1 | `scripts/__tests__/create-component.test.ts` | S09, S15 | HECHO |
-| S18 | Verificación end-to-end de AC1: generar `Demo` en el repo, typecheck + lint + test + story, y borrarlo | AC1 | — (evidencia en esta spec) | S16 | PENDIENTE |
-| S19 | `check:contract` como paso de CI | AC3 | `.github/workflows/ci.yml` | S08 | PENDIENTE |
-| S20 | `AGENTS.md`: §7 pasa a apoyarse en el generador y en el checker; §6.1 lista los scripts nuevos | — | `AGENTS.md` | S16, S19 | PENDIENTE |
-| S21 | Changeset con el impacto de versión | — | `.changeset/` | S20 | PENDIENTE |
+| S18 | Verificación end-to-end de AC1: generar `Demo` en el repo, typecheck + lint + test + story, y borrarlo | AC1 | — (evidencia en esta spec) | S16 | HECHO |
+| S19 | `check:contract` como paso de CI | AC3 | `.github/workflows/ci.yml` | S08 | HECHO |
+| S20 | `AGENTS.md`: §7 pasa a apoyarse en el generador y en el checker; §6.1 lista los scripts nuevos | — | `AGENTS.md` | S16, S19 | HECHO |
+| S21 | Changeset con el impacto de versión | — | `.changeset/` | S20 | HECHO |
 
 ---
 
@@ -78,8 +78,8 @@ Reglas de oro de `@docs/BUILD-BATCHES.md` que condicionan este lote:
 | ID  | Slices | Predecesora | Modo + justificación | Commit | Estado |
 | --- | ------ | ----------- | -------------------- | ------ | ------ |
 | T1 | S01–S09 | — | SECUENCIAL. Es la primera. | `e002cc0` | HECHO |
-| T2 | S10–S17 | T1 | SECUENCIAL: lo que genera T2 tiene que pasar el checker de T1, y sus tests lo invocan. Archivos compartidos: `package.json` raíz, `scripts/__tests__/`. | (este commit) | HECHO |
-| T3 | S18–S21 | T2 | SECUENCIAL: la verificación end-to-end y la documentación describen lo que T1 y T2 dejan en el árbol. | — | PENDIENTE |
+| T2 | S10–S17 | T1 | SECUENCIAL: lo que genera T2 tiene que pasar el checker de T1, y sus tests lo invocan. Archivos compartidos: `package.json` raíz, `scripts/__tests__/`. | `e73b750` | HECHO |
+| T3 | S18–S21 | T2 | SECUENCIAL: la verificación end-to-end y la documentación describen lo que T1 y T2 dejan en el árbol. | `f5e6d31` | HECHO |
 
 Ninguna task es paralelizable en este lote: las tres tocan `package.json` raíz y las dos
 primeras comparten el directorio de tests. Registrado como decisión **D-02**.
@@ -90,9 +90,9 @@ primeras comparten el directorio de tests. Registrado como decisión **D-02**.
 
 | ID  | Estado | Evidencia |
 | --- | ------ | --------- |
-| AC1 | PENDIENTE | — |
-| AC2 | PENDIENTE | — |
-| AC3 | PENDIENTE | — |
+| AC1 — `pnpm create-component Demo` produce un paquete que compila, pasa lint, tiene un test que pasa y una story que renderiza, sin edición manual | **CUMPLIDO** | Commit `e73b750`. Verificado generando **dos** componentes en el repo real, `Demo` (composición) y `Panel` (`--compound`), sin tocar un solo archivo después: `pnpm --filter @ownui/{demo,panel} typecheck` → 0 errores · `build` → `DTS ⚡️ Build success` (ESM + CJS + `.d.ts`, banner `"use client"`) · `jest --selectProjects components` → 109/109 (los tests generados incluidos: 16 del simple, 9 del compound) · `eslint` → 0 errores **y 0 avisos** · `prettier --check` → "All matched files use Prettier code style" · `pnpm check:contract` → verde. Ambos componentes se borraron al terminar la verificación (el árbol queda sin `Demo`/`Panel`). Automatizado además en `scripts/__tests__/create-component.test.ts` (13 tests sobre un árbol temporal). |
+| AC2 — `pnpm check:contract` detecta los desajustes de L5 y L6 si se reintroducen | **CUMPLIDO** | Commit `e002cc0`, `scripts/__tests__/check-contract.test.ts`: cada desajuste se reintroduce de verdad sobre una copia temporal del árbol y se exige error + código de salida 1. L5 contrato sin CSS (`variant.solid` → regla C2), L5 tipo sin contrato (`ButtonVariant = "solid"` → C3), L6 clases emitidas sin selector (se renombran los `.dropdown-menu*` del CSS → C1), L1 CSS fuera de `css/index.css` (→ C4), clase inventada en un componente (→ C1) y clase muerta en el CSS (→ aviso W1, que sólo falla con `--strict`). 10 tests. |
+| AC3 — `check:contract` corre en CI y falla el build cuando debe | **CUMPLIDO** | Commit `f5e6d31`: paso `Contract Check` en `.github/workflows/ci.yml`, **sin** `continue-on-error`, situado antes de `Build` (sólo lee archivos). Falla cuando debe porque el script sale con 1 — lo verifican los tests de AC2, que comprueban el código de salida y no el texto. Localmente: `pnpm check:contract` → 0. |
 
 ---
 
@@ -168,11 +168,22 @@ primeras comparten el directorio de tests. Registrado como decisión **D-02**.
 | Razón | (b) duplicaría trabajo sin mergear y crearía dos implementaciones que divergen. (a) deja un andamio que nace mintiendo. (c) cubre lo que no depende de decisiones del componente y deja el resto marcado donde se va a leer: en el hook generado. |
 | Reversibilidad | Total: cuando el lote 7 se mergee, la plantilla se actualiza con su implementación. |
 
+### D-08 — Se toca CI, pese a la regla dura del prompt
+
+| Campo | Valor |
+| --- | --- |
+| Contexto | Las reglas duras del prompt dicen "sin tocar CI", pero el criterio AC3 del lote es literalmente que `check:contract` corra en CI y falle el build cuando debe. Son instrucciones del mismo autor que se contradicen. |
+| Opciones | (a) No tocar CI y marcar AC3 como no cumplido. (b) Añadir el paso mínimo y registrarlo. |
+| Decisión | **(b)**: un paso `Contract Check` que ejecuta `pnpm check:contract`, sin tocar nada más del workflow. |
+| Razón | La regla específica del lote es más concreta que la general, y los lotes 2 y 3 ya modificaron `ci.yml` con el mismo criterio (commit `dbfec5e`, "ci: hacer que el pipeline signifique algo"). Un gate que no corre en CI no es un gate. |
+| Reversibilidad | Total: son 8 líneas en `ci.yml`. |
+
 ---
 
 ## 7. Bloqueantes
 
-Ninguno hasta ahora.
+Ninguno. Las tres tasks se cerraron en el primer intento (sin agotar los 3 que permite el
+prompt) y ningún slice quedó bloqueado.
 
 ---
 
@@ -188,6 +199,8 @@ Ninguno hasta ahora.
 | G-04 | El paso `Lint` de CI sigue con `continue-on-error` (gap G-15 del lote 3). Con el lote 6 mergeado habría que comprobar si ya puede ser puerta. |
 | G-05 | `useDOMRef` tal y como lo usan `Button` y `Dropdown` deja `innerRef.current` en `null`: montan en el DOM la ref del `forwardRef`, y `useImperativeHandle` sólo copia en la dirección contraria. Funciona porque React Aria no necesita el nodo, pero nada que dependa del nodo (devolver el foco, medir) puede usarlo. El andamio del lote 8 lo hace bien (monta el `buttonRef` del hook); arreglarlo en los dos componentes existentes es trabajo de otro lote. |
 | G-06 | El registro de `@ownui/<name>` en las dependencias de `@ownui/ui` se inserta antes de `@ownui/tw-theme`, así que la lista deja de estar en orden alfabético. Cosmético. |
+| G-07 | **La suite e2e no se puede ejecutar con el comando del repo en este contenedor.** `pnpm --filter @ownui/tw-theme e2e` falla con `browserType.launch: Executable doesn't exist at /opt/pw-browsers/chromium_headless_shell-1200/...`: el entorno trae Chromium 1243 pre-instalado y esta versión de Playwright pide la build 1200. **No es una regresión del lote** — no se toca ni CSS ni plugin. Se verificó pasando `launchOptions.executablePath: "/opt/pw-browsers/chromium"` en una config temporal: **150/150 en verde**. En CI no ocurre, porque el workflow hace `playwright install --with-deps chromium`. Si se quiere que el comando funcione también en local, haría falta respetar `PLAYWRIGHT_CHROMIUM_EXECUTABLE` en `e2e/playwright.config.ts`; es trabajo de otro lote. |
+| G-08 | `pnpm lint` cierra con 130 avisos de `prettier/prettier` en archivos preexistentes (0 errores). Todo lo que añade este lote está limpio. Mientras el paso `Lint` de CI siga con `continue-on-error` (G-04) no es puerta, así que no bloquea. |
 
 
 ---
@@ -199,4 +212,7 @@ Ninguno hasta ahora.
 | Fase 0 | `git fetch` + inventario de ramas. `develop` existe (`368b3fe`) y tiene los lotes 0–6. Rama `claude/lote-8` creada desde ahí. |
 | Fase 0 | Spec inicial con slices, tasks y dependencias. |
 | T1 | `scripts/check-contract.mjs` + tercer proyecto de Jest + `pnpm check:contract`. 10 tests; verde sobre el árbol real y rojo al reintroducir los desajustes de los lotes 1, 5 y 6. Commit `e002cc0`. |
-| T2 | `scripts/create-component.mjs` (+ `--compound`, `--prefix`, `--dry-run`, `--force`, `--root`) + 13 tests. Verificado generando `Demo` (composición) y `Panel` (compound) en el repo real: `check:contract` en verde, 109 tests de componentes en verde, typecheck sin errores, build con `.d.ts` correcto, lint y `prettier --check` limpios. Los dos componentes de prueba se borraron después. |
+| T2 | `scripts/create-component.mjs` (+ `--compound`, `--prefix`, `--dry-run`, `--force`, `--root`) + 13 tests. Verificado generando `Demo` (composición) y `Panel` (compound) en el repo real: `check:contract` en verde, 109 tests de componentes en verde, typecheck sin errores, build con `.d.ts` correcto, lint y `prettier --check` limpios. Los dos componentes de prueba se borraron después. Commit `e73b750`. |
+| T3 | Paso `Contract Check` en `ci.yml`, `AGENTS.md` (§3 mapa, §6.1 comandos, §6.3 tres proyectos de Jest, §7 receta reescrita sobre el andamio, regla 12 de §8) y changeset vacío. Commit `f5e6d31`. |
+| Fase final | `git merge origin/develop` (`43b10e3`, PR #34 del lote 7) **sin conflictos**: el lote 7 toca el Dropdown y la §9.8 de `AGENTS.md`; este lote toca `scripts/`, la §7 y la §6. Tras el merge, `pnpm check:contract` sigue en verde con el Dropdown nuevo (que emite más clases que antes). |
+| Fase final | Suite completa sobre la rama ya integrada: `pnpm check:contract` → verde · `pnpm test` → **14 suites / 259 tests** en verde (3 proyectos) · `pnpm build` → 6/6 paquetes · e2e → **150/150** (con el apaño de Chromium del gap G-07) · `pnpm lint` → 0 errores, 130 avisos preexistentes (G-08). |
