@@ -100,14 +100,18 @@ describe("check-contract", () => {
       expect(result.status).toBe(0);
     });
 
-    test("descubre los tres componentes sin lista escrita a mano", () => {
-      expect(result.report.map((row) => row.component)).toEqual(["button", "dropdown", "loader"]);
+    test("descubre los componentes sin lista escrita a mano", () => {
+      // `toContain` y no `toEqual`: el descubrimiento es automático, así que un
+      // componente nuevo (lotes 10+) no tiene por qué tocar este test.
+      const components = result.report.map((row) => row.component);
+
+      expect(components).toEqual(expect.arrayContaining(["button", "dropdown", "loader"]));
     });
 
     test("deduce el prefijo de clase de cada componente (button → btn)", () => {
       const prefixes = Object.fromEntries(result.report.map((row) => [row.component, row.prefix]));
 
-      expect(prefixes).toEqual({ button: "btn", dropdown: "dropdown", loader: "loader" });
+      expect(prefixes).toMatchObject({ button: "btn", dropdown: "dropdown", loader: "loader" });
     });
 
     test("`--component` limita el informe a un componente", () => {
