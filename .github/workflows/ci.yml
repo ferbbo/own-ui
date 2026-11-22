@@ -65,6 +65,14 @@ jobs:
         run: pnpm lint
         continue-on-error: true
 
+      # Puerta del contrato (lote 8): ninguna clase emitida por los hooks sin
+      # selector en el CSS, ninguna entrada de contrato sin CSS, ningun valor de
+      # union de tipos sin entrada en el contrato y ningun CSS de componente
+      # fuera del agregador que se publica. Solo lee archivos, asi que va antes
+      # de Build para que falle en segundos.
+      - name: Contract Check
+        run: pnpm check:contract
+
       # `pnpm build` construye los 6 paquetes en orden topologico (turbo con
       # `dependsOn: ["^build"]`). Antes se construia paquete a paquete segun una
       # deteccion de cambios que comparaba contra `main`, lo que en un PR a
