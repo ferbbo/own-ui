@@ -13,6 +13,7 @@ const workspaceModuleMapper = {
   "^@ownui/dropdown$": "<rootDir>/packages/ui/src/Dropdown/src/index.ts",
   "^@ownui/loader$": "<rootDir>/packages/ui/src/Loader/src/index.ts",
   "^@ownui/input$": "<rootDir>/packages/ui/src/Input/src/index.ts",
+  "^@ownui/card$": "<rootDir>/packages/ui/src/Card/src/index.ts",
   "^@ownui/ui$": "<rootDir>/packages/ui/src/index.ts",
 };
 

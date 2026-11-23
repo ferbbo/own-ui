@@ -16,3 +16,7 @@ export * from "./Loader/src/Loader.types";
 export { default as Input } from "./Input/src/Input";
 export type { InputProps } from "./Input/src/Input.types";
 export * from "./Input/src/Input.types";
+
+export { default as Card } from "./Card/src/Card";
+export type { CardProps } from "./Card/src/Card.types";
+export * from "./Card/src/Card.types";
