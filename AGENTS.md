@@ -70,16 +70,22 @@ own-ui/
 │   │   │   ├── theme.ts           → entry "@ownui/tw-theme/theme": temas custom
 │   │   │   ├── types.ts           → SemanticColorName, PluginOptions, Flags…
 │   │   │   ├── themes/            → TOKENS: root (forma), light, dark (color)
-│   │   │   ├── variants/          → CONTRATO de clases: button, dropdown, loader
+│   │   │   ├── variants/          → CONTRATO de clases: button, dropdown, loader, input,
+│   │   │   │                        card, badge, avatar
 │   │   │   ├── functions/         → generateThemeProperties, formatAndClean…, plugin.withOptions, splitStyles
 │   │   │   ├── utilities/         → colors.ts (generateColorUtilities, cssVarName/Ref), file.ts
-│   │   │   └── css/               → index + button/dropdown/loader .css  [PUBLICADO en ./css]
-│   │   └── e2e/                   → 9 fixtures + specs Playwright (150 tests)
+│   │   │   └── css/               → index + button/dropdown/loader/input/card/badge/avatar
+│   │   │                            .css  [PUBLICADO en ./css]
+│   │   └── e2e/                   → 12 fixtures + specs Playwright (254 tests)
 │   │
 │   ├── ui/                        → @ownui/ui          paquete agregador (barrel)
 │   │   └── src/
-│   │       ├── index.ts           → re-exporta Button, Dropdown, Input, Loader + tipos
+│   │       ├── index.ts           → re-exporta Avatar, Badge, Button, Card, Dropdown,
+│   │       │                        Input, Loader + tipos
+│   │       ├── Avatar/            → @ownui/avatar      [paquete propio]
+│   │       ├── Badge/             → @ownui/badge       [paquete propio]
 │   │       ├── Button/            → @ownui/button      [paquete propio]
+│   │       ├── Card/              → @ownui/card        [paquete propio]
 │   │       ├── Dropdown/          → @ownui/dropdown    [paquete propio]
 │   │       ├── Input/             → @ownui/input       [paquete propio]
 │   │       └── Loader/            → @ownui/loader      [paquete propio]
@@ -95,7 +101,7 @@ own-ui/
 │
 ├── @docs/                         → BUILD-BATCHES.md, Own_ui.fig, heroui-structure.svg,
 │                                    salvage/ (material histórico, no vigente)
-├── specs/                         → spec por lote (lote-0.md … lote-9.md)
+├── specs/                         → spec por lote (lote-0.md … lote-12.md)
 ├── .github/
 │   ├── copilot-instructions.md    → puntero a este archivo (lote 9)
 │   ├── instructions/components-react.instructions.md  → ARQUITECTURA DE COMPONENTES (canónica)
@@ -427,7 +433,11 @@ Clases existentes hoy:
 | `button.css` (306 ln) | `.btn`, `.btn-active`, 8 semánticos, `.btn-ghost`, `.btn-link`, `.btn-outline`, `.btn-dash`, `.btn-soft`, `.btn-{xs..xl}`, `.btn-square`, `.btn-circle`, `.btn-wide`, `.btn-block` |
 | `dropdown.css` (540 ln) | `.dropdown` (wrapper), `.dropdown-open`, `.dropdown-trigger` (+ `-active`, sobre `.btn`), `.dropdown-menu` (+ `-open`/`-closed`), `.dropdown-item` (+ selected/disabled/text), **8** semánticos, `.dropdown-{xs..xl}`, `.dropdown-{ghost,bordered,compact}`, y los mismos tres grupos repetidos con prefijo `.dropdown-menu-*`, más un bloque `prefers-reduced-motion` |
 | `loader.css` (119 ln) | `.loader`, `.loader-spinner`, `@keyframes loader-spin`, `.loader-{2xs..lg}`, 8 colores + `.loader-current` (hereda `currentColor`, L5), soporte `prefers-reduced-motion` |
-| `index.css` | agregador: `@import` de los tres anteriores. Es el destino de `@ownui/tw-theme/css` |
+| `input.css` (335 ln) | `.input-field`, `.input` (la caja), `.input-label`, `.input-control`, `.input-icon`, `.input-description`, `.input-error-message`, 8 semánticos **sobre el borde**, `.input-{outline,ghost,bordered}`, `.input-{xs..xl}`, `.input-{invalid,readonly,disabled}` |
+| `card.css` (303 ln) | `.card` (superficie), `.card-{header,title,body,footer}`, 8 semánticos **sobre el borde**, `.card-{elevated,outlined,ghost}`, `.card-{xs..xl}`, `.card-clickable` |
+| `badge.css` (217 ln) | `.badge` (relleno por rol), 8 semánticos, `.badge-{outline,soft}` (texto derivado con `color-mix`), `.badge-{xs..xl}`, `.badge-dot` |
+| `avatar.css` (210 ln) | `.avatar` (caja cuadrada), `.avatar-{img,initials,fallback}`, `.avatar-group`, 8 semánticos, `.avatar-{circle,square}`, `.avatar-{xs..xl}` |
+| `index.css` | agregador: `@import` de los siete anteriores. Es el destino de `@ownui/tw-theme/css` |
 
 Estos archivos **sí llegan al paquete publicado** desde el lote 1: el build los copia a
 `dist/css/` y se exponen como `@ownui/tw-theme/css` (todos) y `@ownui/tw-theme/css/<archivo>`
@@ -628,6 +638,15 @@ Loader usa en cambio el patrón genérico `LoaderProps<T extends ElementType = "
 `Omit<ComponentPropsWithoutRef<T>, keyof LoaderBaseProps>`. **Son dos patrones polimórficos
 distintos coexistiendo**; conviene unificar (ver lote 5 del plan).
 
+Desde el lote 12 el criterio para un componente **nuevo** es la unión discriminada, y el
+andamio de `pnpm create-component` —que genera el genérico— hay que reescribirlo al usarlo.
+Dos razones, por orden de peso: la unión permite **exigir `href` en `as="a"` y prohibirlo en
+el resto**, que es lo que convierte una regla de accesibilidad en un error de compilación; y
+el genérico no compila sus propias stories polimórficas, porque `Meta<typeof X>` de Storybook
+colapsa el parámetro de tipo a su valor por defecto. El Card es el primero que lo aplica
+(`CardProps = CardAsElementProps | CardAsAnchorProps | CardAsButtonProps`); el Badge y el
+Avatar no son polimórficos a propósito. Queda el Loader por migrar.
+
 ### 5.5 Reglas de rendimiento y a11y (no negociables)
 
 - `React.memo` en todo componente exportado; `useMemo` para el string de clases; `useCallback`
@@ -644,6 +663,9 @@ distintos coexistiendo**; conviene unificar (ver lote 5 del plan).
 | `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `shape`(2), `width`(2), `active`, `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ✅ 39 reales (L5) | 15 stories | **completo** (L5): contrato alineado, `loading` con `aria-busy`, iconos reales, sin fuga de props |
 | `@ownui/dropdown` | Provider | `variant`(8), `size`(5), `styleVariant`(3), `open`/`defaultOpen`/`onOpenChange` + `.Trigger`/`.Menu`/`.Item` | ✅ reales | 296 ln | **parcial**: sin CSS para menu/trigger, sin navegación por teclado, fuga de props al DOM |
 | `@ownui/input` | Composición | `label`, `description`, `errorMessage`, `invalid`, `theme`(8), `variant`(3), `size`(5), `type`(7), `startIcon`, `endIcon`, `readOnly`, `disabled`, `value`/`defaultValue`/`onChange` | ✅ reales (33) | 142 ln | **sano** (L10): `useTextField`, el rol colorea borde y foco en vez del relleno, cobertura 100% líneas |
+| `@ownui/card` | Compound estático | `as`(7), `theme`(8), `variant`(3), `size`(5), `className` + `.Header`/`.Title`/`.Body`/`.Footer` | ✅ 35 reales (L12) | 6 stories | **sano** (L12): rol sobre el borde, accionable sólo con `as="a"`/`"button"`, cobertura 100% líneas |
+| `@ownui/badge` | Composición | `theme`(8), `variant`(2), `size`(5), `dot`, `className` | ✅ 26 reales (L12) | 5 stories | **sano** (L12): relleno por rol, texto de `outline`/`soft` derivado y medido contra AA, punto decorativo vs anunciable |
+| `@ownui/avatar` | Composición + contexto | `src`, `alt`, `name`, `initials`, `theme`(8), `shape`(2), `size`(5) + `.Group` (`max`, `total`, `size`, `shape`, `theme`) | ✅ 46 reales (L12) | 7 stories | **sano** (L12): cascada imagen→hijos→iniciales→reserva con recuperación de `onError`, cobertura 100% líneas |
 | `@ownui/loader` | Composición | `as`, `color`(8 + `current`), `size`(5), `aria-label`, `id` | ✅ reales | 121 ln | sano; `color="current"` desde L5 (hereda `currentColor`); `Loader.variants.ts` vacío |
 | `@ownui/dom-utils` | — | `useDOMRef` | ✅ 6 reales (L2) | — | ok |
 | `@ownui/tw-theme` | — | ver §4 | ✅ 3 suites + 6 fixtures e2e | — | **maduro** |
@@ -668,7 +690,7 @@ pnpm test:tw-theme                 # sólo el plugin
 pnpm test:components               # componentes de packages/ui + utils de packages/utils
 pnpm test:scripts                  # los CLIs de scripts/ (lote 8)
 
-pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (9 fixtures / 150 tests)
+pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (12 fixtures / 254 tests)
 
 pnpm create-component <Name>       # andamio completo del componente (lote 8)
 pnpm create-component <Name> --compound   # patrón Provider + Trigger/Panel/Item

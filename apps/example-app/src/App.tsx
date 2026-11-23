@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { AvatarSection } from "./sections/AvatarSection";
+import { BadgeSection } from "./sections/BadgeSection";
 import { ButtonSection } from "./sections/ButtonSection";
+import { CardSection } from "./sections/CardSection";
 import { DropdownSection } from "./sections/DropdownSection";
 import { InputSection } from "./sections/InputSection";
 import { LoaderSection } from "./sections/LoaderSection";
@@ -85,6 +88,9 @@ export default function App() {
         <InputSection />
         <DropdownSection />
         <LoaderSection />
+        <CardSection />
+        <BadgeSection />
+        <AvatarSection />
       </main>
 
       <footer className="border-t border-base-300 px-6 py-8 text-sm opacity-70">
