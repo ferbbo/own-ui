@@ -1,0 +1,302 @@
+/* =========================================================
+   checkbox.css — sistema de tokens del Checkbox
+
+   Sigue la cascada de `AGENTS.md` §4.8: la base define todas las custom
+   properties, la variante semantica solo redefine --checkbox-color, los
+   estados recalculan por color-mix en oklab y los tamanos derivan de
+   --control-size. Ningun color literal: solo var(--color-*), con #000/#0000
+   como operandos de color-mix.
+
+   ── Anatomia ──────────────────────────────────────────────
+   El `<input type="checkbox">` nativo no es estilizable de forma fiable, asi
+   que se oculta visualmente (sin sacarlo del arbol de accesibilidad ni del
+   foco) y se pinta un `<span>` hermano. El `<label>` envuelve a los dos, de
+   modo que un click en el texto marca la casilla sin necesitar `for`.
+
+     .checkbox-field                 <label>: fila, control + texto
+       .checkbox-input               el <input> nativo, oculto visualmente
+       .checkbox                     la caja que se ve
+         .checkbox-mark              el trazo (check o guion)
+       .checkbox-label               el texto
+
+     .checkbox-group                 <div role="group"> en columna
+       .checkbox-group-label
+       .checkbox-group-items
+       .checkbox-group-description
+       .checkbox-group-error-message
+
+   ── Estado ────────────────────────────────────────────────
+   Cada estado se escribe DOS veces: como clase del contrato
+   (`.checkbox-checked`, que es lo que emite el hook) y como `:has()` sobre
+   el input nativo. La segunda forma es la que hace que este CSS sirva
+   tambien a HTML escrito a mano, que es el punto de publicarlo.
+
+   El tamano del control sale de `--control-size`, que es global
+   (`themes/root.ts`): checkbox, radio y switch tienen que alinearse entre si
+   cuando conviven en un formulario.
+   ========================================================= */
+
+/* =========================================================
+   0) El input nativo: invisible, pero presente
+   ========================================================= */
+
+/* No se usa `display: none` ni `visibility: hidden`: los dos sacan al input
+   del orden de tabulacion y del arbol de accesibilidad, que es justo lo que
+   no se puede perder. Este es el patron de `@react-aria/visually-hidden`. */
+.checkbox-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   1) Base: .checkbox — la caja que se ve
+   ========================================================= */
+
+.checkbox {
+  /* ─── estructura ─── */
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  /* ─── fuente (ROL): lo unico que redefinen las variantes ─── */
+  --checkbox-color: var(--color-primary);
+  --checkbox-fg: var(--color-primary-content);
+
+  /* ─── finales (pintura) ─── */
+  --checkbox-bg: #0000;
+  --checkbox-border: color-mix(in oklab, var(--color-base-content) 35%, #0000);
+
+  /* ─── decoracion ─── */
+  --checkbox-size: var(--control-size, 1.25rem);
+  --checkbox-radius: var(--control-radius, 0.375rem);
+  --checkbox-border-width: var(--control-border-width, 1px);
+  --checkbox-mark-width: var(--control-mark-width, 2px);
+
+  /* ─── estados ─── */
+  --checkbox-disabled-opacity: var(--disabled-fg-opacity, 35%);
+  --checkbox-transition-duration: var(--transition-duration, 0.2s);
+  --checkbox-outline-width: 2px;
+  --checkbox-outline-offset: 2px;
+
+  /* ─── propiedades finales ─── */
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+
+  background-color: var(--checkbox-bg);
+  color: var(--checkbox-fg);
+  border: var(--checkbox-border-width) solid var(--checkbox-border);
+  border-radius: var(--checkbox-radius);
+
+  transition:
+    background-color var(--checkbox-transition-duration),
+    border-color var(--checkbox-transition-duration);
+}
+
+/* =========================================================
+   2) El trazo
+   ========================================================= */
+
+/* Oculto por defecto con `scale`, no con `display`, para que la aparicion
+   sea animable y respete la transicion del control. */
+.checkbox-mark {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: var(--checkbox-mark-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity var(--checkbox-transition-duration),
+    transform var(--checkbox-transition-duration);
+}
+
+.checkbox-checked .checkbox-mark,
+.checkbox-indeterminate .checkbox-mark,
+.checkbox-field:has(.checkbox-input:checked) .checkbox-mark,
+.checkbox-field:has(.checkbox-input:indeterminate) .checkbox-mark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkbox,
+  .checkbox-mark {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* =========================================================
+   3) El campo: label + control + texto
+   ========================================================= */
+
+.checkbox-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--control-gap, 0.5rem);
+  cursor: pointer;
+  --checkbox-field-muted-opacity: 70%;
+}
+
+.checkbox-label {
+  font-size: var(--checkbox-fontsize, var(--fontsize, 0.875rem));
+  color: var(--color-base-content);
+  user-select: none;
+}
+
+/* =========================================================
+   4) El grupo
+   ========================================================= */
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--size-field, 0.25rem) * 1.5);
+  --checkbox-group-muted-opacity: 70%;
+}
+
+.checkbox-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--size-field, 0.25rem) * 2);
+}
+
+.checkbox-group-label {
+  font-size: var(--checkbox-fontsize, var(--fontsize, 0.875rem));
+  font-weight: 500;
+  color: var(--color-base-content);
+}
+
+.checkbox-group-description {
+  font-size: calc(var(--checkbox-fontsize, var(--fontsize, 0.875rem)) * 0.9);
+  color: color-mix(in oklab, var(--color-base-content) var(--checkbox-group-muted-opacity), #0000);
+}
+
+.checkbox-group-error-message {
+  font-size: calc(var(--checkbox-fontsize, var(--fontsize, 0.875rem)) * 0.9);
+  font-weight: 500;
+  color: var(--color-error);
+}
+
+/* =========================================================
+   5) Variantes semanticas: solo mueven la FUENTE del color
+   ========================================================= */
+
+.checkbox-primary {
+  --checkbox-color: var(--color-primary);
+  --checkbox-fg: var(--color-primary-content);
+}
+
+.checkbox-secondary {
+  --checkbox-color: var(--color-secondary);
+  --checkbox-fg: var(--color-secondary-content);
+}
+
+.checkbox-accent {
+  --checkbox-color: var(--color-accent);
+  --checkbox-fg: var(--color-accent-content);
+}
+
+.checkbox-neutral {
+  --checkbox-color: var(--color-neutral);
+  --checkbox-fg: var(--color-neutral-content);
+}
+
+.checkbox-info {
+  --checkbox-color: var(--color-info);
+  --checkbox-fg: var(--color-info-content);
+}
+
+.checkbox-success {
+  --checkbox-color: var(--color-success);
+  --checkbox-fg: var(--color-success-content);
+}
+
+.checkbox-warning {
+  --checkbox-color: var(--color-warning);
+  --checkbox-fg: var(--color-warning-content);
+}
+
+.checkbox-error {
+  --checkbox-color: var(--color-error);
+  --checkbox-fg: var(--color-error-content);
+}
+
+/* =========================================================
+   6) Estados: solo redefinen custom properties
+   ========================================================= */
+
+/* Marcado e indeterminado comparten pintura: los dos significan "esta casilla
+   participa", y lo que cambia es el trazo. */
+.checkbox-checked,
+.checkbox-indeterminate,
+.checkbox-field:has(.checkbox-input:checked) .checkbox,
+.checkbox-field:has(.checkbox-input:indeterminate) .checkbox {
+  --checkbox-bg: var(--checkbox-color);
+  --checkbox-border: var(--checkbox-color);
+}
+
+.checkbox-invalid,
+.checkbox-field:has(.checkbox-input[aria-invalid="true"]) .checkbox {
+  --checkbox-border: var(--color-error);
+}
+
+.checkbox-focused,
+.checkbox-field:has(.checkbox-input:focus-visible) .checkbox {
+  outline: var(--checkbox-outline-width) solid var(--checkbox-color);
+  outline-offset: var(--checkbox-outline-offset);
+}
+
+.checkbox-disabled,
+.checkbox-field:has(.checkbox-input:disabled) .checkbox {
+  opacity: var(--checkbox-disabled-opacity);
+}
+
+.checkbox-field:has(.checkbox-input:disabled),
+.checkbox-field:has(.checkbox-disabled) {
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   7) Tamanos: todo deriva de --size-field
+   ========================================================= */
+
+.checkbox-xs {
+  --checkbox-size: calc(var(--size-field, 0.25rem) * 3.5);
+  --checkbox-fontsize: 0.75rem;
+  --checkbox-mark-width: 2.5px;
+}
+
+.checkbox-sm {
+  --checkbox-size: calc(var(--size-field, 0.25rem) * 4);
+  --checkbox-fontsize: 0.8125rem;
+  --checkbox-mark-width: 2.25px;
+}
+
+.checkbox-md {
+  --checkbox-size: calc(var(--size-field, 0.25rem) * 5);
+  --checkbox-fontsize: 0.875rem;
+  --checkbox-mark-width: 2px;
+}
+
+.checkbox-lg {
+  --checkbox-size: calc(var(--size-field, 0.25rem) * 6);
+  --checkbox-fontsize: 1rem;
+  --checkbox-mark-width: 1.75px;
+}
+
+.checkbox-xl {
+  --checkbox-size: calc(var(--size-field, 0.25rem) * 7);
+  --checkbox-fontsize: 1.125rem;
+  --checkbox-mark-width: 1.5px;
+}
