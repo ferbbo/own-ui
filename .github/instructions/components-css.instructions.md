@@ -68,12 +68,23 @@ Advanced color mixing for consistent visual hierarchy:
 ## Build Integration
 
 ### File Location
-Place component CSS files in: `packages/tw-theme/src/components/{component}.css`
+Place component CSS files in: `packages/tw-theme/src/css/{component}.css`
 
 ### Build Process
-1. **Tailwind CLI**: Processes CSS with `@apply` directives and custom properties
-2. **PostCSS**: Converts CSS to JavaScript objects for plugin consumption
-3. **Auto-generation**: Creates `{component}Styles` exports in `src/build/components.js`
+The CSS is **not** compiled into JavaScript. It ships as CSS:
+
+1. **Aggregator**: every component file is `@import`ed from
+   `packages/tw-theme/src/css/index.css`, and the order matters (see the note at the top of
+   that file).
+2. **Copy on build**: `pnpm --filter @ownui/tw-theme build` copies `src/css/` to `dist/css/`.
+3. **Published entry points**: `exports["./css"]` resolves to `dist/css/index.css` and
+   `exports["./css/*"]` to a single file, so a consumer writes
+   `@import "@ownui/tw-theme/css";` or `@import "@ownui/tw-theme/css/button.css";`.
+
+> An earlier revision of this guide described a `pnpm build:components` step that generated
+> `{component}Styles` exports in `src/build/components.js`. **That script and that directory
+> never existed**, which is why component CSS went unpublished until batch 1
+> (`AGENTS.md` §9.1). Do not reintroduce a JS-object pipeline for CSS.
 
 ## Critical Implementation Details
 
@@ -114,12 +125,19 @@ outline-color: var(--btn-color, var(--color-base-content));
 
 ## Component Development Workflow
 
-1. **Create CSS file**: `packages/tw-theme/src/components/{component}.css`
+Use `pnpm create-component <Name>` (batch 8): it emits the CSS skeleton, the class contract
+and the registrations below. Doing it by hand is the same list:
+
+1. **Create CSS file**: `packages/tw-theme/src/css/{component}.css`
 2. **Define base class**: Establish all CSS custom properties and core styles
 3. **Add semantic variants**: Override `--{component}-color` for each semantic color
 4. **Implement style variants**: Create ghost, outline, soft, etc. variations
 5. **Add size variants**: Define size-specific property overrides
-6. **Build integration**: Run `pnpm build:components` to generate JS exports
-7. **Import Component styles**: Import the generated styles in `packages/tw-theme/src/plugin.ts` in Add components section
+6. **Register the file**: add `@import "./{component}.css";` to
+   `packages/tw-theme/src/css/index.css` — a file that is not imported there is not published
+7. **Declare the contract**: `packages/tw-theme/src/variants/{component}.ts` plus its entry in
+   `variants/index.ts`, so React props and CSS selectors say the same thing
+8. **Verify**: `pnpm check:contract` fails if a class is emitted without a selector, or a
+   contract entry without CSS
 
 This approach ensures consistent theming, accessibility, and maintainability across all UI components.

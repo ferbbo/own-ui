@@ -12,7 +12,11 @@ Este proyecto utiliza una configuración unificada de Jest que maneja pruebas pa
 
 #### 1. Componentes React (`components`)
 - **Entorno**: `jsdom` (para simulación de DOM)
-- **Archivos**: `packages/components/**/__test__/**/*.{test,spec}.{ts,tsx}`
+- **Archivos**: `packages/ui/**/__test__/**/*.{test,spec}.{ts,tsx}` y
+  `packages/utils/**/__test__/**/*.{test,spec}.{ts,tsx}`, más los `*.{test,spec}.{ts,tsx}`
+  sueltos de esos dos árboles. Hasta el lote 2 este `testMatch` apuntaba a un directorio
+  `components/` colgando de `packages/` que no existe, así que los tests de componentes no
+  corrían nunca y `pnpm test` salía en verde sin ejecutarlos.
 - **Características**:
   - Soporte completo para JSX con `react-jsx`
   - ESModule interoperability habilitada
@@ -27,6 +31,21 @@ Este proyecto utiliza una configuración unificada de Jest que maneja pruebas pa
   - Usa `tsconfig.test.json` del paquete tw-theme
   - Excluye archivos de build y utilidades de prueba
 
+#### 3. Scripts de mantenimiento (`scripts`)
+- **Entorno**: `node`
+- **Archivos**: `scripts/__tests__/**/*.{test,spec}.ts`
+- **Características**:
+  - Cubre los CLIs del repo: `create-component`, `check-contract` y `check-docs-links`
+  - Los invoca como procesos (`execFileSync`) para verificar también el **código de salida**,
+    que es lo que los convierte en puerta de CI
+  - Trabaja sobre árboles temporales, nunca sobre el repo
+
+### Qué NO cubre Jest
+
+Las pruebas del plugin sobre **CSS compilado de verdad** son Playwright, no Jest:
+`pnpm --filter @ownui/tw-theme e2e` (9 fixtures, 150 tests). Un cambio en el plugin viene con
+su fixture; las pruebas unitarias no capturan regresiones de CSS compilado.
+
 ## Scripts Disponibles
 
 ### Scripts Principales
@@ -40,9 +59,12 @@ pnpm test:coverage           # Ejecuta pruebas con reporte de cobertura
 ```bash
 pnpm test:components         # Solo pruebas de componentes React
 pnpm test:tw-theme           # Solo pruebas del paquete tw-theme
+pnpm test:scripts            # Solo pruebas de los CLIs de scripts/
 pnpm test:components:watch   # Modo watch para componentes
 pnpm test:tw-theme:watch     # Modo watch para tw-theme
 ```
+
+Estado actual de la suite: **14 suites / 259 tests** en verde (`pnpm test`).
 
 ## Configuración de Cobertura
 

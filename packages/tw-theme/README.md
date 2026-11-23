@@ -758,7 +758,9 @@ Currently, the plugin does not include a built-in debug mode. For troubleshootin
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! The workflow lives in the root README's
+[Contributing section](../../README.md#contributing), and the architecture, conventions and
+known debt in [`AGENTS.md`](../../AGENTS.md). There is no separate `CONTRIBUTING.md`.
 
 ### Development Setup
 

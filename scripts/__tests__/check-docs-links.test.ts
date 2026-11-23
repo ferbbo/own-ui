@@ -201,6 +201,17 @@ describe("check-docs-links", () => {
     expect(run(["--root", dir]).status).toBe(0);
   });
 
+  it("el repo real no tiene ningún enlace relativo roto", () => {
+    // Regresión del criterio AC5 del lote 9: los 7 enlaces muertos de
+    // `e2e/README.md` que documentaba `AGENTS.md` §9.9, más los tres que
+    // encontró el checker al escribirlo. Si alguien vuelve a enlazar un
+    // documento que no existe, esto se pone rojo sin esperar a CI.
+    const result = run();
+
+    expect(result.broken).toEqual([]);
+    expect(result.status).toBe(0);
+  });
+
   it("--help sale con 0 y explica el uso", () => {
     const stdout = execFileSync("node", [SCRIPT, "--help"], { encoding: "utf8" });
     expect(stdout).toContain("--root");

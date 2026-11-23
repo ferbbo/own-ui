@@ -1,3 +1,12 @@
+> ⚠️ **Documento histórico. No describe este repo.**
+>
+> Archivado en el lote 9. Describe un proyecto de un solo paquete con `src/components/` y
+> Emotion; Own UI es un monorepo de paquetes por componente sin CSS-in-JS. Se conserva porque
+> documenta la intención original de la estructura, no el estado actual.
+> La fuente de verdad es [`AGENTS.md`](../../AGENTS.md).
+
+---
+
 # Suggested Folder Structure
 
 Below is a typical directory structure for a **React** + **TypeScript** project using **Vite**, **Emotion**, **ESLint**, **Prettier**, **Jest**, **Storybook**, **Husky**, and **semantic-release**, with **pnpm** as the package manager.
