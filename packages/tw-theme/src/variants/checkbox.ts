@@ -34,10 +34,15 @@ export default {
    * atributo**: solo existe como propiedad del elemento en el DOM, asi que
    * sin clase no hay forma de pintarlo desde el servidor.
    */
+  /**
+   * No hay `focused`: el anillo de foco lo resuelve el CSS con
+   * `:has(:focus-visible)` sobre el input nativo, que es lo correcto
+   * tanto con React como con HTML escrito a mano. Emitir una clase desde
+   * JS seria una segunda fuente de verdad para el mismo estado.
+   */
   state: {
     checked: "checkbox-checked",
     indeterminate: "checkbox-indeterminate",
-    focused: "checkbox-focused",
     invalid: "checkbox-invalid",
     disabled: "checkbox-disabled",
   },

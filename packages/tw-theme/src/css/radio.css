@@ -215,7 +215,6 @@
   --radio-border: var(--color-error);
 }
 
-.radio-focused,
 .radio-field:has(.radio-input:focus-visible) .radio {
   outline: var(--radio-outline-width) solid var(--radio-color);
   outline-offset: var(--radio-outline-offset);

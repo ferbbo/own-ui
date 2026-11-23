@@ -31,9 +31,14 @@ export default {
     lg: "switch-lg",
     xl: "switch-xl",
   },
+  /**
+   * No hay `focused`: el anillo de foco lo resuelve el CSS con
+   * `:has(:focus-visible)` sobre el input nativo, que es lo correcto
+   * tanto con React como con HTML escrito a mano. Emitir una clase desde
+   * JS seria una segunda fuente de verdad para el mismo estado.
+   */
   state: {
     checked: "switch-checked",
-    focused: "switch-focused",
     invalid: "switch-invalid",
     disabled: "switch-disabled",
   },

@@ -188,7 +188,6 @@
   outline-offset: var(--switch-outline-offset);
 }
 
-.switch-focused,
 .switch-field:has(.switch-input:focus-visible) .switch {
   outline: var(--switch-outline-width) solid var(--switch-color);
   outline-offset: var(--switch-outline-offset);

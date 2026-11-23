@@ -251,7 +251,6 @@
   --checkbox-border: var(--color-error);
 }
 
-.checkbox-focused,
 .checkbox-field:has(.checkbox-input:focus-visible) .checkbox {
   outline: var(--checkbox-outline-width) solid var(--checkbox-color);
   outline-offset: var(--checkbox-outline-offset);
