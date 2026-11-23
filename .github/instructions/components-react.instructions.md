@@ -1,5 +1,5 @@
 ---
-applyTo: 'packages/components/**'
+applyTo: 'packages/ui/src/**'
 ---
 
 # Instrucciones para la Generación de Componentes React - Own UI
@@ -11,7 +11,7 @@ Esta guía define los estándares y patrones arquitectónicos para crear compone
 ### Estructura de Carpetas
 Cada componente debe seguir esta estructura exacta:
 ```
-packages/components/ComponentName/
+packages/ui/src/ComponentName/
 ├── src/
 │   ├── ComponentName.tsx          # Componente principal
 │   ├── useComponentName.tsx       # Hook de lógica

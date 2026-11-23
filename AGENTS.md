@@ -3,7 +3,7 @@
 > Contexto canónico para agentes (Claude Code, Copilot, etc.) y para cualquier
 > persona que entre al repo. Describe **lo que el código realmente hace hoy**,
 > no lo que la documentación histórica aspira a hacer.
-> Última verificación contra el código: **2026-11-18** (rama `claude/lote-1`, tras el lote 0).
+> Última verificación contra el código: **2026-11-23** (rama `claude/lote-9`, tras el lote 8).
 >
 > Plan de trabajo por lotes: **[`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md)**
 
@@ -74,7 +74,7 @@ own-ui/
 │   │   │   ├── functions/         → generateThemeProperties, formatAndClean…, plugin.withOptions, splitStyles
 │   │   │   ├── utilities/         → colors.ts (generateColorUtilities, cssVarName/Ref), file.ts
 │   │   │   └── css/               → index + button/dropdown/loader .css  [PUBLICADO en ./css]
-│   │   └── e2e/                   → 6 fixtures + specs Playwright
+│   │   └── e2e/                   → 9 fixtures + specs Playwright (150 tests)
 │   │
 │   ├── ui/                        → @ownui/ui          paquete agregador (barrel)
 │   │   └── src/
@@ -88,15 +88,22 @@ own-ui/
 │   │
 │   └── storybook/                 → @ownui/storybook   [private] docs visual
 │
-├── @docs/                         → my-project-structure.md, Own_ui.fig, heroui-structure.svg
+├── apps/
+│   └── example-app/               → @ownui/example-app [private] Vite + React 19
+│                                    consumo real por workspace:* y prueba de humo
+│
+├── @docs/                         → BUILD-BATCHES.md, Own_ui.fig, heroui-structure.svg,
+│                                    salvage/ (material histórico, no vigente)
+├── specs/                         → spec por lote (lote-0.md … lote-9.md)
 ├── .github/
-│   ├── copilot-instructions.md    → guía general (rutas desactualizadas, §9.9)
+│   ├── copilot-instructions.md    → puntero a este archivo (lote 9)
 │   ├── instructions/components-react.instructions.md  → ARQUITECTURA DE COMPONENTES (canónica)
 │   ├── instructions/components-css.instructions.md    → ARQUITECTURA CSS (canónica)
 │   └── workflows/                 → ci.yml, release.yml
 ├── owonui_system.drawio           → diagrama C4-ish del sistema
 ├── project-structure-heroui.drawio→ referencia de arquitectura HeroUI
-├── scripts/                       → create-component.mjs, check-contract.mjs, check-contrast.mjs
+├── scripts/                       → create-component.mjs, check-contract.mjs,
+│                                    check-contrast.mjs, check-docs-links.mjs
 ├── jest.config.js                 → 3 proyectos: "components", "tw-theme" y "scripts"
 └── turbo.json
 ```
@@ -113,8 +120,11 @@ own-ui/
 @ownui/ui ──► importa los 3 componentes por ruta relativa (./Button/src/Button)
 ```
 
-`apps/` está declarado en el workspace **pero no existe**. El README menciona
-`apps/example-app` y `pnpm example`: es documentación aspiracional (§9.9).
+`apps/example-app` existe desde el lote 9 y **no declara alias al fuente de los paquetes**: sus
+imports resuelven por el symlink de pnpm a lo que cada `exports` publica, es decir a `dist/`.
+Eso la convierte en la prueba de humo de consumo real del monorepo — habría detectado el bug
+raíz del lote 1— además de en documentación ejecutable. No sustituye a instalar un tarball de
+`npm pack` fuera del repo (ver el protocolo de lote en `@docs/BUILD-BATCHES.md`).
 
 ---
 
@@ -650,25 +660,38 @@ pnpm --filter "@ownui/ui..." build # el agregador + sus dependencias (ojo a los 
 turbo build --filter=@ownui/ui     # equivalente vía turbo (usa dependsOn: ["^build"])
 pnpm --filter @ownui/button build  # SÓLO ese paquete: falla en limpio si sus deps no están
 
-pnpm test                          # Jest, los 3 proyectos — 14 suites / 234 tests (sin coverage)
+pnpm test                          # Jest, los 3 proyectos — 15 suites / 271 tests (sin coverage)
 pnpm test:coverage                 # lo mismo + informe de cobertura
 pnpm test:tw-theme                 # sólo el plugin
 pnpm test:components               # componentes de packages/ui + utils de packages/utils
 pnpm test:scripts                  # los CLIs de scripts/ (lote 8)
 
-pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (116 tests)
+pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (9 fixtures / 150 tests)
 
 pnpm create-component <Name>       # andamio completo del componente (lote 8)
 pnpm create-component <Name> --compound   # patrón Provider + Trigger/Panel/Item
 pnpm check:contract                # React ⇄ variants/ ⇄ css/ — puerta en CI
 pnpm check:contrast                # auditoría WCAG de los pares color / -content
+pnpm check:docs                    # enlaces relativos de los .md (lote 9)
 
 pnpm lint  /  pnpm lint:fix  /  pnpm format
 pnpm changeset                     # crear changeset antes de abrir PR
 
 pnpm storybook                     # :6006 (delega en @ownui/storybook)
 pnpm build-storybook               # build estático del Storybook
+
+pnpm example                       # app de ejemplo en :5173 (construye sus deps antes)
+pnpm example:build                 # typecheck + build de producción de la app
+pnpm dev                           # alias de `pnpm example`
 ```
+
+> **`pnpm check:contrast` sale con código 1 a propósito**: reporta los 15 pares por debajo de
+> 4.5:1 que son el alcance del lote 22. Es un informe de deuda, no un fallo del comando.
+
+> **La app de ejemplo no entra en `turbo build`.** Su script se llama `build:app`, no `build`,
+> para que ni CI ni `release.yml` —que invocan `pnpm build`— dependan nunca de que una demo
+> compile. `pnpm example` y `pnpm example:build` construyen antes sus dependencias con
+> `turbo build --filter=@ownui/example-app^...`, así que funcionan desde un checkout limpio.
 
 > **Orden topológico.** `pnpm --filter <pkg> build` ejecuta **sólo** el script de ese paquete:
 > pnpm no construye sus dependencias. Para que las construya hay que pedirlo — con el sufijo
@@ -862,9 +885,12 @@ stories completas · build sin errores con banner `"use client"`.
 7. **Cambios en el plugin vienen con fixture e2e.** Las pruebas unitarias no capturan
    regresiones de CSS compilado.
 8. **Usa `pnpm`** (nunca npm/yarn) y `workspace:*` para dependencias internas.
-9. **Confía en el código, no en los `.md` históricos.** `copilot-instructions.md` y el README
-   describen rutas y scripts que ya no existen (§9.9); las guías de `.github/instructions/`
-   siguen siendo válidas en lo arquitectónico.
+9. **Confía en el código, no en los `.md` históricos.** Desde el lote 9 el README,
+   `copilot-instructions.md`, `TESTING.md` y las guías de `.github/instructions/` están
+   verificados contra el árbol (§9.9), y `pnpm check:docs` impide que vuelvan los enlaces
+   muertos. Lo único deliberadamente desactualizado es `@docs/salvage/`, que lleva la
+   advertencia delante. Si tocas una ruta o un script, actualiza el `.md` que lo nombra en el
+   mismo PR.
 10. **`pnpm changeset` en cada PR** que toque un paquete publicable.
 11. Commits en conventional commits; comentarios en español.
 12. **Componente nuevo ⇒ `pnpm create-component`** (§7), no copiar y pegar otro paquete; y
@@ -1007,17 +1033,26 @@ de `display: none` sí es animable. Verificado en Chromium midiendo la opacidad 
 transición; el caso `prefers-reduced-motion` sirve de control negativo, porque ahí la misma
 medida da 1.
 
-### 9.9 🟡 Documentación que miente
-- README: `apps/example-app`, `pnpm example`, `pnpm dev`, `pnpm storybook` en la raíz →
-  **`apps/` no existe y esos scripts no están en el `package.json` raíz**.
-- README: anuncia 6 paquetes publicados; el workflow publica 1.
-- `copilot-instructions.md`: usa `packages/components/` (real: `packages/ui/src/`),
-  `packages/utils/dom.ts` (real: `packages/utils/dom-utils/src/dom.ts`) e importaciones
-  `../../../utils/dom` (real: `@ownui/dom-utils`).
-- `e2e/README.md`: enlaza QUICKSTART.md, FINAL-SUMMARY.md, INSTALLATION.md, EXAMPLES.md,
-  SUMMARY.md, CHECKLIST.md, ROADMAP.md → **ninguno existe**.
-- `@docs/my-project-structure.md`: describe una estructura `src/components/` de un solo
-  paquete con Emotion; no corresponde a este monorepo.
+### 9.9 ✅ Documentación que miente — **cerrado en el lote 9**
+Queda aquí porque explica por qué existen `pnpm check:docs` y `apps/example-app`.
+
+- README: documentaba `apps/example-app`, `pnpm example`, `pnpm dev` y `pnpm storybook` en la
+  raíz cuando `apps/` no existía. → La app **existe** y los cuatro scripts también; cada
+  comando del README se ejecutó uno a uno (evidencia en `specs/lote-9.md`).
+- README: anunciaba 6 paquetes publicados mientras el workflow publicaba 1. → Desde el lote 3
+  `pnpm release` es `changeset publish`, que publica los 6 no privados.
+- `copilot-instructions.md`: describía una estructura de directorios que no existe. → Pasa a
+  ser un puntero a este archivo; dos descripciones del mismo sistema garantizan que una mienta.
+- `.github/instructions/*`: `applyTo` y rutas corregidas; el paso `build:components` que
+  generaba `src/build/components.js` —script y carpeta que nunca existieron— se sustituye por
+  el pipeline real (`@import` en `css/index.css` + copia a `dist/css`).
+- `e2e/README.md`: enlazaba siete documentos inexistentes y hablaba de 6 fixtures / ~88 tests.
+  → Reescrito con 9 fixtures / 150 tests, medidos corriendo la suite.
+- `@docs/my-project-structure.md` (un solo paquete, con Emotion): archivado en
+  `@docs/salvage/` con la advertencia delante.
+- **Gate nuevo**: `pnpm check:docs` falla si algún enlace relativo de un `.md` apunta a algo que
+  no existe, y un test lo fija sobre el árbol real. No está en CI (el lote no lo pedía y tocar
+  workflows quedaba fuera de su alcance): candidato inmediato.
 
 ### 9.10 🟡 Varios
 - ~~`peerDependencies: tailwindcss ">= 3.4.17 <4.1.1"`~~ **corregido a `">=4.1.0 <5"` en el
@@ -1080,6 +1115,7 @@ medida da 1.
 | ¿Cómo se hace un compound? | `packages/ui/src/Dropdown/src/{Dropdown.tsx,DropdownContext.tsx}` |
 | ¿Cómo se testea el plugin de verdad? | `packages/tw-theme/e2e/` |
 | ¿Las 3 formas de configurar el plugin? | `packages/storybook/.storybook/styles/tailwind.css` |
+| ¿Cómo se ve todo junto, consumido de verdad? | `apps/example-app/` (`pnpm example`) |
 | ¿Qué construir y qué publicar? | `turbo.json`, `.github/workflows/release.yml` |
 
 ---

@@ -1,114 +1,42 @@
 # AI Coding Instructions for Own UI
 
-This is a React component library built with TypeScript, Tailwind CSS v4, and a monorepo architecture using pnpm workspaces and Turbo.
+**La fuente de verdad de este repo es [`AGENTS.md`](../AGENTS.md).** Léelo antes de escribir
+código: describe la arquitectura real (tokens, plugin de Tailwind, contrato de clases, patrones
+de componente), las convenciones y la deuda técnica conocida, verificado contra el código.
 
-## Architecture Overview
+Este archivo era una segunda descripción de la arquitectura y se había desincronizado: situaba
+los componentes en un directorio `components/` colgando de `packages/`, las utilidades de DOM
+en un `dom.ts` suelto y los imports como rutas relativas de tres niveles. Ninguna de esas rutas
+existe en este monorepo (los componentes viven en `packages/ui/src/<Name>/`, `useDOMRef` en
+`packages/utils/dom-utils/src/` y se importa como `@ownui/dom-utils`). Mantener dos
+descripciones del mismo sistema garantiza que una de las dos mienta, así que esta pasa a ser un
+puntero.
 
-### Monorepo Structure
-- **`packages/components/`**: Individual React components (each in its own package)
-- **`packages/tw-theme/`**: Core Tailwind CSS v4 plugin for semantic theming
-- **`packages/storybook/`**: Shared Storybook configuration
-- **`packages/utils/`**: Shared utilities across components
+## Dónde está cada cosa
 
-### Key Design Patterns
+| Pregunta | Dónde |
+| --- | --- |
+| Arquitectura, tokens, convenciones, deuda | [`AGENTS.md`](../AGENTS.md) |
+| Plan de trabajo por lotes | [`@docs/BUILD-BATCHES.md`](../@docs/BUILD-BATCHES.md) |
+| Cómo se escribe un componente React | [`instructions/components-react.instructions.md`](instructions/components-react.instructions.md) |
+| Cómo se escribe el CSS de un componente | [`instructions/components-css.instructions.md`](instructions/components-css.instructions.md) |
+| Cómo se publica | [`RELEASE_SETUP.md`](RELEASE_SETUP.md) |
+| Consumo real de los paquetes | [`apps/example-app/`](../apps/example-app/README.md) |
 
-#### Component Architecture
-Each component follows this structure:
-```
-packages/components/Button/
-├── src/
-│   ├── Button.tsx          # Main component (uses forwardRef + React.memo)
-│   ├── useButton.tsx       # Custom hook with react-aria integration
-│   ├── Button.types.ts     # TypeScript definitions
-│   ├── Button.stories.tsx  # Storybook stories
-│   └── index.ts           # Public exports
-├── __test__/
-│   └── Button.test.tsx    # Jest tests
-├── package.json           # Component-specific dependencies
-└── tsup.config.ts         # Build configuration
-```
+## Lo mínimo que no puedes saltarte
 
-#### React Aria Integration
-Components use `@react-aria/button` and similar hooks for accessibility. The pattern:
-- Custom hook (e.g., `useButton`) handles aria logic + class generation
-- `mergeProps` combines aria props with native HTML attributes
-- `useDOMRef` utility manages ref forwarding between react-aria and forwardRef
-
-#### Polymorphic Components
-Components support `as` prop for element polymorphism:
-```tsx
-<Button as="button" type="submit">Submit</Button>
-<Button as="a" href="/link">Link Button</Button>
-```
-
-## Theme System
-
-### Semantic Color System
-The `@ownui/tw-theme` plugin generates CSS custom properties and utility classes:
-
-- **Semantic colors**: `primary`, `secondary`, `accent`, `neutral`, `info`, `success`, `warning`, `error`
-- **Variants**: Each color has `-content` and `-focus` variants
-- **Auto-generated utilities**: `bg-primary`, `text-primary-content`, `border-primary-focus`, etc.
-
-### Theme Structure
-```typescript
-// packages/tw-theme/src/themes/light.ts
-export const lightTheme: ThemeColors = {
-  '--color-primary': '#3b82f6',
-  '--color-primary-content': '#ffffff',
-  '--color-primary-focus': '#2563eb',
-  // ... more colors
-};
-```
-
-### Component CSS Classes
-Components use a predictable class naming pattern:
-- `.btn` (base) + `.btn-primary` (variant) + `.btn-md` (size)
-- Built using the theme system's CSS custom properties
-
-## Development Workflows
-
-### Adding New Components
-1. Create package structure: `packages/components/ComponentName/`
-2. Follow the Button component as template
-3. Use `forwardRef` + `React.memo` for performance
-4. Create custom hook for logic (integrate react-aria if interactive)
-5. Define TypeScript types with polymorphic `as` prop support
-6. Add Storybook stories and Jest tests
-
-### Build System
-- **Turbo**: Orchestrates builds across packages (`turbo build`)
-- **tsup**: Bundles individual components with `"use client"` banner for Next.js
-- **pnpm workspaces**: Manages dependencies and cross-package references
-
-### Testing Strategy
-- **Jest + React Testing Library**: Component unit tests
-- **Storybook**: Visual regression and component documentation
-- Custom mock utilities in test files for isolated testing
-
-### Key Commands
-```bash
-pnpm build                 # Build all packages via Turbo
-pnpm test                  # Run Jest tests
-pnpm storybook            # Start Storybook dev server
-pnpm changeset            # Create changeset for versioning
-```
-
-## Critical Integration Points
-
-### Shared Utilities
-- `packages/utils/dom.ts`: Contains `useDOMRef` for ref management
-- Import pattern: `import { useDOMRef } from "../../../utils/dom"`
-
-### Cross-Package Dependencies
-- Components depend on `@ownui/tw-theme` for styling
-- Theme plugin builds CSS files to `src/components/` for component consumption
-- Storybook package consumes all components for documentation
-
-### Theme Plugin Build Process
-The tw-theme package has a unique build process:
-1. `build:components` - Generates component-specific CSS files
-2. `build:lib` - Builds the plugin itself with tsup
-3. CSS files are generated in `src/components/` and consumed by components
-
-When modifying themes or adding new semantic colors, the CSS build must complete before component builds.
+1. **El contrato manda.** Para cada componente, `packages/ui/src/<Name>/` (React),
+   `packages/tw-theme/src/variants/<name>.ts` (contrato) y
+   `packages/tw-theme/src/css/<name>.css` (CSS) tienen que decir lo mismo.
+   `pnpm check:contract` lo verifica y corre en CI.
+2. **Ningún color literal fuera de `packages/tw-theme/src/themes/*.ts`.** En el CSS de
+   componente, siempre `var(--color-*)` y mezclas en `oklab`/`oklch`.
+3. **CSS antes que React.** Un componente cuyo CSS no esté importado en
+   `packages/tw-theme/src/css/index.css` no se publica, y sale sin estilos en el proyecto de
+   quien lo instale.
+4. **Todo componente interactivo pasa por un hook de `@react-aria/*`.**
+5. **Tests reales**, nunca stubs de `console.log`.
+6. **`pnpm`**, nunca npm ni yarn; dependencias internas con `workspace:*`.
+7. **Un componente nuevo se crea con `pnpm create-component <Name>`**, que genera las tres capas
+   ya registradas.
+8. Commits en conventional commits; comentarios y JSDoc en español.
