@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Badge Test</title>
+    <link rel="stylesheet" href="output.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .test-section {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Relleno solido: el rol pinta el fondo y el -content el texto. -->
+    <div class="test-section">
+      <span class="badge badge-md badge-primary" id="badge-primary">primary</span>
+      <span class="badge badge-md badge-secondary" id="badge-secondary">secondary</span>
+      <span class="badge badge-md badge-accent" id="badge-accent">accent</span>
+      <span class="badge badge-md badge-neutral" id="badge-neutral">neutral</span>
+      <span class="badge badge-md badge-info" id="badge-info">info</span>
+      <span class="badge badge-md badge-success" id="badge-success">success</span>
+      <span class="badge badge-md badge-warning" id="badge-warning">warning</span>
+      <span class="badge badge-md badge-error" id="badge-error">error</span>
+    </div>
+
+    <!-- Perfilado: fondo del tema, borde y texto derivados del rol. -->
+    <div class="test-section">
+      <span class="badge badge-md badge-primary badge-outline" id="outline-primary">primary</span>
+      <span class="badge badge-md badge-secondary badge-outline" id="outline-secondary"
+        >secondary</span
+      >
+      <span class="badge badge-md badge-accent badge-outline" id="outline-accent">accent</span>
+      <span class="badge badge-md badge-neutral badge-outline" id="outline-neutral">neutral</span>
+      <span class="badge badge-md badge-info badge-outline" id="outline-info">info</span>
+      <span class="badge badge-md badge-success badge-outline" id="outline-success">success</span>
+      <span class="badge badge-md badge-warning badge-outline" id="outline-warning">warning</span>
+      <span class="badge badge-md badge-error badge-outline" id="outline-error">error</span>
+    </div>
+
+    <!-- Tenue: relleno lavado del rol y el mismo texto legible. -->
+    <div class="test-section">
+      <span class="badge badge-md badge-primary badge-soft" id="soft-primary">primary</span>
+      <span class="badge badge-md badge-secondary badge-soft" id="soft-secondary">secondary</span>
+      <span class="badge badge-md badge-accent badge-soft" id="soft-accent">accent</span>
+      <span class="badge badge-md badge-neutral badge-soft" id="soft-neutral">neutral</span>
+      <span class="badge badge-md badge-info badge-soft" id="soft-info">info</span>
+      <span class="badge badge-md badge-success badge-soft" id="soft-success">success</span>
+      <span class="badge badge-md badge-warning badge-soft" id="soft-warning">warning</span>
+      <span class="badge badge-md badge-error badge-soft" id="soft-error">error</span>
+    </div>
+
+    <!-- Tamanos. -->
+    <div class="test-section">
+      <span class="badge badge-xs badge-primary" id="badge-xs">xs</span>
+      <span class="badge badge-sm badge-primary" id="badge-sm">sm</span>
+      <span class="badge badge-md badge-primary" id="badge-md">md</span>
+      <span class="badge badge-lg badge-primary" id="badge-lg">lg</span>
+      <span class="badge badge-xl badge-primary" id="badge-xl">xl</span>
+    </div>
+
+    <!-- Punto de estado, con y sin nombre accesible. -->
+    <div class="test-section">
+      <span class="badge badge-md badge-success badge-dot" id="dot-md" aria-hidden="true"></span>
+      <span class="badge badge-xs badge-error badge-dot" id="dot-xs" aria-hidden="true"></span>
+      <span
+        class="badge badge-xl badge-info badge-dot"
+        id="dot-xl"
+        role="img"
+        aria-label="En linea"
+      ></span>
+    </div>
+
+    <!-- Badge sin rol, para comprobar el relleno por defecto. -->
+    <div class="test-section">
+      <span class="badge badge-md" id="badge-base">base</span>
+    </div>
+  </body>
+</html>

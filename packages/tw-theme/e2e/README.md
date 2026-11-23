@@ -25,17 +25,21 @@ e2e/fixtures/<caso>/{tailwind.config.js, input.css, index.html}
 
 ## Fixtures
 
-| Fixture | Tests | Qué fija |
-| --- | --- | --- |
-| `default-themes` | 10 | Los temas light y dark que inyecta el plugin por defecto |
-| `no-default-themes` | 6 | `themes: false` desactiva los temas built-in |
-| `custom-theme` | 10 | Un tema completo declarado con `@plugin "@ownui/tw-theme/theme"` |
-| `theme-switching` | 10 | Cambio en vivo entre temas con `data-theme` |
-| `utility-classes` | 32 | Las utilidades de color generadas (`bg-`, `text-`, `border-`…) |
-| `custom-root-scope` | 12 | La opción `root`: aplicar el tema a un ámbito y no a `:root` |
-| `base-surfaces` | 18 | La escala de superficies `base-100/200/300` (lote 4) |
-| `component-styles` | 21 | Que el CSS de componentes publicado define de verdad `.btn`, `.dropdown` y `.loader` (lote 1) |
-| `dropdown` | 31 | Posicionamiento, elevación y orden de importación del menú y el trigger (lote 6) |
+| Fixture             | Tests | Qué fija                                                                                           |
+| ------------------- | ----- | -------------------------------------------------------------------------------------------------- |
+| `default-themes`    | 10    | Los temas light y dark que inyecta el plugin por defecto                                           |
+| `no-default-themes` | 6     | `themes: false` desactiva los temas built-in                                                       |
+| `custom-theme`      | 10    | Un tema completo declarado con `@plugin "@ownui/tw-theme/theme"`                                   |
+| `theme-switching`   | 10    | Cambio en vivo entre temas con `data-theme`                                                        |
+| `utility-classes`   | 32    | Las utilidades de color generadas (`bg-`, `text-`, `border-`…)                                     |
+| `custom-root-scope` | 12    | La opción `root`: aplicar el tema a un ámbito y no a `:root`                                       |
+| `base-surfaces`     | 18    | La escala de superficies `base-100/200/300` (lote 4)                                               |
+| `component-styles`  | 21    | Que el CSS de componentes publicado define de verdad `.btn`, `.dropdown` y `.loader` (lote 1)      |
+| `dropdown`          | 31    | Posicionamiento, elevación y orden de importación del menú y el trigger (lote 6)                   |
+| `input`             | 26    | El rol colorea el borde y el anillo de foco, no el relleno del campo (lote 10)                     |
+| `card`              | 20    | Superficie, separadores de las partes, tratamientos del marco y card accionable (lote 12)          |
+| `badge`             | 32    | Relleno por rol, punto de estado y **contraste AA medido** del texto de `outline`/`soft` (lote 12) |
+| `avatar`            | 26    | Caja cuadrada, formas, solapamiento del grupo y contraste AA de las iniciales (lote 12)            |
 
 ## Scripts
 
@@ -53,3 +57,9 @@ pnpm --filter @ownui/tw-theme e2e:report   # abrir el último informe HTML
 3. `pnpm --filter @ownui/tw-theme e2e`.
 
 Un fixture nuevo no necesita registro: `compile-fixtures.js` recorre el directorio.
+
+`tests/support/` **no** son specs (Playwright sólo recoge `*.spec.ts`): ahí vive
+`contrast.ts`, que resuelve un color calculado con `color-mix` a sRGB pasándolo por un
+canvas y calcula el ratio WCAG. Hace falta porque Chromium serializa
+`color-mix(in oklab, …)` como `oklab(L a b)`, y leer esos números como componentes sRGB
+da ratios inventados.

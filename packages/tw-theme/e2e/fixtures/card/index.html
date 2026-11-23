@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Test</title>
+    <link rel="stylesheet" href="output.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .test-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+      }
+      .test-section > * {
+        width: 220px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Base y anatomia completa. -->
+    <div class="test-section">
+      <div class="card card-md" id="card-base">
+        <div class="card-header" id="header-base">
+          <h3 class="card-title" id="title-base">Base</h3>
+        </div>
+        <div class="card-body" id="body-base">Cuerpo</div>
+        <div class="card-footer" id="footer-base">Pie</div>
+      </div>
+    </div>
+
+    <!-- Roles: el rol colorea el borde, no el relleno. -->
+    <div class="test-section">
+      <div class="card card-md card-primary" id="card-primary">
+        <div class="card-body">primary</div>
+      </div>
+      <div class="card card-md card-error" id="card-error">
+        <div class="card-body">error</div>
+      </div>
+      <div class="card card-md card-success" id="card-success">
+        <div class="card-body">success</div>
+      </div>
+    </div>
+
+    <!-- Tratamientos del marco. -->
+    <div class="test-section">
+      <div class="card card-md card-primary card-elevated" id="card-elevated">
+        <div class="card-body">elevated</div>
+      </div>
+      <div class="card card-md card-primary card-outlined" id="card-outlined">
+        <div class="card-body">outlined</div>
+      </div>
+      <div class="card card-md card-primary card-ghost" id="card-ghost">
+        <div class="card-body">ghost</div>
+      </div>
+    </div>
+
+    <!-- Tamanos: el padding vive en las partes. -->
+    <div class="test-section">
+      <div class="card card-xs" id="card-xs"><div class="card-body" id="body-xs">xs</div></div>
+      <div class="card card-sm" id="card-sm"><div class="card-body" id="body-sm">sm</div></div>
+      <div class="card card-md" id="card-md"><div class="card-body" id="body-md">md</div></div>
+      <div class="card card-lg" id="card-lg"><div class="card-body" id="body-lg">lg</div></div>
+      <div class="card card-xl" id="card-xl"><div class="card-body" id="body-xl">xl</div></div>
+    </div>
+
+    <!-- Accionable: solo un elemento nativamente interactivo lo lleva. -->
+    <div class="test-section">
+      <a class="card card-md card-primary card-clickable" id="card-link" href="#destino">
+        <div class="card-body">enlace</div>
+      </a>
+      <button class="card card-md card-accent card-clickable" id="card-button" type="button">
+        <div class="card-body">boton</div>
+      </button>
+    </div>
+  </body>
+</html>
