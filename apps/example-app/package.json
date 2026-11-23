@@ -1,0 +1,29 @@
+{
+  "name": "@ownui/example-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "App de ejemplo: consume @ownui/ui y @ownui/tw-theme como lo haría un proyecto real",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:app": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ownui/tw-theme": "workspace:*",
+    "@ownui/ui": "workspace:*",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.1.1",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "4.1.1",
+    "typescript": "^5.7.3",
+    "vite": "^5.2.6"
+  },
+  "license": "MIT"
+}

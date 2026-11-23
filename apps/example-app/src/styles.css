@@ -1,0 +1,102 @@
+/* =========================================================
+   styles.css — entrada de Tailwind de la app de ejemplo
+
+   Es la configuración canónica de un consumidor de Own UI, en el
+   orden que documenta el README y `@ownui/tw-theme/css/index.css`:
+
+     1. Tailwind.
+     2. El plugin: tokens semánticos (--color-*), escala de
+        superficies y las 136 utilidades de color.
+     3. El CSS de componentes: lo que define .btn, .dropdown y
+        .loader. Sin este paso los componentes salen sin estilos
+        (AGENTS.md §9.1, cerrado en el lote 1).
+     4. Un tema propio registrado por la segunda entrada del plugin.
+
+   Nada de esto necesita `tailwind.config.js`: en Tailwind v4 el
+   plugin se carga desde el CSS con `@plugin`.
+   ========================================================= */
+
+@import "tailwindcss";
+
+@plugin "@ownui/tw-theme";
+
+@import "@ownui/tw-theme/css";
+
+/* ---------------------------------------------------------
+   Tema propio "ownui-dusk".
+
+   Demuestra la tercera forma de configurar el plugin: un tema
+   completo declarado en CSS, sin tocar el paquete. Se aplica con
+   [data-theme="ownui-dusk"].
+
+   El nombre va en minúsculas y con guiones a propósito:
+   `formatAndCleanPluginConfig` saca del nombre todo lo que no
+   case con [a-z,-\s], así que un tema "Dusk2" se corrompería en
+   silencio (AGENTS.md §4.6).
+
+   Es el único sitio de la app donde aparece un color literal: un
+   bloque de tema ES la declaración de los tokens. El resto del
+   chrome se pinta con las utilidades de superficie.
+   --------------------------------------------------------- */
+@plugin "@ownui/tw-theme/theme" {
+  name: "ownui-dusk";
+
+  /* Escala de superficies */
+  --color-base-100: #1b1f2a;
+  --color-base-200: #232834;
+  --color-base-300: #2f3542;
+  --color-base-content: #e8eaf0;
+
+  /* Primary */
+  --color-primary: #7c9cff;
+  --color-primary-content: #101322;
+  --color-primary-focus: #a3b9ff;
+
+  /* Secondary */
+  --color-secondary: #5ed3a8;
+  --color-secondary-content: #0d1f18;
+  --color-secondary-focus: #86e0c0;
+
+  /* Accent */
+  --color-accent: #f0a65c;
+  --color-accent-content: #241403;
+  --color-accent-focus: #f7bd84;
+
+  /* Neutral */
+  --color-neutral: #8b93a7;
+  --color-neutral-content: #12151d;
+  --color-neutral-focus: #a7aec0;
+
+  /* Info */
+  --color-info: #63c6f0;
+  --color-info-content: #05202b;
+  --color-info-focus: #8dd8f6;
+
+  /* Success */
+  --color-success: #6edb8f;
+  --color-success-content: #06210f;
+  --color-success-focus: #96e8ae;
+
+  /* Warning */
+  --color-warning: #f2cc5b;
+  --color-warning-content: #251d02;
+  --color-warning-focus: #f7dd8c;
+
+  /* Error */
+  --color-error: #f4786f;
+  --color-error-content: #2a0b08;
+  --color-error-focus: #f89d96;
+}
+
+/* ---------------------------------------------------------
+   Lo único que la app define por su cuenta: el fondo y el color
+   de texto del documento, tirando de los tokens del tema activo
+   para que cambiar `data-theme` repinte la página entera.
+   --------------------------------------------------------- */
+body {
+  margin: 0;
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+}

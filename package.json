@@ -17,16 +17,16 @@
     "check:contrast": "node scripts/check-contrast.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}'",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "prepare": "husky",
     "storybook": "pnpm --filter @ownui/storybook storybook",
     "build-storybook": "pnpm --filter @ownui/storybook build-storybook",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish",
-    "example": "cd apps/example-app && pnpm dev",
-    "example:build": "cd apps/example-app && pnpm build",
-    "example:install": "cd apps/example-app && pnpm install"
+    "dev": "pnpm example",
+    "example": "turbo build --filter=@ownui/example-app^... && pnpm --filter @ownui/example-app dev",
+    "example:build": "turbo build --filter=@ownui/example-app^... && pnpm --filter @ownui/example-app build:app"
   },
   "keywords": [
     "react",
