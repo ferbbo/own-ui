@@ -95,8 +95,7 @@
   border: var(--checkbox-border-width) solid var(--checkbox-border);
   border-radius: var(--checkbox-radius);
 
-  transition:
-    background-color var(--checkbox-transition-duration),
+  transition: background-color var(--checkbox-transition-duration),
     border-color var(--checkbox-transition-duration);
 }
 
@@ -116,8 +115,7 @@
   fill: none;
   opacity: 0;
   transform: scale(0.6);
-  transition:
-    opacity var(--checkbox-transition-duration),
+  transition: opacity var(--checkbox-transition-duration),
     transform var(--checkbox-transition-duration);
 }
 

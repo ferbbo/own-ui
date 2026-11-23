@@ -51,8 +51,8 @@ export function useCheckboxClasses({
     const stateCls = indeterminate
       ? checkbox.state.indeterminate
       : checked
-        ? checkbox.state.checked
-        : "";
+      ? checkbox.state.checked
+      : "";
 
     return [
       checkbox.part.box,

@@ -78,37 +78,38 @@ function toAriaProps(props: CheckboxProps) {
 /**
  * Casilla suelta: el estado vive aqui.
  */
-const StandaloneCheckbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  function StandaloneCheckbox(props, ref) {
-    const ariaProps = toAriaProps(props);
-    const state = useToggleState(ariaProps);
-    const domRef = useDOMRef<HTMLInputElement>(ref);
-    const { inputProps } = useAriaCheckbox(ariaProps, state, domRef as never);
+const StandaloneCheckbox = forwardRef<HTMLInputElement, CheckboxProps>(function StandaloneCheckbox(
+  props,
+  ref
+) {
+  const ariaProps = toAriaProps(props);
+  const state = useToggleState(ariaProps);
+  const domRef = useDOMRef<HTMLInputElement>(ref);
+  const { inputProps } = useAriaCheckbox(ariaProps, state, domRef as never);
 
-    const { fieldClassNames, boxClassNames } = useCheckboxClasses({
-      theme: props.theme,
-      size: props.size,
-      checked: state.isSelected,
-      indeterminate: props.indeterminate,
-      invalid: props.invalid,
-      disabled: props.disabled,
-      className: props.className,
-      boxClassName: props.boxClassName,
-    });
+  const { fieldClassNames, boxClassNames } = useCheckboxClasses({
+    theme: props.theme,
+    size: props.size,
+    checked: state.isSelected,
+    indeterminate: props.indeterminate,
+    invalid: props.invalid,
+    disabled: props.disabled,
+    className: props.className,
+    boxClassName: props.boxClassName,
+  });
 
-    return (
-      <CheckboxView
-        inputProps={inputProps}
-        domRef={domRef}
-        fieldClassNames={fieldClassNames}
-        boxClassNames={boxClassNames}
-        indeterminate={Boolean(props.indeterminate)}
-      >
-        {props.children}
-      </CheckboxView>
-    );
-  }
-);
+  return (
+    <CheckboxView
+      inputProps={inputProps}
+      domRef={domRef}
+      fieldClassNames={fieldClassNames}
+      boxClassNames={boxClassNames}
+      indeterminate={Boolean(props.indeterminate)}
+    >
+      {props.children}
+    </CheckboxView>
+  );
+});
 
 /**
  * Casilla dentro de un grupo: el estado vive en el grupo y aqui solo se lee.

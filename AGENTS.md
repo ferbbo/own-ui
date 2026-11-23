@@ -3,7 +3,7 @@
 > Contexto canónico para agentes (Claude Code, Copilot, etc.) y para cualquier
 > persona que entre al repo. Describe **lo que el código realmente hace hoy**,
 > no lo que la documentación histórica aspira a hacer.
-> Última verificación contra el código: **2026-11-23** (rama `claude/lote-9`, tras el lote 8).
+> Última verificación contra el código: **2026-11-23** (rama `claude/lote-11`, tras el lote 10).
 >
 > Plan de trabajo por lotes: **[`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md)**
 
@@ -70,18 +70,22 @@ own-ui/
 │   │   │   ├── theme.ts           → entry "@ownui/tw-theme/theme": temas custom
 │   │   │   ├── types.ts           → SemanticColorName, PluginOptions, Flags…
 │   │   │   ├── themes/            → TOKENS: root (forma), light, dark (color)
-│   │   │   ├── variants/          → CONTRATO de clases: button, dropdown, loader
+│   │   │   ├── variants/          → CONTRATO de clases: button, checkbox, dropdown, input,
+│   │   │   │                        radio, switch, loader
 │   │   │   ├── functions/         → generateThemeProperties, formatAndClean…, plugin.withOptions, splitStyles
 │   │   │   ├── utilities/         → colors.ts (generateColorUtilities, cssVarName/Ref), file.ts
-│   │   │   └── css/               → index + button/dropdown/loader .css  [PUBLICADO en ./css]
-│   │   └── e2e/                   → 9 fixtures + specs Playwright (150 tests)
+│   │   │   └── css/               → index + un .css por componente  [PUBLICADO en ./css]
+│   │   └── e2e/                   → 11 fixtures + specs Playwright (193 tests)
 │   │
 │   ├── ui/                        → @ownui/ui          paquete agregador (barrel)
 │   │   └── src/
-│   │       ├── index.ts           → re-exporta Button, Dropdown, Input, Loader + tipos
+│   │       ├── index.ts           → re-exporta los 7 componentes + tipos
 │   │       ├── Button/            → @ownui/button      [paquete propio]
+│   │       ├── Checkbox/          → @ownui/checkbox    [paquete propio] + CheckboxGroup
 │   │       ├── Dropdown/          → @ownui/dropdown    [paquete propio]
 │   │       ├── Input/             → @ownui/input       [paquete propio]
+│   │       ├── Radio/             → @ownui/radio       [paquete propio] + RadioGroup
+│   │       ├── Switch/            → @ownui/switch      [paquete propio]
 │   │       └── Loader/            → @ownui/loader      [paquete propio]
 │   │
 │   ├── utils/
@@ -154,6 +158,7 @@ Compartidos por todos los temas, inyectados en `:root`:
 | `--disabled-bg-opacity` | `60%` | opacidad del relleno deshabilitado |
 | `--disabled-fg-opacity` | `35%` | opacidad del texto deshabilitado |
 | `--transition-duration` | `0.2s` | duración de las transiciones de color |
+| `--control-size` · `-radius` · `-border-width` · `-gap` · `-mark-width` | `5 × --size-field`… | **capa de controles marcables** (L11): checkbox, radio y switch. Globales, no por componente, para que los tres se alineen entre sí cuando conviven en un formulario |
 | `--noise` | `0` | opacidad de la textura de ruido |
 | `--fx-noise` | `none` | imagen de ruido |
 | `--btn-noise` | `var(--fx-noise)` | alias por componente |
@@ -644,6 +649,9 @@ distintos coexistiendo**; conviene unificar (ver lote 5 del plan).
 | `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `shape`(2), `width`(2), `active`, `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ✅ 39 reales (L5) | 15 stories | **completo** (L5): contrato alineado, `loading` con `aria-busy`, iconos reales, sin fuga de props |
 | `@ownui/dropdown` | Provider | `variant`(8), `size`(5), `styleVariant`(3), `open`/`defaultOpen`/`onOpenChange` + `.Trigger`/`.Menu`/`.Item` | ✅ reales | 296 ln | **parcial**: sin CSS para menu/trigger, sin navegación por teclado, fuga de props al DOM |
 | `@ownui/input` | Composición | `label`, `description`, `errorMessage`, `invalid`, `theme`(8), `variant`(3), `size`(5), `type`(7), `startIcon`, `endIcon`, `readOnly`, `disabled`, `value`/`defaultValue`/`onChange` | ✅ reales (33) | 142 ln | **sano** (L10): `useTextField`, el rol colorea borde y foco en vez del relleno, cobertura 100% líneas |
+| `@ownui/checkbox` | Composición + Provider | `theme`(8), `size`(5), `checked`/`defaultChecked`/`onChange`, `indeterminate`, `value`, `invalid`, `readOnly`, `disabled` · `CheckboxGroup`: `label`, `description`, `errorMessage`, `value`/`defaultValue`/`onChange` | ✅ reales (32) | 119 ln | **sano** (L11): `useCheckbox` / `useCheckboxGroupItem`, tercer estado, 100% líneas |
+| `@ownui/radio` | Provider | `RadioGroup`: `label`, `description`, `errorMessage`, `orientation`, `value`/`defaultValue`/`onChange` · `Radio`: `value` (obligatorio), `theme`, `size`, `disabled` | ✅ reales (23) | 134 ln | **sano** (L11): flechas y tabindex rotatorio; un `<Radio>` suelto lanza |
+| `@ownui/switch` | Composición | `theme`(8), `size`(5), `checked`/`defaultChecked`/`onChange`, `invalid`, `readOnly`, `disabled` | ✅ reales (18) | 95 ln | **sano** (L11): `role="switch"`; sin tercer estado ni grupo, a propósito |
 | `@ownui/loader` | Composición | `as`, `color`(8 + `current`), `size`(5), `aria-label`, `id` | ✅ reales | 121 ln | sano; `color="current"` desde L5 (hereda `currentColor`); `Loader.variants.ts` vacío |
 | `@ownui/dom-utils` | — | `useDOMRef` | ✅ 6 reales (L2) | — | ok |
 | `@ownui/tw-theme` | — | ver §4 | ✅ 3 suites + 6 fixtures e2e | — | **maduro** |
@@ -662,13 +670,13 @@ pnpm --filter "@ownui/ui..." build # el agregador + sus dependencias (ojo a los 
 turbo build --filter=@ownui/ui     # equivalente vía turbo (usa dependsOn: ["^build"])
 pnpm --filter @ownui/button build  # SÓLO ese paquete: falla en limpio si sus deps no están
 
-pnpm test                          # Jest, los 3 proyectos — 15 suites / 271 tests (sin coverage)
+pnpm test                          # Jest, los 3 proyectos — 19 suites / 400 tests (sin coverage)
 pnpm test:coverage                 # lo mismo + informe de cobertura
 pnpm test:tw-theme                 # sólo el plugin
 pnpm test:components               # componentes de packages/ui + utils de packages/utils
 pnpm test:scripts                  # los CLIs de scripts/ (lote 8)
 
-pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (9 fixtures / 150 tests)
+pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (11 fixtures / 193 tests)
 
 pnpm create-component <Name>       # andamio completo del componente (lote 8)
 pnpm create-component <Name> --compound   # patrón Provider + Trigger/Panel/Item

@@ -92,10 +92,8 @@
   border: var(--input-border-width) solid var(--input-border);
   border-radius: var(--input-radius);
 
-  transition:
-    color var(--input-transition-duration),
-    background-color var(--input-transition-duration),
-    border-color var(--input-transition-duration);
+  transition: color var(--input-transition-duration),
+    background-color var(--input-transition-duration), border-color var(--input-transition-duration);
 }
 
 /* El anillo de foco va en la caja, no en el `<input>`: el `<input>` ya no
@@ -291,7 +289,11 @@
 .input:has(.input-control:disabled) {
   cursor: not-allowed;
   --input-bg: color-mix(in oklab, var(--color-base-200) var(--input-disabled-bg-opacity), #0000);
-  --input-fg: color-mix(in oklab, var(--color-base-content) var(--input-disabled-fg-opacity), #0000);
+  --input-fg: color-mix(
+    in oklab,
+    var(--color-base-content) var(--input-disabled-fg-opacity),
+    #0000
+  );
   --input-border: color-mix(in oklab, var(--input-color) var(--input-disabled-bg-opacity), #0000);
 }
 

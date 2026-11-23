@@ -20,7 +20,8 @@ estilo propio: emite `class="btn btn-primary btn-md"` y esas clases las define
 - 📚 Storybook como escaparate visual y `apps/example-app` como prueba de consumo real
 - ✅ Jest + React Testing Library para unidad, Playwright sobre CSS compilado para el plugin
 
-**Estado: pre-1.0.** Hay cuatro componentes (`Button`, `Dropdown`, `Input`, `Loader`). El plugin de theming
+**Estado: pre-1.0.** Hay siete componentes (`Button`, `Checkbox`, `Dropdown`, `Input`, `Radio`,
+`Switch`, `Loader`). El plugin de theming
 está maduro; la capa de componentes está en construcción. Lo que falta está listado y priorizado
 en [`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md), no escondido.
 
@@ -47,7 +48,7 @@ En tu CSS de entrada:
 /* 1. Tokens semánticos + utilidades de color (temas light y dark incluidos) */
 @plugin "@ownui/tw-theme";
 
-/* 2. CSS de componentes: define .btn, .dropdown, .input y .loader */
+/* 2. CSS de componentes: .btn, .checkbox, .dropdown, .input, .radio, .switch y .loader */
 @import "@ownui/tw-theme/css";
 ```
 
@@ -64,7 +65,7 @@ que emiten no existirían en ningún sitio. Para cargar un único componente:
 ### Uso
 
 ```jsx
-import { Button, Dropdown, Input, Loader } from "@ownui/ui";
+import { Button, Checkbox, Dropdown, Input, Loader, Switch } from "@ownui/ui";
 
 function App() {
   return (
@@ -78,6 +79,9 @@ function App() {
       </Button>
 
       <Input label="Correo" type="email" placeholder="nombre@ejemplo.com" />
+
+      <Checkbox defaultChecked>Acepto los términos</Checkbox>
+      <Switch theme="success">Notificaciones</Switch>
 
       <Dropdown variant="primary">
         <Dropdown.Trigger>Elige</Dropdown.Trigger>
@@ -93,8 +97,8 @@ function App() {
 }
 ```
 
-Cada componente se puede instalar suelto: `@ownui/button`, `@ownui/dropdown`, `@ownui/input`,
-`@ownui/loader`.
+Cada componente se puede instalar suelto: `@ownui/button`, `@ownui/checkbox`,
+`@ownui/dropdown`, `@ownui/input`, `@ownui/radio`, `@ownui/switch`, `@ownui/loader`.
 
 ---
 
@@ -165,6 +169,47 @@ sin texto visible no hay nombre accesible.
 Sobre `@react-aria/useTextField`: genera y enlaza los `id` del label, la ayuda
 y el error, y pone `aria-invalid`. El `ref` apunta al `<input>` nativo. Sin
 `label` hace falta `aria-label`.
+
+### Checkbox
+
+```jsx
+<Checkbox theme="primary" size="md" indeterminate={algunos} onChange={setTodos}>
+  Seleccionar todo
+</Checkbox>
+
+<CheckboxGroup label="Ingredientes" description="Elige los que quieras." value={value} onChange={setValue}>
+  <Checkbox value="queso">Queso</Checkbox>
+  <Checkbox value="jamon">Jamón</Checkbox>
+</CheckboxGroup>
+```
+
+`indeterminate` es el tercer estado de una casilla "seleccionar todo". La etiqueta, la ayuda y el
+error los lleva el **grupo**, no cada casilla. Una casilla suelta es válida: el grupo es opcional.
+
+### Radio
+
+```jsx
+<RadioGroup label="Envío" description="Puedes cambiarlo luego." value={value} onChange={setValue}>
+  <Radio value="estandar">Estándar</Radio>
+  <Radio value="rapido">Rápido</Radio>
+</RadioGroup>
+```
+
+Aquí el grupo **no** es opcional: un `<Radio>` fuera de un `<RadioGroup>` lanza, porque sin estado
+compartido no hay nada que deseleccionar. El grupo entero es una sola parada de tabulación y
+dentro se navega con las flechas. Admite `orientation="horizontal"`.
+
+### Switch
+
+```jsx
+<Switch theme="success" checked={on} onChange={setOn}>
+  Modo oscuro
+</Switch>
+```
+
+Se anuncia como `role="switch"` ("activado"), no como casilla ("marcado"). No tiene tercer estado
+ni grupo: un interruptor no está "encendido a medias", y varios switches son ajustes
+independientes, no una elección entre opciones.
 
 ### Dropdown
 
@@ -254,11 +299,11 @@ Todos verificados ejecutándolos en el lote 9 (ver [`specs/lote-9.md`](./specs/l
 | Script | Qué hace |
 | --- | --- |
 | `pnpm build` | Construye los 6 paquetes publicables en orden topológico (Turborepo) |
-| `pnpm test` | Jest, los 3 proyectos: 16 suites / 307 tests |
+| `pnpm test` | Jest, los 3 proyectos: 19 suites / 400 tests |
 | `pnpm test:components` · `test:tw-theme` · `test:scripts` | Un proyecto de Jest cada uno |
 | `pnpm test:watch` · `test:components:watch` · `test:tw-theme:watch` | Modo watch |
 | `pnpm test:coverage` | Jest con informe de cobertura (la cobertura **no** va activada por defecto) |
-| `pnpm --filter @ownui/tw-theme e2e` | Playwright sobre CSS compilado: 10 fixtures / 176 tests |
+| `pnpm --filter @ownui/tw-theme e2e` | Playwright sobre CSS compilado: 11 fixtures / 193 tests |
 | `pnpm lint` · `pnpm lint:fix` | ESLint sobre todo el repo |
 | `pnpm format` | Prettier sobre todo el repo |
 | `pnpm check:contract` | Cruza React ⇄ `variants/` ⇄ CSS de cada componente. Puerta de CI |
@@ -295,8 +340,9 @@ Se usa [Changesets](https://github.com/changesets/changesets).
 3. **Se mergea ese PR**: se construye y se publican a npm sólo los paquetes con cambios, y se
    crean las releases de GitHub.
 
-Paquetes publicables: `@ownui/tw-theme`, `@ownui/ui`, `@ownui/button`, `@ownui/dropdown`,
-`@ownui/input`, `@ownui/loader` y `@ownui/dom-utils`. `@ownui/storybook` y `@ownui/example-app` son privados.
+Paquetes publicables: `@ownui/tw-theme`, `@ownui/ui`, `@ownui/button`, `@ownui/checkbox`,
+`@ownui/dropdown`, `@ownui/input`, `@ownui/radio`, `@ownui/switch`, `@ownui/loader` y
+`@ownui/dom-utils`. `@ownui/storybook` y `@ownui/example-app` son privados.
 
 Requiere los secretos `NPM_TOKEN` y `CHANGESET_PAT`. Detalles en
 [`.github/RELEASE_SETUP.md`](./.github/RELEASE_SETUP.md).
