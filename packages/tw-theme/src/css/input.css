@@ -1,0 +1,335 @@
+/* =========================================================
+   input.css — sistema de tokens del Input
+
+   Sigue la cascada de `AGENTS.md` §4.8 y de
+   `.github/instructions/components-css.instructions.md`:
+
+     1. la base define TODAS las custom properties del componente
+     2. la variante semántica SOLO redefine --input-color / --input-fg
+     3. los estados recalculan por color-mix en oklab, nunca con un hex nuevo
+     4. los tamaños derivan de --size-field, no de valores sueltos
+
+   Ningún color literal: sólo var(--color-*). Los únicos literales permitidos
+   son #000 / #0000 como operandos de color-mix.
+
+   ── Anatomía ──────────────────────────────────────────────
+   El rol NO pinta el relleno del campo. Un input primary con fondo azul es
+   ilegible en cuanto lleva texto: el relleno es siempre una superficie
+   (`--color-base-100`) y el rol colorea el BORDE y el anillo de foco, que es
+   donde un campo comunica su estado. Por eso `--input-color` entra aquí como
+   fuente del borde, no del fondo.
+
+     .input-field                 contenedor en columna (label, campo, ayuda)
+       .input-label               <label>
+       .input                     la caja: borde, relleno, altura y foco
+         .input-icon              adorno a izquierda o derecha
+         .input-control           el <input> nativo, transparente y sin borde
+       .input-description         texto de ayuda
+       .input-error-message       mensaje de error
+
+   El borde vive en `.input` y no en `.input-control` porque los iconos van
+   DENTRO de la caja: con el borde en el `<input>` quedarían fuera del marco.
+
+   El mensaje de error es `.input-error-message` y no `.input-error`: ese
+   nombre ya es el rol semántico `error` del contrato, y dos reglas con el
+   mismo selector y distinta intención es exactamente el tipo de colisión
+   que `pnpm check:contract` no puede ver.
+
+   Se publica como `@ownui/tw-theme/css/input.css` y agregado en
+   `@ownui/tw-theme/css` (ver `src/css/index.css`).
+   ========================================================= */
+
+/* =========================================================
+   0) Base: .input — la caja
+   ========================================================= */
+
+.input {
+  /* ─── estructura ─── */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--input-gap, 0.5rem);
+  width: 100%;
+  cursor: text;
+
+  /* ─── fuente (ROL): lo único que redefinen las variantes ─── */
+  --input-color: var(--color-base-300);
+  --input-fg: var(--color-base-content);
+
+  /* ─── finales (pintura) ─── */
+  --input-bg: var(--color-base-100);
+  /* El borde en reposo es el color del rol mezclado hacia la superficie: se
+     distingue un `info` de un `error` sin que el campo grite. En foco se usa
+     --input-focus-color a plena intensidad. */
+  --input-border: color-mix(in oklab, var(--input-color), var(--input-bg) 55%);
+
+  /* ─── decoración ─── */
+  --input-radius: var(--radius-field, 0.375rem);
+  --input-border-width: var(--border, 1px);
+
+  /* ─── tamaños (los redefine cada .input-{xs..xl}) ─── */
+  --input-size: calc(var(--size-field, 0.25rem) * 10);
+  --input-p: var(--paragraph, 1rem);
+  --input-fontsize: var(--fontsize, 0.875rem);
+
+  /* ─── estados: heredan de los tokens globales de profundidad ─── */
+  --input-disabled-bg-opacity: var(--disabled-bg-opacity, 60%);
+  --input-disabled-fg-opacity: var(--disabled-fg-opacity, 35%);
+  --input-transition-duration: var(--transition-duration, 0.2s);
+  --input-placeholder-opacity: 55%;
+
+  /* ─── focus ring ─── */
+  --input-outline-width: 2px;
+  --input-outline-offset: 2px;
+
+  /* ─── propiedades finales ─── */
+  min-height: var(--input-size);
+  padding-inline: var(--input-p);
+  font-size: var(--input-fontsize);
+
+  background-color: var(--input-bg);
+  color: var(--input-fg);
+
+  border: var(--input-border-width) solid var(--input-border);
+  border-radius: var(--input-radius);
+
+  transition:
+    color var(--input-transition-duration),
+    background-color var(--input-transition-duration),
+    border-color var(--input-transition-duration);
+}
+
+/* El anillo de foco va en la caja, no en el `<input>`: el `<input>` ya no
+   tiene marco propio, así que su outline nativo dibujaría un rectángulo
+   descolocado dentro del campo. `:focus-within` lo traslada a la caja. */
+.input:focus-within {
+  --input-border: var(--input-focus-color, var(--input-color));
+  outline: var(--input-outline-width) solid
+    var(--input-focus-color, var(--input-color, currentColor));
+  outline-offset: var(--input-outline-offset);
+}
+
+/* =========================================================
+   1) .input-control — el <input> nativo
+   ========================================================= */
+
+.input-control {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+}
+
+.input-control:focus {
+  /* El foco lo pinta `.input:focus-within`. */
+  outline: none;
+}
+
+.input-control::placeholder {
+  color: color-mix(in oklab, currentColor var(--input-placeholder-opacity), #0000);
+  opacity: 1;
+}
+
+/* Un `type="number"` con flechas rompe la métrica de la caja. */
+.input-control::-webkit-outer-spin-button,
+.input-control::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* =========================================================
+   2) .input-icon — adornos dentro de la caja
+   ========================================================= */
+
+.input-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in oklab, currentColor 70%, #0000);
+  pointer-events: none;
+}
+
+/* =========================================================
+   3) Partes del campo: label, ayuda y error
+   ========================================================= */
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--size-field, 0.25rem) * 1.5);
+  --input-field-muted-opacity: 70%;
+}
+
+.input-label {
+  font-size: var(--input-fontsize, var(--fontsize, 0.875rem));
+  font-weight: 500;
+  color: var(--color-base-content);
+  width: fit-content;
+}
+
+.input-description {
+  font-size: calc(var(--input-fontsize, var(--fontsize, 0.875rem)) * 0.9);
+  color: color-mix(in oklab, var(--color-base-content) var(--input-field-muted-opacity), #0000);
+}
+
+.input-error-message {
+  font-size: calc(var(--input-fontsize, var(--fontsize, 0.875rem)) * 0.9);
+  font-weight: 500;
+  color: var(--color-error);
+}
+
+/* =========================================================
+   4) Variantes semánticas: sólo mueven la FUENTE del color
+   ========================================================= */
+
+.input-primary {
+  --input-color: var(--color-primary);
+  --input-focus-color: var(--color-primary-focus);
+}
+
+.input-secondary {
+  --input-color: var(--color-secondary);
+  --input-focus-color: var(--color-secondary-focus);
+}
+
+.input-accent {
+  --input-color: var(--color-accent);
+  --input-focus-color: var(--color-accent-focus);
+}
+
+.input-neutral {
+  --input-color: var(--color-neutral);
+  --input-focus-color: var(--color-neutral-focus);
+}
+
+.input-info {
+  --input-color: var(--color-info);
+  --input-focus-color: var(--color-info-focus);
+}
+
+.input-success {
+  --input-color: var(--color-success);
+  --input-focus-color: var(--color-success-focus);
+}
+
+.input-warning {
+  --input-color: var(--color-warning);
+  --input-focus-color: var(--color-warning-focus);
+}
+
+.input-error {
+  --input-color: var(--color-error);
+  --input-focus-color: var(--color-error-focus);
+}
+
+/* =========================================================
+   5) Tratamientos: remapean fuente -> finales
+   ========================================================= */
+
+/* Sin relleno: la caja se apoya en el fondo de la página. */
+.input-outline {
+  --input-bg: #0000;
+  --input-border: var(--input-color);
+}
+
+/* Sin marco en reposo; el borde aparece al enfocar. Para formularios densos
+   y para inputs embebidos en otro control. */
+.input-ghost {
+  --input-bg: #0000;
+  --input-border: #0000;
+}
+
+.input-ghost:focus-within {
+  --input-border: var(--input-focus-color, var(--input-color));
+}
+
+/* Marco enfatizado: el doble de grosor y el color del rol a plena
+   intensidad. */
+.input-bordered {
+  --input-border-width: calc(var(--border, 1px) * 2);
+  --input-border: var(--input-color);
+}
+
+/* =========================================================
+   6) Estados: sólo redefinen custom properties
+   ========================================================= */
+
+/* Invalidez. Se escribe tres veces el mismo cuerpo a propósito:
+   `:user-invalid` no está soportado en todas partes, `aria-invalid` es lo que
+   pone React Aria y `.input-invalid` es la clase del contrato. Agruparlos en
+   un `:is()` haría que un navegador sin `:user-invalid` descartara TODO el
+   selector. */
+.input-invalid {
+  --input-color: var(--color-error);
+  --input-focus-color: var(--color-error-focus);
+  --input-border: var(--input-color);
+}
+
+.input:has(.input-control[aria-invalid="true"]) {
+  --input-color: var(--color-error);
+  --input-focus-color: var(--color-error-focus);
+  --input-border: var(--input-color);
+}
+
+/* Sólo lectura: el contenido se puede seleccionar pero no editar, así que la
+   caja pierde el aspecto de "escribe aquí" sin llegar a verse apagada. */
+.input-readonly {
+  --input-bg: var(--color-base-200);
+  cursor: default;
+}
+
+.input-readonly .input-control {
+  cursor: default;
+}
+
+.input:where(.input-disabled),
+.input:has(.input-control:disabled) {
+  cursor: not-allowed;
+  --input-bg: color-mix(in oklab, var(--color-base-200) var(--input-disabled-bg-opacity), #0000);
+  --input-fg: color-mix(in oklab, var(--color-base-content) var(--input-disabled-fg-opacity), #0000);
+  --input-border: color-mix(in oklab, var(--input-color) var(--input-disabled-bg-opacity), #0000);
+}
+
+.input:where(.input-disabled) .input-control,
+.input .input-control:disabled {
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   7) Tamaños: todo deriva de --size-field
+   ========================================================= */
+
+.input-xs {
+  --input-size: calc(var(--size-field, 0.25rem) * 6);
+  --input-fontsize: 0.75rem;
+  --input-p: 0.5rem;
+}
+
+.input-sm {
+  --input-size: calc(var(--size-field, 0.25rem) * 8);
+  --input-fontsize: 0.8125rem;
+  --input-p: 0.75rem;
+}
+
+.input-md {
+  --input-size: calc(var(--size-field, 0.25rem) * 10);
+  --input-fontsize: 0.875rem;
+  --input-p: 1rem;
+}
+
+.input-lg {
+  --input-size: calc(var(--size-field, 0.25rem) * 12);
+  --input-fontsize: 1rem;
+  --input-p: 1.25rem;
+}
+
+.input-xl {
+  --input-size: calc(var(--size-field, 0.25rem) * 14);
+  --input-fontsize: 1.125rem;
+  --input-p: 1.5rem;
+}
