@@ -78,9 +78,10 @@ own-ui/
 │   │
 │   ├── ui/                        → @ownui/ui          paquete agregador (barrel)
 │   │   └── src/
-│   │       ├── index.ts           → re-exporta Button, Dropdown, Loader + tipos
+│   │       ├── index.ts           → re-exporta Button, Dropdown, Input, Loader + tipos
 │   │       ├── Button/            → @ownui/button      [paquete propio]
 │   │       ├── Dropdown/          → @ownui/dropdown    [paquete propio]
+│   │       ├── Input/             → @ownui/input       [paquete propio]
 │   │       └── Loader/            → @ownui/loader      [paquete propio]
 │   │
 │   ├── utils/
@@ -642,6 +643,7 @@ distintos coexistiendo**; conviene unificar (ver lote 5 del plan).
 |---|---|---|---|---|---|
 | `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `shape`(2), `width`(2), `active`, `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ✅ 39 reales (L5) | 15 stories | **completo** (L5): contrato alineado, `loading` con `aria-busy`, iconos reales, sin fuga de props |
 | `@ownui/dropdown` | Provider | `variant`(8), `size`(5), `styleVariant`(3), `open`/`defaultOpen`/`onOpenChange` + `.Trigger`/`.Menu`/`.Item` | ✅ reales | 296 ln | **parcial**: sin CSS para menu/trigger, sin navegación por teclado, fuga de props al DOM |
+| `@ownui/input` | Composición | `label`, `description`, `errorMessage`, `invalid`, `theme`(8), `variant`(3), `size`(5), `type`(7), `startIcon`, `endIcon`, `readOnly`, `disabled`, `value`/`defaultValue`/`onChange` | ✅ reales (33) | 142 ln | **sano** (L10): `useTextField`, el rol colorea borde y foco en vez del relleno, cobertura 100% líneas |
 | `@ownui/loader` | Composición | `as`, `color`(8 + `current`), `size`(5), `aria-label`, `id` | ✅ reales | 121 ln | sano; `color="current"` desde L5 (hereda `currentColor`); `Loader.variants.ts` vacío |
 | `@ownui/dom-utils` | — | `useDOMRef` | ✅ 6 reales (L2) | — | ok |
 | `@ownui/tw-theme` | — | ver §4 | ✅ 3 suites + 6 fixtures e2e | — | **maduro** |

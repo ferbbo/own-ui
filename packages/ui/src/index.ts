@@ -12,3 +12,7 @@ export type { LoaderProps } from "./Loader/src/Loader.types";
 export * from "./Button/src/Button.types";
 export * from "./Dropdown/src/Dropdown.types";
 export * from "./Loader/src/Loader.types";
+
+export { default as Input } from "./Input/src/Input";
+export type { InputProps } from "./Input/src/Input.types";
+export * from "./Input/src/Input.types";
