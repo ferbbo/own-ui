@@ -14,6 +14,7 @@
     "test:tw-theme:watch": "jest --selectProjects tw-theme --watch",
     "create-component": "node scripts/create-component.mjs",
     "check:contract": "node scripts/check-contract.mjs",
+    "check:docs": "node scripts/check-docs-links.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
