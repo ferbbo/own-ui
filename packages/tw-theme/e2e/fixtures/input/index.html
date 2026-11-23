@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .test-section {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      max-width: 420px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Caja base, sin rol ni tratamiento. -->
+  <div class="test-section">
+    <div class="input-field input-md" id="field-base">
+      <label class="input-label" for="base">Base</label>
+      <div class="input input-md" id="box-base">
+        <input class="input-control" id="base" placeholder="sin rol" />
+      </div>
+      <p class="input-description" id="description-base">Texto de ayuda</p>
+    </div>
+  </div>
+
+  <!-- Roles semanticos: el rol colorea el borde, no el relleno. -->
+  <div class="test-section">
+    <div class="input input-md input-primary" id="box-primary">
+      <input class="input-control" id="primary" placeholder="primary" />
+    </div>
+    <div class="input input-md input-success" id="box-success">
+      <input class="input-control" id="success" placeholder="success" />
+    </div>
+    <div class="input input-md input-error" id="box-error">
+      <input class="input-control" id="error" placeholder="error" />
+    </div>
+  </div>
+
+  <!-- Tratamientos del marco. -->
+  <div class="test-section">
+    <div class="input input-md input-primary input-outline" id="box-outline">
+      <input class="input-control" id="outline" placeholder="outline" />
+    </div>
+    <div class="input input-md input-primary input-ghost" id="box-ghost">
+      <input class="input-control" id="ghost" placeholder="ghost" />
+    </div>
+    <div class="input input-md input-primary input-bordered" id="box-bordered">
+      <input class="input-control" id="bordered" placeholder="bordered" />
+    </div>
+  </div>
+
+  <!-- Tamanos. -->
+  <div class="test-section">
+    <div class="input input-xs" id="box-xs"><input class="input-control" id="xs" /></div>
+    <div class="input input-sm" id="box-sm"><input class="input-control" id="sm" /></div>
+    <div class="input input-md" id="box-md"><input class="input-control" id="md" /></div>
+    <div class="input input-lg" id="box-lg"><input class="input-control" id="lg" /></div>
+    <div class="input input-xl" id="box-xl"><input class="input-control" id="xl" /></div>
+  </div>
+
+  <!-- Estados. -->
+  <div class="test-section">
+    <div class="input input-md input-invalid" id="box-invalid">
+      <input class="input-control" id="invalid" aria-invalid="true" />
+    </div>
+    <div class="input input-md input-readonly" id="box-readonly">
+      <input class="input-control" id="readonly" readonly value="solo lectura" />
+    </div>
+    <div class="input input-md input-disabled" id="box-disabled">
+      <input class="input-control" id="disabled" disabled />
+    </div>
+    <p class="input-error-message" id="error-message">Mensaje de error</p>
+  </div>
+
+  <!-- Iconos dentro de la caja. -->
+  <div class="test-section">
+    <div class="input input-md" id="box-icons">
+      <span class="input-icon" id="icon-start" aria-hidden="true">@</span>
+      <input class="input-control" id="icons" placeholder="con iconos" />
+      <span class="input-icon" id="icon-end" aria-hidden="true">?</span>
+    </div>
+  </div>
+</body>
+</html>
