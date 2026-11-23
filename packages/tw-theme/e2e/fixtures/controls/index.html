@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controls Test</title>
+  <link rel="stylesheet" href="output.css">
+  <style>
+    body { margin: 0; padding: 20px; font-family: system-ui, sans-serif; }
+    .test-section { margin-bottom: 20px; padding: 20px; border: 2px solid #ccc; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <!-- Los tres al mismo tamano: tienen que alinearse. -->
+  <div class="test-section">
+    <label class="checkbox-field checkbox-md">
+      <input class="checkbox-input" type="checkbox" id="cb-md" />
+      <span class="checkbox checkbox-primary checkbox-md" id="box-cb-md" aria-hidden="true">
+        <svg class="checkbox-mark" viewBox="0 0 16 16"><path d="m3.5 8.5 3 3 6-6.5" /></svg>
+      </span>
+      <span class="checkbox-label">Casilla</span>
+    </label>
+
+    <label class="radio-field radio-md">
+      <input class="radio-input" type="radio" name="g" id="rd-md" />
+      <span class="radio radio-primary radio-md" id="box-rd-md" aria-hidden="true">
+        <span class="radio-mark"></span>
+      </span>
+      <span class="radio-label">Opción</span>
+    </label>
+
+    <label class="switch-field switch-md">
+      <input class="switch-input" type="checkbox" role="switch" id="sw-md" />
+      <span class="switch switch-primary switch-md" id="box-sw-md" aria-hidden="true">
+        <span class="switch-thumb" id="thumb-md"></span>
+      </span>
+      <span class="switch-label">Interruptor</span>
+    </label>
+  </div>
+
+  <!-- Marcados. -->
+  <div class="test-section">
+    <label class="checkbox-field checkbox-md">
+      <input class="checkbox-input" type="checkbox" id="cb-on" checked />
+      <span class="checkbox checkbox-primary checkbox-md checkbox-checked" id="box-cb-on" aria-hidden="true">
+        <svg class="checkbox-mark" viewBox="0 0 16 16"><path d="m3.5 8.5 3 3 6-6.5" /></svg>
+      </span>
+    </label>
+
+    <label class="radio-field radio-md">
+      <input class="radio-input" type="radio" name="h" id="rd-on" checked />
+      <span class="radio radio-primary radio-md radio-checked" id="box-rd-on" aria-hidden="true">
+        <span class="radio-mark" id="mark-rd-on"></span>
+      </span>
+    </label>
+
+    <label class="switch-field switch-md">
+      <input class="switch-input" type="checkbox" role="switch" id="sw-on" checked />
+      <span class="switch switch-primary switch-md switch-checked" id="box-sw-on" aria-hidden="true">
+        <span class="switch-thumb" id="thumb-on"></span>
+      </span>
+    </label>
+  </div>
+
+  <!-- Indeterminado: solo el checkbox. -->
+  <div class="test-section">
+    <span class="checkbox checkbox-primary checkbox-md checkbox-indeterminate" id="box-cb-mixed">
+      <svg class="checkbox-mark" id="mark-cb-mixed" viewBox="0 0 16 16"><path d="M4 8h8" /></svg>
+    </span>
+  </div>
+
+  <!-- Roles. -->
+  <div class="test-section">
+    <span class="checkbox checkbox-md checkbox-success checkbox-checked" id="box-cb-success"></span>
+    <span class="checkbox checkbox-md checkbox-error checkbox-checked" id="box-cb-error"></span>
+    <span class="radio radio-md radio-success radio-checked" id="box-rd-success">
+      <span class="radio-mark" id="mark-rd-success"></span>
+    </span>
+    <span class="switch switch-md switch-success switch-checked" id="box-sw-success"></span>
+  </div>
+
+  <!-- Tamanos de los tres. -->
+  <div class="test-section">
+    <span class="checkbox checkbox-xs" id="box-cb-xs"></span>
+    <span class="checkbox checkbox-sm" id="box-cb-sm"></span>
+    <span class="checkbox checkbox-lg" id="box-cb-lg"></span>
+    <span class="checkbox checkbox-xl" id="box-cb-xl"></span>
+    <span class="radio radio-xs" id="box-rd-xs"></span>
+    <span class="radio radio-xl" id="box-rd-xl"></span>
+    <span class="switch switch-xs" id="box-sw-xs"><span class="switch-thumb"></span></span>
+    <span class="switch switch-xl" id="box-sw-xl"><span class="switch-thumb"></span></span>
+  </div>
+
+  <!-- Estados. -->
+  <div class="test-section">
+    <span class="checkbox checkbox-md checkbox-invalid" id="box-cb-invalid"></span>
+    <span class="checkbox checkbox-md checkbox-disabled" id="box-cb-disabled"></span>
+    <span class="radio radio-md radio-invalid" id="box-rd-invalid"></span>
+    <span class="switch switch-md switch-disabled" id="box-sw-disabled"></span>
+  </div>
+
+  <!-- El grupo. -->
+  <div class="test-section">
+    <div class="checkbox-group checkbox-md" id="cb-group">
+      <span class="checkbox-group-label" id="cb-group-label">Ingredientes</span>
+      <div class="checkbox-group-items" id="cb-group-items">
+        <label class="checkbox-field checkbox-md">
+          <input class="checkbox-input" type="checkbox" />
+          <span class="checkbox checkbox-md"></span>
+        </label>
+      </div>
+      <p class="checkbox-group-description" id="cb-group-description">Elige los que quieras</p>
+      <p class="checkbox-group-error-message" id="cb-group-error">Elige al menos uno</p>
+    </div>
+  </div>
+</body>
+</html>
