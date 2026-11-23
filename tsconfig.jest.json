@@ -30,6 +30,7 @@
       "@ownui/button": ["packages/ui/src/Button/src/index.ts"],
       "@ownui/dropdown": ["packages/ui/src/Dropdown/src/index.ts"],
       "@ownui/loader": ["packages/ui/src/Loader/src/index.ts"],
+      "@ownui/input": ["packages/ui/src/Input/src/index.ts"],
       "@ownui/ui": ["packages/ui/src/index.ts"]
     }
   }
