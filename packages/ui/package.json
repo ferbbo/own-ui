@@ -33,6 +33,7 @@
     "@ownui/loader": "workspace:*",
     "@ownui/input": "workspace:*",
     "@ownui/card": "workspace:*",
+    "@ownui/badge": "workspace:*",
     "@ownui/tw-theme": "workspace:*",
     "@react-aria/button": "^3.10.0",
     "@react-aria/utils": "^3.26.0"

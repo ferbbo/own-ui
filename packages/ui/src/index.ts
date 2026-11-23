@@ -20,3 +20,7 @@ export * from "./Input/src/Input.types";
 export { default as Card } from "./Card/src/Card";
 export type { CardProps } from "./Card/src/Card.types";
 export * from "./Card/src/Card.types";
+
+export { default as Badge } from "./Badge/src/Badge";
+export type { BadgeProps } from "./Badge/src/Badge.types";
+export * from "./Badge/src/Badge.types";

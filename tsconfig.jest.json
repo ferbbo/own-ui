@@ -32,6 +32,7 @@
       "@ownui/loader": ["packages/ui/src/Loader/src/index.ts"],
       "@ownui/input": ["packages/ui/src/Input/src/index.ts"],
       "@ownui/card": ["packages/ui/src/Card/src/index.ts"],
+      "@ownui/badge": ["packages/ui/src/Badge/src/index.ts"],
       "@ownui/ui": ["packages/ui/src/index.ts"]
     }
   }
