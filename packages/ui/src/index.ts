@@ -23,6 +23,7 @@ export type { CheckboxProps } from "./Checkbox/src/Checkbox.types";
 export * from "./Checkbox/src/Checkbox.types";
 
 export { default as Radio } from "./Radio/src/Radio";
+export { default as RadioGroup } from "./Radio/src/RadioGroup";
 export type { RadioProps } from "./Radio/src/Radio.types";
 export * from "./Radio/src/Radio.types";
 
