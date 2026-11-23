@@ -15,6 +15,7 @@ const workspaceModuleMapper = {
   "^@ownui/input$": "<rootDir>/packages/ui/src/Input/src/index.ts",
   "^@ownui/card$": "<rootDir>/packages/ui/src/Card/src/index.ts",
   "^@ownui/badge$": "<rootDir>/packages/ui/src/Badge/src/index.ts",
+  "^@ownui/avatar$": "<rootDir>/packages/ui/src/Avatar/src/index.ts",
   "^@ownui/ui$": "<rootDir>/packages/ui/src/index.ts",
 };
 

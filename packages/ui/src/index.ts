@@ -24,3 +24,7 @@ export * from "./Card/src/Card.types";
 export { default as Badge } from "./Badge/src/Badge";
 export type { BadgeProps } from "./Badge/src/Badge.types";
 export * from "./Badge/src/Badge.types";
+
+export { default as Avatar } from "./Avatar/src/Avatar";
+export type { AvatarProps } from "./Avatar/src/Avatar.types";
+export * from "./Avatar/src/Avatar.types";
