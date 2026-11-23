@@ -20,7 +20,7 @@ estilo propio: emite `class="btn btn-primary btn-md"` y esas clases las define
 - 📚 Storybook como escaparate visual y `apps/example-app` como prueba de consumo real
 - ✅ Jest + React Testing Library para unidad, Playwright sobre CSS compilado para el plugin
 
-**Estado: pre-1.0.** Hay tres componentes (`Button`, `Dropdown`, `Loader`). El plugin de theming
+**Estado: pre-1.0.** Hay cuatro componentes (`Button`, `Dropdown`, `Input`, `Loader`). El plugin de theming
 está maduro; la capa de componentes está en construcción. Lo que falta está listado y priorizado
 en [`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md), no escondido.
 
@@ -47,7 +47,7 @@ En tu CSS de entrada:
 /* 1. Tokens semánticos + utilidades de color (temas light y dark incluidos) */
 @plugin "@ownui/tw-theme";
 
-/* 2. CSS de componentes: define .btn, .dropdown y .loader */
+/* 2. CSS de componentes: define .btn, .dropdown, .input y .loader */
 @import "@ownui/tw-theme/css";
 ```
 
@@ -64,7 +64,7 @@ que emiten no existirían en ningún sitio. Para cargar un único componente:
 ### Uso
 
 ```jsx
-import { Button, Dropdown, Loader } from "@ownui/ui";
+import { Button, Dropdown, Input, Loader } from "@ownui/ui";
 
 function App() {
   return (
@@ -76,6 +76,8 @@ function App() {
       <Button theme="success" loading>
         Enviando
       </Button>
+
+      <Input label="Correo" type="email" placeholder="nombre@ejemplo.com" />
 
       <Dropdown variant="primary">
         <Dropdown.Trigger>Elige</Dropdown.Trigger>
@@ -91,7 +93,8 @@ function App() {
 }
 ```
 
-Cada componente se puede instalar suelto: `@ownui/button`, `@ownui/dropdown`, `@ownui/loader`.
+Cada componente se puede instalar suelto: `@ownui/button`, `@ownui/dropdown`, `@ownui/input`,
+`@ownui/loader`.
 
 ---
 
@@ -137,6 +140,31 @@ Si un paquete deja de publicar algo, la app se rompe aquí antes que en el proye
 
 Un botón icon-only usa `icon` en vez de `children`, y entonces `aria-label` es **obligatorio**:
 sin texto visible no hay nombre accesible.
+
+### Input
+
+```jsx
+<Input
+  label="Correo"              // <label> enlazado con el control
+  description="Te enviaremos el recibo."  // ayuda, vía aria-describedby
+  errorMessage="Dominio inválido"         // sólo se muestra si invalid
+  invalid={false}
+  theme="primary"   // los 8 roles: colorean el BORDE y el anillo de foco, no el relleno
+  variant="outline" // outline | ghost | bordered — omitirlo es la caja rellena
+  size="md"         // xs | sm | md | lg | xl
+  type="email"      // text | email | password | number | search | tel | url
+  startIcon={<Icon />}
+  endIcon={<Icon />}
+  value={value}
+  onChange={setValue} // recibe el VALOR, no el evento
+  readOnly
+  disabled
+/>
+```
+
+Sobre `@react-aria/useTextField`: genera y enlaza los `id` del label, la ayuda
+y el error, y pone `aria-invalid`. El `ref` apunta al `<input>` nativo. Sin
+`label` hace falta `aria-label`.
 
 ### Dropdown
 
@@ -226,11 +254,11 @@ Todos verificados ejecutándolos en el lote 9 (ver [`specs/lote-9.md`](./specs/l
 | Script | Qué hace |
 | --- | --- |
 | `pnpm build` | Construye los 6 paquetes publicables en orden topológico (Turborepo) |
-| `pnpm test` | Jest, los 3 proyectos: 15 suites / 271 tests |
+| `pnpm test` | Jest, los 3 proyectos: 16 suites / 307 tests |
 | `pnpm test:components` · `test:tw-theme` · `test:scripts` | Un proyecto de Jest cada uno |
 | `pnpm test:watch` · `test:components:watch` · `test:tw-theme:watch` | Modo watch |
 | `pnpm test:coverage` | Jest con informe de cobertura (la cobertura **no** va activada por defecto) |
-| `pnpm --filter @ownui/tw-theme e2e` | Playwright sobre CSS compilado: 9 fixtures / 150 tests |
+| `pnpm --filter @ownui/tw-theme e2e` | Playwright sobre CSS compilado: 10 fixtures / 176 tests |
 | `pnpm lint` · `pnpm lint:fix` | ESLint sobre todo el repo |
 | `pnpm format` | Prettier sobre todo el repo |
 | `pnpm check:contract` | Cruza React ⇄ `variants/` ⇄ CSS de cada componente. Puerta de CI |
@@ -268,7 +296,7 @@ Se usa [Changesets](https://github.com/changesets/changesets).
    crean las releases de GitHub.
 
 Paquetes publicables: `@ownui/tw-theme`, `@ownui/ui`, `@ownui/button`, `@ownui/dropdown`,
-`@ownui/loader` y `@ownui/dom-utils`. `@ownui/storybook` y `@ownui/example-app` son privados.
+`@ownui/input`, `@ownui/loader` y `@ownui/dom-utils`. `@ownui/storybook` y `@ownui/example-app` son privados.
 
 Requiere los secretos `NPM_TOKEN` y `CHANGESET_PAT`. Detalles en
 [`.github/RELEASE_SETUP.md`](./.github/RELEASE_SETUP.md).

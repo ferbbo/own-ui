@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ButtonSection } from "./sections/ButtonSection";
 import { DropdownSection } from "./sections/DropdownSection";
+import { InputSection } from "./sections/InputSection";
 import { LoaderSection } from "./sections/LoaderSection";
 import { Panel, Row, Section } from "./layout";
 import { applyTheme, ThemeName, ThemeSwitcher } from "./ThemeSwitcher";
@@ -81,6 +82,7 @@ export default function App() {
       <main>
         <SurfaceSection />
         <ButtonSection />
+        <InputSection />
         <DropdownSection />
         <LoaderSection />
       </main>
