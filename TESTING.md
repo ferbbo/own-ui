@@ -64,7 +64,7 @@ pnpm test:components:watch   # Modo watch para componentes
 pnpm test:tw-theme:watch     # Modo watch para tw-theme
 ```
 
-Estado actual de la suite: **14 suites / 259 tests** en verde (`pnpm test`).
+Estado actual de la suite: **15 suites / 271 tests** en verde (`pnpm test`).
 
 ## Configuración de Cobertura
 

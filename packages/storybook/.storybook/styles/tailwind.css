@@ -1,18 +1,42 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
-/* x
- * OPCIÓN 1: Usar el plugin con los temas predeterminados (light y dark)
- * @plugin "@ownui/tw-theme";
+/*
+ * OPCIÓN 1 (activa): el plugin con sus temas predeterminados, light y dark.
+ *
+ * Estaba comentada y en su lugar corría la opción 2 (`themes: false`). El
+ * efecto, verificado en Chromium en el lote 9, era que Storybook no tenía
+ * NINGÚN tema activo en claro: el único tema registrado llevaba
+ * `--prefersdark`, así que `--color-primary` y compañía quedaban sin definir y
+ * los componentes se veían descoloridos. Un escaparate visual sin tema no
+ * enseña nada.
+ */
+@plugin "@ownui/tw-theme";
+
+/*
+ * OPCIÓN 2: el plugin sin temas predeterminados, para un proyecto que sólo
+ * quiere los suyos. Se deja documentada, no activa.
+ *
+ * @plugin "@ownui/tw-theme" {
+ *   themes: false;
+ * }
  */
 
-/* 
- * OPCIÓN 2: Usar el plugin sin temas predeterminados 
- * pero con temas personalizados definidos en el mismo archivo
+/*
+ * CSS de componentes: lo que define .btn, .dropdown y .loader.
+ *
+ * Sin esta línea Storybook renderiza los componentes **sin un solo estilo**:
+ * `<Button>` emite `class="btn btn-primary btn-md"` y ninguna de esas clases
+ * existe. Se verificó en el lote 9 midiendo en Chromium: background
+ * transparente, padding 0, radio 0. Es el mismo bug raíz del lote 1
+ * (AGENTS.md §9.1), que se cerró para el consumidor publicado pero nunca se
+ * cableó aquí.
+ *
+ * Resuelve por el `exports["./css"]` del paquete, igual que en un proyecto
+ * instalado desde npm: no apunta a `node_modules/@ownui/tw-theme/src/`, que no
+ * existe en el tarball publicado.
  */
-@plugin "@ownui/tw-theme" {
-  themes: false;
-}
+@import "@ownui/tw-theme/css";
 
 /* 
  * OPCIÓN 3: Configuración de tema independiente
