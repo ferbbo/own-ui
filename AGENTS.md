@@ -96,7 +96,8 @@ own-ui/
 │   └── workflows/                 → ci.yml, release.yml
 ├── owonui_system.drawio           → diagrama C4-ish del sistema
 ├── project-structure-heroui.drawio→ referencia de arquitectura HeroUI
-├── jest.config.js                 → 2 proyectos: "components" y "tw-theme"
+├── scripts/                       → create-component.mjs, check-contract.mjs, check-contrast.mjs
+├── jest.config.js                 → 3 proyectos: "components", "tw-theme" y "scripts"
 └── turbo.json
 ```
 
@@ -649,12 +650,18 @@ pnpm --filter "@ownui/ui..." build # el agregador + sus dependencias (ojo a los 
 turbo build --filter=@ownui/ui     # equivalente vía turbo (usa dependsOn: ["^build"])
 pnpm --filter @ownui/button build  # SÓLO ese paquete: falla en limpio si sus deps no están
 
-pnpm test                          # Jest, ambos proyectos — 10 suites / 122 tests (sin coverage)
+pnpm test                          # Jest, los 3 proyectos — 14 suites / 234 tests (sin coverage)
 pnpm test:coverage                 # lo mismo + informe de cobertura
 pnpm test:tw-theme                 # sólo el plugin
 pnpm test:components               # componentes de packages/ui + utils de packages/utils
+pnpm test:scripts                  # los CLIs de scripts/ (lote 8)
 
 pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (116 tests)
+
+pnpm create-component <Name>       # andamio completo del componente (lote 8)
+pnpm create-component <Name> --compound   # patrón Provider + Trigger/Panel/Item
+pnpm check:contract                # React ⇄ variants/ ⇄ css/ — puerta en CI
+pnpm check:contrast                # auditoría WCAG de los pares color / -content
 
 pnpm lint  /  pnpm lint:fix  /  pnpm format
 pnpm changeset                     # crear changeset antes de abrir PR
@@ -682,12 +689,18 @@ sostener los subpath exports `.`, `./theme`, `./variants`. Desde el lote 1 añad
 `onSuccess` que copia `src/css` → `dist/css` (tsup no procesa CSS), que es lo que sostiene los
 exports `./css` y `./css/*`.
 
-### 6.3 Jest — dos proyectos
+### 6.3 Jest — tres proyectos
 
 | Proyecto | Entorno | testMatch |
 |---|---|---|
 | `components` | jsdom | `packages/ui/**/__test__/**` + `packages/utils/**/__test__/**` ✅ |
 | `tw-theme` | node | `packages/tw-theme/src/**/*.{test,spec}.{ts,tsx}` ✅ |
+| `scripts` | node | `scripts/__tests__/**/*.{test,spec}.ts` ✅ (lote 8) |
+
+El proyecto `scripts` prueba los CLIs de `scripts/` invocándolos con `execFileSync` sobre un
+árbol temporal: así se verifica también su **código de salida**, que es lo que los convierte en
+puerta de CI. Se eligió un tercer proyecto de Jest en vez de `node --test` para no meter un
+segundo runner de tests en el repo.
 
 Preset `ts-jest/presets/default-esm`; CSS mapeado a `identity-obj-proxy`; `maxWorkers: "50%"`.
 La cobertura **no** es global: se pide con `pnpm test:coverage` (corregido en el lote 2).
@@ -771,25 +784,59 @@ Rama de trabajo para sesiones de agente: **`claude/great-archimedes-5f008a`**.
 
 ## 7. Cómo añadir un componente nuevo (receta end-to-end)
 
-El orden importa: **CSS y contrato antes que React**, o el componente nace sin estilos.
+Desde el lote 8 los pasos mecánicos **no se hacen a mano**: `pnpm create-component` los ejecuta
+en el orden correcto (**CSS y contrato antes que React**, que es lo que impide que un componente
+nazca sin estilos) y `pnpm check:contract` verifica que las tres capas digan lo mismo.
 
-1. **CSS** → `packages/tw-theme/src/css/<name>.css` siguiendo la cascada de §4.8
-   (base define todas las props → variantes sólo redefinen `--{c}-color` → estados por `color-mix`).
-2. **Contrato** → `packages/tw-theme/src/variants/<name>.ts` + export en `variants/index.ts`.
-   Las claves son props de React; los valores, clases CSS que existan realmente en (1).
-3. **Wiring del CSS** → el plugin debe inyectar esas clases (hoy **no lo hace**: resolver §9.1
-   / lote 1 antes de que esto tenga efecto).
-4. **Fixture e2e** → `packages/tw-theme/e2e/fixtures/` + spec, si introduce tokens o utilidades.
-5. **Paquete** → `packages/ui/src/<Name>/` con `package.json` (`@ownui/<name>`,
-   `sideEffects: false`, `publishConfig.access: "public"`, peers React), `tsconfig.json`,
-   `tsup.config.ts`.
-6. **Tipos** → `<Name>.types.ts`: unión discriminada sobre `as`, `never` para props inválidas.
-7. **Hook** → `use<Name>.tsx`: los 5 pasos de §5.2. Si hay 3+ subcomponentes, Provider (§5.3).
-8. **Componente** → `<Name>.tsx`: `forwardRef` + `React.memo`, sin lógica.
-9. **Export** → `index.ts` del componente **y** registro en `packages/ui/src/index.ts`.
-10. **Tests** → `__test__/<Name>.test.tsx` con RTL real (nunca stubs de `console.log`).
-11. **Stories** → `Default`, `AllVariants`, `AllSizes`, `Disabled`, `AsLink` (si es polimórfico).
+```bash
+pnpm create-component Tabs              # patrón A (composición simple)
+pnpm create-component Select --compound # patrón B (Provider + Trigger/Panel/Item)
+pnpm create-component Chip --prefix cp  # prefijo de clase distinto del nombre
+pnpm create-component Tabs --dry-run    # enseña lo que haría sin escribir nada
+```
+
+Qué genera y registra, en este orden:
+
+1. **CSS** → `packages/tw-theme/src/css/<name>.css` con la cascada de §4.8 (la base define
+   todas las custom properties → las variantes sólo redefinen `--{c}-color` → los estados
+   recalculan por `color-mix` en oklab → los tamaños derivan de `--size-field` →
+   `:focus-visible` → `disabled`).
+2. **Contrato** → `packages/tw-theme/src/variants/<name>.ts` con los 8 roles, los 5 tamaños y
+   los estados, más su `export` en `variants/index.ts`.
+3. **Publicación del CSS** → `@import "./<name>.css"` en `css/index.css`, que es lo que viaja
+   en el paquete (`@ownui/tw-theme/css`). Sin este paso el componente no renderiza estilado:
+   es el bug del lote 1.
+4. **Paquete** → `packages/ui/src/<Name>/` con `package.json` (`@ownui/<name>`,
+   `sideEffects: false`, `publishConfig.access: "public"`, peers de React), `tsconfig.json` y
+   `tsup.config.ts` con el banner `"use client"`.
+5. **Tipos, hook, componente y barrel** → `<Name>.types.ts` (uniones de literales para `theme`
+   y `size`), `use<Name>.tsx` (toda la lógica; las clases se **leen del contrato**),
+   `<Name>.tsx` (`forwardRef` + `React.memo`, sin lógica) e `index.ts`.
+6. **Tests y stories** → `__test__/<Name>.test.tsx` con RTL real (nunca stubs de
+   `console.log`) y `<Name>.stories.tsx` con `Default`, `AllVariants`, `AllSizes` y `Disabled`.
+7. **Registros** → `packages/ui/src/index.ts`, las `dependencies` de `@ownui/ui`, el
+   `moduleNameMapper` de `jest.config.js` y los `paths` de `tsconfig.jest.json`.
+
+Todo lo generado pasa por Prettier al escribirse, así que nace limpio de lint.
+
+Lo que **sigue siendo tuyo** — el andamio no sabe qué hace el componente:
+
+8. **Rellenar el CSS** con la geometría y los estados reales, y **ajustar contrato y tipos** a
+   las props que de verdad tiene.
+9. **React Aria** → si el componente es interactivo, el hook pasa por un hook de
+   `@react-aria/*` (§5.5). El compound generado trae `Esc` + retorno de foco, pero **no**
+   navegación con flechas ni click-outside: eso es trabajo del componente.
+10. **Fixture e2e** → `packages/tw-theme/e2e/fixtures/` + spec, si introduce tokens o
+    utilidades nuevas (§6.4). Obligatorio para cualquier cambio del plugin.
+11. **Tests de comportamiento** y stories específicas.
 12. **Changeset** → `pnpm changeset`.
+
+Antes de abrir el PR, estas dos tienen que estar en verde:
+
+```bash
+pnpm check:contract   # ninguna clase emitida sin CSS, ningún valor de tipo sin contrato
+pnpm test             # los 3 proyectos de Jest
+```
 
 Checklist de "listo" (de la guía canónica): todas las variantes y tamaños aplican clase real ·
 teclado completo · ARIA correcto · `memo`+`useMemo`+`forwardRef` · cobertura >90% ·
@@ -820,6 +867,8 @@ stories completas · build sin errores con banner `"use client"`.
    siguen siendo válidas en lo arquitectónico.
 10. **`pnpm changeset` en cada PR** que toque un paquete publicable.
 11. Commits en conventional commits; comentarios en español.
+12. **Componente nuevo ⇒ `pnpm create-component`** (§7), no copiar y pegar otro paquete; y
+    **`pnpm check:contract` en verde antes del PR** — es puerta en CI desde el lote 8.
 
 ---
 

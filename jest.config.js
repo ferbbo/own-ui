@@ -90,6 +90,32 @@ module.exports = {
         "!packages/tw-theme/src/**/*test-utils*",
       ],
     },
+    // Scripts de mantenimiento del repo (`scripts/*.mjs`). Son CLIs sin
+    // dependencias, y sus tests los invocan como procesos para verificar
+    // también el código de salida: es lo que los convierte en puerta de CI.
+    // Viven aquí y no en el proyecto "components" porque no necesitan jsdom ni
+    // los alias del workspace.
+    {
+      displayName: "scripts",
+      preset: "ts-jest/presets/default-esm",
+      testEnvironment: "node",
+      extensionsToTreatAsEsm: [".ts"],
+      testMatch: ["<rootDir>/scripts/__tests__/**/*.{test,spec}.ts"],
+      moduleNameMapper: {
+        "^(\\.{1,2}/.*)\\.js$": "$1",
+      },
+      transform: {
+        "^.+\\.ts$": [
+          "ts-jest",
+          {
+            useESM: true,
+            tsconfig: "<rootDir>/tsconfig.jest.json",
+          },
+        ],
+      },
+      moduleFileExtensions: ["ts", "js", "json", "node"],
+      collectCoverageFrom: [],
+    },
   ],
 
   // Global configuration
