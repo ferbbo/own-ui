@@ -9,7 +9,7 @@
 | Rama de trabajo | `claude/lote-12`                                                           |
 | Estado general  | **COMPLETO** — 8 tasks, 0 bloqueadas, 9/10 criterios cumplidos y 1 parcial |
 | Fecha           | 2026-11-23                                                                 |
-| PR              | hacia `develop` (ver el enlace en el commit de cierre)                     |
+| PR              | [#39](https://github.com/ferbbo/own-ui/pull/39) → `develop`                |
 
 > **El prompt del lote llegó con el parámetro sin sustituir** (`LOTE {{N}}`). La resolución a
 > **L12** está documentada en **D-01**: no es una elección de alcance, es la lectura del estado
