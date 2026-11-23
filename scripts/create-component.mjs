@@ -57,6 +57,28 @@ const THEMES = [
 ];
 
 /** La escala de tamaños del sistema, en unidades de `--size-field`. */
+/**
+ * Palabras reservadas de JavaScript que pueden ser nombre de componente.
+ * No es la lista completa del lenguaje: solo las que alguien escribiria como
+ * nombre de un componente de interfaz.
+ */
+const RESERVED_WORDS = new Set([
+  "switch",
+  "class",
+  "default",
+  "delete",
+  "export",
+  "import",
+  "new",
+  "return",
+  "super",
+  "this",
+  "void",
+  "while",
+  "with",
+  "yield",
+]);
+
 const SIZES = [
   { key: "xs", fields: 6, fontsize: "0.75rem", padding: "0.5rem" },
   { key: "sm", fields: 8, fontsize: "0.8125rem", padding: "0.75rem" },
@@ -524,9 +546,9 @@ export interface ${Name}ContextValue {
     : ""
 }`;
 
-const hookTemplate = ({ name, Name, prefix }) => `// use${Name}.tsx
+const hookTemplate = ({ name, Name, prefix, contract, contractImport }) => `// use${Name}.tsx
 import { ElementType, useMemo } from "react";
-import { ${name} } from "@ownui/tw-theme/variants";
+import { ${contractImport} } from "@ownui/tw-theme/variants";
 import { ${Name}Props } from "./${Name}.types";
 
 /**
@@ -560,9 +582,9 @@ export function use${Name}(props: ${Name}Props): {
 
   const classNames = useMemo(() => {
     const base = "${prefix}";
-    const themeCls = ${name}.theme[theme] ?? "";
-    const sizeCls = ${name}.size[size] ?? "";
-    const disabledCls = disabled ? ${name}.state.disabled : "";
+    const themeCls = ${contract}.theme[theme] ?? "";
+    const sizeCls = ${contract}.size[size] ?? "";
+    const disabledCls = disabled ? ${contract}.state.disabled : "";
 
     return [base, themeCls, sizeCls, disabledCls, className].filter(Boolean).join(" ");
   }, [theme, size, disabled, className]);
@@ -708,10 +730,10 @@ export const Compound: Story = {
     : ""
 }`;
 
-const simpleTestTemplate = ({ name, Name, prefix }) => `// ${Name}.test.tsx
+const simpleTestTemplate = ({ name, Name, prefix, contract, contractImport }) => `// ${Name}.test.tsx
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { ${name} } from "@ownui/tw-theme/variants";
+import { ${contractImport} } from "@ownui/tw-theme/variants";
 import ${Name} from "../src/${Name}";
 
 /**
@@ -728,13 +750,13 @@ describe("${Name}", () => {
     const node = screen.getByTestId("${name}");
 
     expect(node).toBeInTheDocument();
-    expect(node).toHaveClass("${prefix}", ${name}.theme.primary, ${name}.size.md);
+    expect(node).toHaveClass("${prefix}", ${contract}.theme.primary, ${contract}.size.md);
     expect(node).toHaveTextContent("contenido");
   });
 
-  test.each(Object.entries(${name}.theme))("theme=%s aplica .%s", (theme, cls) => {
+  test.each(Object.entries(${contract}.theme))("theme=%s aplica .%s", (theme, cls) => {
     render(
-      <${Name} data-testid="${name}" theme={theme as keyof typeof ${name}.theme}>
+      <${Name} data-testid="${name}" theme={theme as keyof typeof ${contract}.theme}>
         x
       </${Name}>
     );
@@ -742,9 +764,9 @@ describe("${Name}", () => {
     expect(screen.getByTestId("${name}")).toHaveClass(cls);
   });
 
-  test.each(Object.entries(${name}.size))("size=%s aplica .%s", (size, cls) => {
+  test.each(Object.entries(${contract}.size))("size=%s aplica .%s", (size, cls) => {
     render(
-      <${Name} data-testid="${name}" size={size as keyof typeof ${name}.size}>
+      <${Name} data-testid="${name}" size={size as keyof typeof ${contract}.size}>
         x
       </${Name}>
     );
@@ -760,7 +782,7 @@ describe("${Name}", () => {
     );
     const node = screen.getByTestId("${name}");
 
-    expect(node).toHaveClass(${name}.state.disabled);
+    expect(node).toHaveClass(${contract}.state.disabled);
     expect(node).toHaveAttribute("aria-disabled", "true");
   });
 
@@ -793,11 +815,11 @@ describe("${Name}", () => {
 });
 `;
 
-const compoundTestTemplate = ({ name, Name, prefix }) => `// ${Name}.test.tsx
+const compoundTestTemplate = ({ name, Name, prefix, contract, contractImport }) => `// ${Name}.test.tsx
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ${name} } from "@ownui/tw-theme/variants";
+import { ${contractImport} } from "@ownui/tw-theme/variants";
 import ${Name} from "../src/${Name}";
 import { ${Name}RootProps } from "../src/${Name}.types";
 
@@ -830,7 +852,7 @@ describe("${Name}", () => {
     const root = screen.getByTestId("${name}");
 
     expect(root).toHaveClass("${prefix}");
-    expect(root).not.toHaveClass(${name}.theme.primary);
+    expect(root).not.toHaveClass(${contract}.theme.primary);
   });
 
   test("el trigger toma el rol y el tamaño del contexto", () => {
@@ -838,8 +860,8 @@ describe("${Name}", () => {
 
     expect(trigger()).toHaveClass(
       "${prefix}",
-      ${name}.theme.success,
-      ${name}.size.lg,
+      ${contract}.theme.success,
+      ${contract}.size.lg,
       ${name}.trigger.base
     );
   });
@@ -1022,12 +1044,12 @@ export function ${Name}Provider({
 export { ${Name}Context };
 `;
 
-const compoundHookTemplate = ({ name, Name, prefix }) => `// use${Name}.tsx
+const compoundHookTemplate = ({ name, Name, prefix, contract, contractImport }) => `// use${Name}.tsx
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useButton as useAriaButton } from "@react-aria/button";
 import { mergeProps } from "@react-aria/utils";
 import { useDOMRef } from "@ownui/dom-utils";
-import { ${name} } from "@ownui/tw-theme/variants";
+import { ${contractImport} } from "@ownui/tw-theme/variants";
 import { use${Name}Context } from "./${Name}Context";
 import {
   ${Name}ItemProps,
@@ -1068,7 +1090,7 @@ export function use${Name}(props: ${Name}RootProps): {
 
   const classNames = useMemo(
     () =>
-      ["${prefix}", open ? ${name}.state.open : "", className].filter(Boolean).join(" "),
+      ["${prefix}", open ? ${contract}.state.open : "", className].filter(Boolean).join(" "),
     [open, className]
   );
 
@@ -1107,8 +1129,8 @@ export function use${Name}Trigger(
     () =>
       [
         "${prefix}",
-        ${name}.theme[theme],
-        ${name}.size[size],
+        ${contract}.theme[theme],
+        ${contract}.size[size],
         ${name}.trigger.base,
         open ? ${name}.trigger.active : "",
         className,
@@ -1488,7 +1510,13 @@ class Plan {
 function generate({ Name, name, prefix, compound, plan }) {
   const twSrc = join("packages", "tw-theme", "src");
   const pkg = join("packages", "ui", "src", Name);
-  const context = { Name, name, prefix, compound };
+  // `switch`, `class`, `default`… son palabras reservadas: no se pueden usar
+  // como nombre de binding en un `import`. El contrato se exporta igual (un
+  // nombre exportado SI puede serlo), pero quien lo importa necesita un alias.
+  const contract = RESERVED_WORDS.has(name) ? `${name}Variants` : name;
+  const contractImport = contract === name ? name : `${name} as ${contract}`;
+
+  const context = { Name, name, prefix, compound, contract, contractImport };
 
   // 1-2. CSS y contrato PRIMERO: un componente sin CSS publicado no está hecho.
   plan.write(join(twSrc, "css", `${name}.css`), cssTemplate(context));
