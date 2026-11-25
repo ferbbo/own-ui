@@ -214,6 +214,28 @@ describe("create-component", () => {
     });
   });
 
+  test("un nombre que es palabra reservada se importa con alias", () => {
+    // `class` se puede EXPORTAR con ese nombre, pero no se puede usar como
+    // binding en un `import`: `import { class } from ...` es un error de
+    // sintaxis. Sin alias, el generador emitia un paquete que no compilaba.
+    // Se descubrio generando el Switch en el lote 11; aqui se usa `Class`
+    // porque `Switch` ya existe en el repo y el generador no pisa archivos.
+    expect(create(dir, ["Class"]).status).toBe(0);
+
+    const hook = read(dir, join(UI_DIR, "Class", "src", "useClass.tsx"));
+    const spec = read(dir, join(UI_DIR, "Class", "__test__", "Class.test.tsx"));
+
+    expect(hook).toContain("class as classVariants");
+    expect(hook).toContain("classVariants.theme");
+    expect(hook).not.toMatch(/\bclass\.theme\b/);
+    expect(spec).toContain("class as classVariants");
+    expect(spec).not.toMatch(/\bclass\.(theme|size|state)\b/);
+
+    // El contrato si se exporta con el nombre reservado: ahi es legal.
+    expect(read(dir, join(VARIANTS_DIR, "index.ts"))).toContain("as class");
+    expect(checkContract(dir).status).toBe(0);
+  });
+
   test("--prefix cambia el prefijo de clase de las tres capas", () => {
     expect(create(dir, ["Chip", "--prefix", "cp"]).status).toBe(0);
 

@@ -32,6 +32,17 @@ const root: ThemeColors = {
   // Transiciones
   "--transition-duration": "0.2s",
 
+  // Controles marcables (checkbox, radio, switch). Son globales y no de cada
+  // componente porque los tres tienen que alinearse entre si cuando conviven
+  // en un formulario: misma altura de caja, mismo grosor de marco y misma
+  // separacion respecto a su etiqueta. Cada componente los redefine por
+  // tamano, pero la relacion entre los tres la fija esta capa.
+  "--control-size": "calc(var(--size-field) * 5)",
+  "--control-radius": "var(--radius-field)",
+  "--control-border-width": "var(--border)",
+  "--control-gap": "0.5rem",
+  "--control-mark-width": "2px",
+
   // Noise and effects
   "--noise": "0",
   "--fx-noise": "none",

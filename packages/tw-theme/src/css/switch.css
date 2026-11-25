@@ -1,0 +1,238 @@
+/* =========================================================
+   switch.css — sistema de tokens del Switch
+
+   Comparte con el Checkbox la fuente de color y los tokens globales
+   `--control-*` (`themes/root.ts`), pero **no la geometria**: un switch es
+   una pista alargada con un pulgar que se desplaza, no una caja cuadrada.
+   De `--control-size` sale la ALTURA de la pista; el ancho se deriva de ella
+   con `--switch-ratio`, asi que cambiar el tamano no descuadra la forma.
+
+   La diferencia semantica tambien importa: un checkbox dice "esta opcion
+   esta seleccionada" y se envia con el formulario; un switch dice "esto esta
+   encendido ahora" y suele tener efecto inmediato. Por eso el switch no
+   tiene estado indeterminado.
+
+   ── Anatomia ──────────────────────────────────────────────
+     .switch-field                  <label>: fila, control + texto
+       .switch-input                el <input role="switch">, oculto visualmente
+       .switch                      la pista
+         .switch-thumb              el pulgar
+       .switch-label                el texto
+
+   Cada estado se escribe como clase del contrato (lo que emite el hook) y
+   como `:has()` sobre el input nativo, para que el CSS publicado sirva
+   tambien a HTML escrito a mano.
+   ========================================================= */
+
+/* =========================================================
+   0) El input nativo: invisible, pero presente
+   ========================================================= */
+
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   1) Base: .switch — la pista
+   ========================================================= */
+
+.switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+
+  /* ─── fuente (ROL) ─── */
+  --switch-color: var(--color-primary);
+  --switch-fg: var(--color-primary-content);
+
+  /* ─── finales (pintura) ─── */
+  /* Apagado: una superficie neutra, no el rol atenuado. Un switch apagado en
+     azul claro se lee como "encendido a medias". */
+  --switch-bg: color-mix(in oklab, var(--color-base-content) 25%, #0000);
+  --switch-thumb-bg: var(--color-base-100);
+
+  /* ─── geometria ─── */
+  --switch-height: var(--control-size, 1.25rem);
+  --switch-ratio: 1.8;
+  --switch-width: calc(var(--switch-height) * var(--switch-ratio));
+  --switch-padding: 2px;
+  --switch-thumb-size: calc(var(--switch-height) - var(--switch-padding) * 2);
+  --switch-travel: calc(var(--switch-width) - var(--switch-thumb-size) - var(--switch-padding) * 2);
+
+  /* ─── estados ─── */
+  --switch-disabled-opacity: var(--disabled-fg-opacity, 35%);
+  --switch-transition-duration: var(--transition-duration, 0.2s);
+  --switch-outline-width: 2px;
+  --switch-outline-offset: 2px;
+
+  width: var(--switch-width);
+  height: var(--switch-height);
+  padding: var(--switch-padding);
+
+  background-color: var(--switch-bg);
+  border-radius: 9999px;
+
+  transition: background-color var(--switch-transition-duration);
+}
+
+/* =========================================================
+   2) El pulgar
+   ========================================================= */
+
+.switch-thumb {
+  width: var(--switch-thumb-size);
+  height: var(--switch-thumb-size);
+  border-radius: 50%;
+  background-color: var(--switch-thumb-bg);
+  /* La sombra se calcula sobre el fondo, como el resto del sistema, y escala
+     con --depth: con --depth: 0 el switch se aplana igual que todo lo demas. */
+  box-shadow: 0 1px calc(var(--depth, 1) * 2px) color-mix(in oklab, #000 25%, #0000);
+  transform: translateX(0);
+  transition: transform var(--switch-transition-duration);
+}
+
+.switch-checked .switch-thumb,
+.switch-field:has(.switch-input:checked) .switch-thumb {
+  transform: translateX(var(--switch-travel));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .switch-thumb {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* =========================================================
+   3) El campo
+   ========================================================= */
+
+.switch-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--control-gap, 0.5rem);
+  cursor: pointer;
+}
+
+.switch-label {
+  font-size: var(--switch-fontsize, var(--fontsize, 0.875rem));
+  color: var(--color-base-content);
+  user-select: none;
+}
+
+/* =========================================================
+   4) Variantes semanticas
+   ========================================================= */
+
+.switch-primary {
+  --switch-color: var(--color-primary);
+  --switch-fg: var(--color-primary-content);
+}
+
+.switch-secondary {
+  --switch-color: var(--color-secondary);
+  --switch-fg: var(--color-secondary-content);
+}
+
+.switch-accent {
+  --switch-color: var(--color-accent);
+  --switch-fg: var(--color-accent-content);
+}
+
+.switch-neutral {
+  --switch-color: var(--color-neutral);
+  --switch-fg: var(--color-neutral-content);
+}
+
+.switch-info {
+  --switch-color: var(--color-info);
+  --switch-fg: var(--color-info-content);
+}
+
+.switch-success {
+  --switch-color: var(--color-success);
+  --switch-fg: var(--color-success-content);
+}
+
+.switch-warning {
+  --switch-color: var(--color-warning);
+  --switch-fg: var(--color-warning-content);
+}
+
+.switch-error {
+  --switch-color: var(--color-error);
+  --switch-fg: var(--color-error-content);
+}
+
+/* =========================================================
+   5) Estados
+   ========================================================= */
+
+.switch-checked,
+.switch-field:has(.switch-input:checked) .switch {
+  --switch-bg: var(--switch-color);
+  --switch-thumb-bg: var(--switch-fg);
+}
+
+.switch-invalid,
+.switch-field:has(.switch-input[aria-invalid="true"]) .switch {
+  outline: var(--switch-outline-width) solid var(--color-error);
+  outline-offset: var(--switch-outline-offset);
+}
+
+.switch-field:has(.switch-input:focus-visible) .switch {
+  outline: var(--switch-outline-width) solid var(--switch-color);
+  outline-offset: var(--switch-outline-offset);
+}
+
+.switch-disabled,
+.switch-field:has(.switch-input:disabled) .switch {
+  opacity: var(--switch-disabled-opacity);
+}
+
+.switch-field:has(.switch-input:disabled),
+.switch-field:has(.switch-disabled) {
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   6) Tamanos: la altura manda, el ancho se deriva
+   ========================================================= */
+
+.switch-xs {
+  --switch-height: calc(var(--size-field, 0.25rem) * 3.5);
+  --switch-fontsize: 0.75rem;
+  --switch-padding: 1.5px;
+}
+
+.switch-sm {
+  --switch-height: calc(var(--size-field, 0.25rem) * 4);
+  --switch-fontsize: 0.8125rem;
+  --switch-padding: 2px;
+}
+
+.switch-md {
+  --switch-height: calc(var(--size-field, 0.25rem) * 5);
+  --switch-fontsize: 0.875rem;
+  --switch-padding: 2px;
+}
+
+.switch-lg {
+  --switch-height: calc(var(--size-field, 0.25rem) * 6);
+  --switch-fontsize: 1rem;
+  --switch-padding: 3px;
+}
+
+.switch-xl {
+  --switch-height: calc(var(--size-field, 0.25rem) * 7);
+  --switch-fontsize: 1.125rem;
+  --switch-padding: 3px;
+}
