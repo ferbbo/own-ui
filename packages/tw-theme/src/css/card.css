@@ -1,0 +1,303 @@
+/* =========================================================
+   card.css — sistema de tokens del Card
+
+   Sigue la cascada de `AGENTS.md` §4.8 y de
+   `.github/instructions/components-css.instructions.md`:
+
+     1. la base define TODAS las custom properties del componente
+     2. la variante semántica SOLO redefine --card-color
+     3. los estados recalculan por color-mix en oklab, nunca con un hex nuevo
+     4. los tamaños derivan de --size-field, no de valores sueltos
+
+   Ningún color literal: sólo var(--color-*). Los únicos literales permitidos
+   son #000 / #0000 como operandos de color-mix.
+
+   ── Anatomía ──────────────────────────────────────────────
+   El Card es el primer componente del sistema que es **superficie** y no
+   control: su trabajo es agrupar contenido, así que el rol NO pinta el
+   relleno. Un card con fondo `primary` obliga a repintar todo lo que lleve
+   dentro —texto, botones, badges— con el `-content` de ese rol, y el
+   contenido de un card es arbitrario. El relleno se queda en la escala de
+   superficies del tema (`--color-base-100`, lote 4) y el rol colorea el
+   BORDE y el anillo de foco. Mismo criterio que `input.css` (D-01 del lote
+   10), por la misma razón: legibilidad del contenido.
+
+     .card                  la superficie: fondo, borde, radio y sombra
+       .card-header         cabecera; separador inferior
+         .card-title        título de la cabecera
+       .card-body           cuerpo; es quien lleva el padding del contenido
+       .card-footer         pie; separador superior, contenido al final
+
+   El padding vive en las PARTES y no en `.card` porque una imagen a sangre
+   (`<img>` como primer hijo) es el caso más común de un card y con padding en
+   el contenedor quedaría flotando. Las partes son opcionales: un card sin
+   ellas es una caja con borde y radio, y el consumidor pone dentro lo que
+   quiera.
+
+   Las variantes de tratamiento (`elevated`, `outlined`, `ghost`) sólo mueven
+   dos finales: la sombra y el borde. No hay `filled` porque "relleno de rol"
+   es justo lo que la anatomía descarta.
+
+   Se publica como `@ownui/tw-theme/css/card.css` y agregado en
+   `@ownui/tw-theme/css` (ver `src/css/index.css`).
+   ========================================================= */
+
+/* =========================================================
+   0) Base: .card — la superficie
+   ========================================================= */
+
+.card {
+  /* ─── estructura ─── */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-width: 0;
+
+  /* ─── fuente (ROL): lo único que redefinen las variantes semánticas ─── */
+  --card-color: var(--color-base-300);
+
+  /* ─── finales (pintura) ─── */
+  --card-bg: var(--color-base-100);
+  --card-fg: var(--color-base-content);
+  /* El borde en reposo es el color del rol mezclado hacia la superficie: se
+     distingue un `info` de un `error` sin que la caja grite. El anillo de
+     foco usa --card-focus-color a plena intensidad. */
+  --card-border: color-mix(in oklab, var(--card-color), var(--card-bg) 45%);
+
+  /* ─── decoración ─── */
+  --card-radius: calc(var(--radius-field, 0.375rem) * 2);
+  --card-border-width: var(--border, 1px);
+  /* La sombra se calcula sobre el color de contenido del tema y la escala
+     --depth, igual que el panel del Dropdown: no hay tokens de sombra
+     discretos en este sistema (AGENTS.md §4.1). */
+  --card-shadow: 0 1px 2px 0
+    color-mix(in oklab, var(--color-base-content) calc(var(--depth, 1) * 6%), #0000);
+  --card-shadow-raised: 0 4px 12px 0
+    color-mix(in oklab, var(--color-base-content) calc(var(--depth, 1) * 12%), #0000);
+
+  /* ─── tamaños (los redefine cada .card-{xs..xl}) ─── */
+  --card-p: var(--paragraph, 1rem);
+  --card-gap: 0.5rem;
+  --card-fontsize: var(--fontsize, 0.875rem);
+  --card-title-fontsize: 1rem;
+
+  /* ─── estados: heredan de los tokens globales de profundidad ─── */
+  --card-hover-depth: var(--hover-depth, 7%);
+  --card-active-depth: var(--active-depth, 5%);
+  --card-transition-duration: var(--transition-duration, 0.2s);
+
+  /* ─── focus ring ─── */
+  --card-outline-width: 2px;
+  --card-outline-offset: 2px;
+
+  /* ─── propiedades finales ─── */
+  font-size: var(--card-fontsize);
+  color: var(--card-fg);
+  background-color: var(--card-bg);
+  border: var(--card-border-width) solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+
+  /* El radio del contenedor no recorta a los hijos por sí solo: una imagen a
+     sangre se saldría por las esquinas. */
+  overflow: hidden;
+
+  transition: color var(--card-transition-duration),
+    background-color var(--card-transition-duration), border-color var(--card-transition-duration),
+    box-shadow var(--card-transition-duration);
+}
+
+/* El card puede ser un enlace o un botón (`as="a"`). El anillo de foco va en
+   el contenedor y se dibuja fuera del borde, no dentro: `overflow: hidden`
+   recortaría un `outline` con offset negativo. */
+.card:focus-visible {
+  outline: var(--card-outline-width) solid var(--card-focus-color, var(--card-color));
+  outline-offset: var(--card-outline-offset);
+}
+
+/* =========================================================
+   1) Variantes semánticas: sólo mueven la FUENTE del color
+   ========================================================= */
+
+.card-primary {
+  --card-color: var(--color-primary);
+  --card-focus-color: var(--color-primary-focus);
+}
+
+.card-secondary {
+  --card-color: var(--color-secondary);
+  --card-focus-color: var(--color-secondary-focus);
+}
+
+.card-accent {
+  --card-color: var(--color-accent);
+  --card-focus-color: var(--color-accent-focus);
+}
+
+.card-neutral {
+  --card-color: var(--color-neutral);
+  --card-focus-color: var(--color-neutral-focus);
+}
+
+.card-info {
+  --card-color: var(--color-info);
+  --card-focus-color: var(--color-info-focus);
+}
+
+.card-success {
+  --card-color: var(--color-success);
+  --card-focus-color: var(--color-success-focus);
+}
+
+.card-warning {
+  --card-color: var(--color-warning);
+  --card-focus-color: var(--color-warning-focus);
+}
+
+.card-error {
+  --card-color: var(--color-error);
+  --card-focus-color: var(--color-error-focus);
+}
+
+/* =========================================================
+   2) Tratamientos del marco: sólo remapean sombra y borde
+   ========================================================= */
+
+/* Elevada: la sombra hace el trabajo y el borde se difumina hacia el fondo. */
+.card-elevated {
+  --card-border: color-mix(in oklab, var(--card-color), var(--card-bg) 75%);
+  box-shadow: var(--card-shadow-raised);
+}
+
+/* Perfilada: el borde a plena intensidad del rol y ninguna sombra. */
+.card-outlined {
+  --card-border: var(--card-color);
+  box-shadow: none;
+}
+
+/* Fantasma: ni borde ni sombra ni superficie propia; sólo agrupa.
+   `transparent` y no `#0000`: la regla de "ningún color literal" admite el hex
+   sólo como operando de color-mix, y aquí es un valor final. */
+.card-ghost {
+  --card-bg: transparent;
+  --card-border: transparent;
+  box-shadow: none;
+}
+
+/* =========================================================
+   3) Tamaños: todo deriva de --size-field
+   ========================================================= */
+
+.card-xs {
+  --card-p: calc(var(--size-field, 0.25rem) * 2);
+  --card-gap: 0.25rem;
+  --card-fontsize: 0.75rem;
+  --card-title-fontsize: 0.875rem;
+}
+
+.card-sm {
+  --card-p: calc(var(--size-field, 0.25rem) * 3);
+  --card-gap: 0.375rem;
+  --card-fontsize: 0.8125rem;
+  --card-title-fontsize: 0.9375rem;
+}
+
+.card-md {
+  --card-p: calc(var(--size-field, 0.25rem) * 4);
+  --card-gap: 0.5rem;
+  --card-fontsize: 0.875rem;
+  --card-title-fontsize: 1rem;
+}
+
+.card-lg {
+  --card-p: calc(var(--size-field, 0.25rem) * 5);
+  --card-gap: 0.625rem;
+  --card-fontsize: 1rem;
+  --card-title-fontsize: 1.125rem;
+}
+
+.card-xl {
+  --card-p: calc(var(--size-field, 0.25rem) * 6);
+  --card-gap: 0.75rem;
+  --card-fontsize: 1.125rem;
+  --card-title-fontsize: 1.25rem;
+}
+
+/* =========================================================
+   4) Estado: card accionable
+   ========================================================= */
+
+/* Sólo lo lleva el card que de verdad responde a una pulsación (`as="a"` o
+   `as="button"` con `clickable`). Un card decorativo con `cursor: pointer`
+   promete una interacción que no existe. */
+.card-clickable {
+  cursor: pointer;
+  text-align: inherit;
+  /* `as="button"` trae `appearance` y fuente propias del agente de usuario. */
+  appearance: none;
+  font: inherit;
+  width: 100%;
+}
+
+.card-clickable:hover {
+  --card-bg: color-mix(in oklab, var(--color-base-100), var(--color-base-content) 4%);
+  --card-border: var(--card-color);
+  box-shadow: var(--card-shadow-raised);
+}
+
+.card-clickable:active {
+  --card-bg: color-mix(
+    in oklab,
+    var(--color-base-100),
+    var(--color-base-content) var(--card-active-depth)
+  );
+  box-shadow: var(--card-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   5) Partes del card
+   ========================================================= */
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--card-gap);
+  padding: var(--card-p);
+  border-bottom: var(--card-border-width) solid
+    color-mix(in oklab, var(--card-color), var(--card-bg) 65%);
+}
+
+.card-title {
+  margin: 0;
+  font-size: var(--card-title-fontsize);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--card-fg);
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+  /* El cuerpo es quien crece: dos cards en una fila quedan a la misma altura
+     con los pies alineados. */
+  flex: 1 1 auto;
+  padding: var(--card-p);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--card-gap);
+  padding: var(--card-p);
+  border-top: var(--card-border-width) solid
+    color-mix(in oklab, var(--card-color), var(--card-bg) 65%);
+}

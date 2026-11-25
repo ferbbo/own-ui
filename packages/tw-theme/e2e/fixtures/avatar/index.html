@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avatar Test</title>
+    <link rel="stylesheet" href="output.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .test-section {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Iniciales con los 8 roles: el texto es el rol mezclado hacia el
+         color de contenido, no el token -content. -->
+    <div class="test-section">
+      <span
+        class="avatar avatar-md avatar-primary"
+        id="avatar-primary"
+        role="img"
+        aria-label="primary"
+        ><span class="avatar-initials" id="initials-primary">AL</span></span
+      >
+      <span
+        class="avatar avatar-md avatar-secondary"
+        id="avatar-secondary"
+        role="img"
+        aria-label="secondary"
+        ><span class="avatar-initials" id="initials-secondary">AL</span></span
+      >
+      <span class="avatar avatar-md avatar-accent" id="avatar-accent" role="img" aria-label="accent"
+        ><span class="avatar-initials" id="initials-accent">AL</span></span
+      >
+      <span
+        class="avatar avatar-md avatar-neutral"
+        id="avatar-neutral"
+        role="img"
+        aria-label="neutral"
+        ><span class="avatar-initials" id="initials-neutral">AL</span></span
+      >
+      <span class="avatar avatar-md avatar-info" id="avatar-info" role="img" aria-label="info"
+        ><span class="avatar-initials" id="initials-info">AL</span></span
+      >
+      <span
+        class="avatar avatar-md avatar-success"
+        id="avatar-success"
+        role="img"
+        aria-label="success"
+        ><span class="avatar-initials" id="initials-success">AL</span></span
+      >
+      <span
+        class="avatar avatar-md avatar-warning"
+        id="avatar-warning"
+        role="img"
+        aria-label="warning"
+        ><span class="avatar-initials" id="initials-warning">AL</span></span
+      >
+      <span class="avatar avatar-md avatar-error" id="avatar-error" role="img" aria-label="error"
+        ><span class="avatar-initials" id="initials-error">AL</span></span
+      >
+    </div>
+
+    <!-- Tamanos. -->
+    <div class="test-section">
+      <span class="avatar avatar-xs avatar-primary" id="avatar-xs"
+        ><span class="avatar-initials">AL</span></span
+      >
+      <span class="avatar avatar-sm avatar-primary" id="avatar-sm"
+        ><span class="avatar-initials">AL</span></span
+      >
+      <span class="avatar avatar-md avatar-primary" id="avatar-md"
+        ><span class="avatar-initials">AL</span></span
+      >
+      <span class="avatar avatar-lg avatar-primary" id="avatar-lg"
+        ><span class="avatar-initials">AL</span></span
+      >
+      <span class="avatar avatar-xl avatar-primary" id="avatar-xl"
+        ><span class="avatar-initials">AL</span></span
+      >
+    </div>
+
+    <!-- Contenidos: imagen, iniciales e icono de reserva. -->
+    <div class="test-section">
+      <span class="avatar avatar-md" id="avatar-image">
+        <img
+          class="avatar-img"
+          id="image"
+          src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2296%22%20height%3D%2296%22%3E%3Crect%20width%3D%2296%22%20height%3D%2296%22%20fill%3D%22%230ea5e9%22%2F%3E%3C%2Fsvg%3E"
+          alt="Retrato"
+        />
+      </span>
+      <span class="avatar avatar-md avatar-neutral" id="avatar-fallback" aria-hidden="true">
+        <svg class="avatar-fallback" id="fallback" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="9" r="4"></circle>
+        </svg>
+      </span>
+    </div>
+
+    <!-- Formas. -->
+    <div class="test-section">
+      <span class="avatar avatar-md avatar-primary avatar-circle" id="avatar-circle">
+        <span class="avatar-initials">AL</span>
+      </span>
+      <span class="avatar avatar-md avatar-primary avatar-square" id="avatar-square">
+        <span class="avatar-initials">AL</span>
+      </span>
+      <span class="avatar avatar-xl avatar-primary avatar-square" id="avatar-square-xl">
+        <span class="avatar-initials">AL</span>
+      </span>
+    </div>
+
+    <!-- Grupo solapado. -->
+    <div class="test-section">
+      <span class="avatar-group" id="group">
+        <span class="avatar avatar-md avatar-primary" id="group-1">
+          <span class="avatar-initials">AL</span>
+        </span>
+        <span class="avatar avatar-md avatar-accent" id="group-2">
+          <span class="avatar-initials">GH</span>
+        </span>
+        <span class="avatar avatar-md avatar-success" id="group-3">
+          <span class="avatar-initials">+3</span>
+        </span>
+      </span>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,210 @@
+/* =========================================================
+   avatar.css — sistema de tokens del Avatar
+
+   Sigue la cascada de `AGENTS.md` §4.8 y de
+   `.github/instructions/components-css.instructions.md`:
+
+     1. la base define TODAS las custom properties del componente
+     2. la variante semántica SOLO redefine --avatar-color
+     3. los finales se derivan por color-mix en oklab, nunca con un hex nuevo
+     4. los tamaños derivan de --size-field, no de valores sueltos
+
+   Ningún color literal: sólo var(--color-*). Los únicos literales permitidos
+   son #000 / #0000 como operandos de color-mix.
+
+   ── Anatomía ──────────────────────────────────────────────
+   El avatar es una caja cuadrada de lado `--avatar-size` que recorta lo que
+   lleve dentro. Hay tres contenidos posibles y son excluyentes: la imagen, las
+   iniciales o el icono de reserva.
+
+     .avatar                caja cuadrada: tamaño, forma, recorte, relleno
+       .avatar-img          <img> a sangre, object-fit: cover
+       .avatar-initials     una o dos letras centradas
+       .avatar-fallback     icono genérico cuando no hay imagen ni nombre
+     .avatar-group          fila de avatares solapados
+
+   El rol **no rellena a plena intensidad**: las iniciales son texto sobre el
+   relleno, y el token `-content` del rol (blanco en el tema claro) da 2.15:1
+   sobre un `warning`. Se usa el mismo mecanismo que el Badge: relleno lavado
+   (`16%` del rol sobre la superficie) y texto del rol mezclado hacia
+   `--color-base-content`. Medido en Chromium, el peor caso de los 8 roles es
+   5.45:1 en claro y 7.24:1 en oscuro, por encima del umbral AA de 4.5:1.
+
+   La escala tipográfica de las iniciales se calcula como fracción del lado
+   (`--avatar-size * 0.38`) en vez de tener cinco valores sueltos: así una
+   forma nueva o un tamaño custom no necesitan tocar la tipografía.
+
+   Se publica como `@ownui/tw-theme/css/avatar.css` y agregado en
+   `@ownui/tw-theme/css` (ver `src/css/index.css`).
+   ========================================================= */
+
+/* =========================================================
+   0) Base: .avatar — la caja
+   ========================================================= */
+
+.avatar {
+  /* ─── estructura ─── */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+
+  /* ─── fuente (ROL): lo único que redefinen las variantes ─── */
+  --avatar-color: var(--color-base-300);
+
+  /* ─── finales (pintura) ─── */
+  --avatar-bg: color-mix(in oklab, var(--avatar-color) 16%, var(--color-base-100));
+  --avatar-fg: color-mix(in oklab, var(--avatar-color), var(--color-base-content) 55%);
+
+  /* ─── decoración ─── */
+  /* Círculo por defecto: `.avatar-square` es quien baja al radio de campo. */
+  --avatar-radius: 9999px;
+  /* El anillo separa dos avatares solapados en un grupo. Fuera de un grupo
+     mide 0 y no se ve. */
+  --avatar-ring-width: 0;
+  --avatar-ring-color: var(--color-base-100);
+
+  /* ─── tamaños (los redefine cada .avatar-{xs..xl}) ─── */
+  --avatar-size: calc(var(--size-field, 0.25rem) * 10);
+  --avatar-fontsize: calc(var(--avatar-size) * 0.38);
+
+  /* ─── propiedades finales ─── */
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  font-size: var(--avatar-fontsize);
+  font-weight: 600;
+  line-height: 1;
+
+  background-color: var(--avatar-bg);
+  color: var(--avatar-fg);
+  border-radius: var(--avatar-radius);
+  box-shadow: 0 0 0 var(--avatar-ring-width) var(--avatar-ring-color);
+}
+
+/* =========================================================
+   1) Variantes semánticas: sólo mueven la FUENTE del color
+   ========================================================= */
+
+.avatar-primary {
+  --avatar-color: var(--color-primary);
+}
+
+.avatar-secondary {
+  --avatar-color: var(--color-secondary);
+}
+
+.avatar-accent {
+  --avatar-color: var(--color-accent);
+}
+
+.avatar-neutral {
+  --avatar-color: var(--color-neutral);
+}
+
+.avatar-info {
+  --avatar-color: var(--color-info);
+}
+
+.avatar-success {
+  --avatar-color: var(--color-success);
+}
+
+.avatar-warning {
+  --avatar-color: var(--color-warning);
+}
+
+.avatar-error {
+  --avatar-color: var(--color-error);
+}
+
+/* =========================================================
+   2) Formas
+   ========================================================= */
+
+.avatar-circle {
+  --avatar-radius: 9999px;
+}
+
+/* El radio del cuadrado escala con el lado para que un `xs` no parezca una
+   caja con las esquinas mordidas y un `xl` un rectángulo. */
+.avatar-square {
+  --avatar-radius: calc(var(--avatar-size) * 0.18);
+}
+
+/* =========================================================
+   3) Tamaños: todo deriva de --size-field
+   ========================================================= */
+
+.avatar-xs {
+  --avatar-size: calc(var(--size-field, 0.25rem) * 6);
+}
+
+.avatar-sm {
+  --avatar-size: calc(var(--size-field, 0.25rem) * 8);
+}
+
+.avatar-md {
+  --avatar-size: calc(var(--size-field, 0.25rem) * 10);
+}
+
+.avatar-lg {
+  --avatar-size: calc(var(--size-field, 0.25rem) * 12);
+}
+
+.avatar-xl {
+  --avatar-size: calc(var(--size-field, 0.25rem) * 16);
+}
+
+/* =========================================================
+   4) Contenidos
+   ========================================================= */
+
+/* La imagen llena la caja y se recorta por el centro: un retrato y un paisaje
+   acaban siendo el mismo cuadrado. */
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-initials {
+  /* Hereda el tamaño y el color de la caja: no vuelve a declararlos. */
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Icono de reserva: ni imagen ni nombre. Ocupa una fracción de la caja para
+   dejar aire alrededor, como lo dejarían las iniciales. */
+.avatar-fallback {
+  width: 60%;
+  height: 60%;
+  display: block;
+  fill: currentColor;
+}
+
+/* =========================================================
+   5) Grupo: avatares solapados
+   ========================================================= */
+
+.avatar-group {
+  display: inline-flex;
+  align-items: center;
+  /* El solapamiento es un margen negativo en los hijos a partir del segundo,
+     no un `gap`. El anillo del color de la superficie es lo que hace legible
+     el borde entre dos avatares pegados.
+     Sin unidad (0.3 = 30% del lado): un porcentaje no puede multiplicar una
+     longitud dentro de calc(). */
+  --avatar-group-overlap: 0.3;
+}
+
+.avatar-group > .avatar {
+  --avatar-ring-width: 2px;
+}
+
+.avatar-group > .avatar + .avatar {
+  margin-inline-start: calc(var(--avatar-size) * var(--avatar-group-overlap) * -1);
+}

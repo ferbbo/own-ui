@@ -20,8 +20,8 @@ estilo propio: emite `class="btn btn-primary btn-md"` y esas clases las define
 - 📚 Storybook como escaparate visual y `apps/example-app` como prueba de consumo real
 - ✅ Jest + React Testing Library para unidad, Playwright sobre CSS compilado para el plugin
 
-**Estado: pre-1.0.** Hay siete componentes (`Button`, `Checkbox`, `Dropdown`, `Input`, `Radio`,
-`Switch`, `Loader`). El plugin de theming
+**Estado: pre-1.0.** Hay diez componentes (`Avatar`, `Badge`, `Button`, `Card`, `Checkbox`,
+`Dropdown`, `Input`, `Loader`, `Radio`, `Switch`). El plugin de theming
 está maduro; la capa de componentes está en construcción. Lo que falta está listado y priorizado
 en [`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md), no escondido.
 
@@ -65,7 +65,7 @@ que emiten no existirían en ningún sitio. Para cargar un único componente:
 ### Uso
 
 ```jsx
-import { Button, Checkbox, Dropdown, Input, Loader, Switch } from "@ownui/ui";
+import { Avatar, Badge, Button, Card, Checkbox, Dropdown, Input, Loader, Radio, Switch } from "@ownui/ui";
 
 function App() {
   return (
@@ -92,13 +92,36 @@ function App() {
       </Dropdown>
 
       <Loader color="primary" aria-label="Cargando" />
+
+      <Card theme="info" variant="elevated">
+        <Card.Header>
+          <Card.Title>Plan Pro</Card.Title>
+          <Badge theme="info" variant="soft">
+            24 €/mes
+          </Badge>
+        </Card.Header>
+        <Card.Body>Historial ilimitado y dominio propio.</Card.Body>
+        <Card.Footer>
+          <Button theme="primary" size="sm">
+            Contratar
+          </Button>
+        </Card.Footer>
+      </Card>
+
+      <Avatar.Group max={3} total={50}>
+        <Avatar src="/ada.png" name="Ada Lovelace" />
+        <Avatar name="Grace Hopper" theme="accent" />
+        <Avatar name="Alan Turing" theme="success" />
+        <Avatar name="Katherine Johnson" theme="warning" />
+      </Avatar.Group>
     </>
   );
 }
 ```
 
-Cada componente se puede instalar suelto: `@ownui/button`, `@ownui/checkbox`,
-`@ownui/dropdown`, `@ownui/input`, `@ownui/radio`, `@ownui/switch`, `@ownui/loader`.
+Cada componente se puede instalar suelto: `@ownui/avatar`, `@ownui/badge`, `@ownui/button`,
+`@ownui/card`, `@ownui/checkbox`, `@ownui/dropdown`, `@ownui/input`, `@ownui/loader`,
+`@ownui/radio`, `@ownui/switch`.
 
 ---
 
@@ -126,17 +149,17 @@ Si un paquete deja de publicar algo, la app se rompe aquí antes que en el proye
 
 ```jsx
 <Button
-  theme="primary"   // primary | secondary | accent | neutral | info | success | warning | error | ghost | link
+  theme="primary" // primary | secondary | accent | neutral | info | success | warning | error | ghost | link
   variant="outline" // outline | dash | soft — omitirlo es el botón sólido
-  size="md"         // xs | sm | md | lg | xl
-  shape="circle"    // square | circle (ancho = altura)
-  width="block"     // wide (16rem) | block (100%)
-  active            // aspecto de pulsado sin depender de :active
-  loading           // spinner JUNTO al contenido, no en su lugar
+  size="md" // xs | sm | md | lg | xl
+  shape="circle" // square | circle (ancho = altura)
+  width="block" // wide (16rem) | block (100%)
+  active // aspecto de pulsado sin depender de :active
+  loading // spinner JUNTO al contenido, no en su lugar
   disabled
   startIcon={<Icon />}
   endIcon={<Icon />}
-  as="button"       // "button" | "a" (con "a", href es obligatorio y disabled está prohibido)
+  as="button" // "button" | "a" (con "a", href es obligatorio y disabled está prohibido)
 >
   Texto
 </Button>
@@ -149,14 +172,14 @@ sin texto visible no hay nombre accesible.
 
 ```jsx
 <Input
-  label="Correo"              // <label> enlazado con el control
-  description="Te enviaremos el recibo."  // ayuda, vía aria-describedby
-  errorMessage="Dominio inválido"         // sólo se muestra si invalid
+  label="Correo" // <label> enlazado con el control
+  description="Te enviaremos el recibo." // ayuda, vía aria-describedby
+  errorMessage="Dominio inválido" // sólo se muestra si invalid
   invalid={false}
-  theme="primary"   // los 8 roles: colorean el BORDE y el anillo de foco, no el relleno
+  theme="primary" // los 8 roles: colorean el BORDE y el anillo de foco, no el relleno
   variant="outline" // outline | ghost | bordered — omitirlo es la caja rellena
-  size="md"         // xs | sm | md | lg | xl
-  type="email"      // text | email | password | number | search | tel | url
+  size="md" // xs | sm | md | lg | xl
+  type="email" // text | email | password | number | search | tel | url
   startIcon={<Icon />}
   endIcon={<Icon />}
   value={value}
@@ -222,6 +245,61 @@ raíz: `variant` (8 roles), `size` (`xs`–`xl`), `styleVariant` (`ghost` | `bor
 
 `color` (los 8 roles más `current`, que hereda el color del contexto), `size`
 (`2xs`–`lg`), `as`. Lleva `role="status"` y `aria-live="polite"`.
+
+### Card
+
+Compound estático: `Card` + `Card.Header` + `Card.Title` + `Card.Body` + `Card.Footer`. No hay
+contexto de React: el tamaño y el rol llegan a las partes por la cascada de custom properties.
+
+```jsx
+<Card
+  theme="info"      // los 8 roles: colorean el BORDE y los separadores, no el relleno
+  variant="elevated" // elevated | outlined | ghost — omitirlo es la superficie por defecto
+  size="md"         // xs | sm | md | lg | xl — escala el padding de las partes
+  as="a"            // div (por defecto) | article | section | aside | li | a | button
+  href="/detalle"   // obligatorio con as="a", prohibido en el resto
+>
+```
+
+El tratamiento de card **accionable** (puntero, hover elevado, anillo de foco) no se pide por
+prop: lo reciben `as="a"` y `as="button"` y nadie más, para que no exista un card que parezca
+pulsable sin ser enfocable. `Card.Title` acepta `as` para fijar el nivel de encabezado que pida
+el documento.
+
+### Badge
+
+```jsx
+<Badge
+  theme="error" // los 8 roles: aquí sí rellenan, con su -content como texto
+  variant="soft" // outline | soft — omitirlo es el relleno sólido
+  size="sm" // xs | sm | md | lg | xl
+  dot // punto de estado: cuadrado, sin contenido
+/>
+```
+
+`outline` y `soft` pintan texto de color de rol sobre una superficie del tema, donde el token
+`-content` no es legible; el CSS lo deriva mezclando el rol hacia `--color-base-content`, y el
+fixture e2e mide el ratio WCAG real de los 8 roles en los dos temas. Un `dot` sin `aria-label`
+es decorativo (`aria-hidden`); con él pasa a ser información (`role="img"`).
+
+### Avatar
+
+```jsx
+<Avatar
+  src="/ada.png"    // si falla al cargar, cae a las iniciales y luego al icono de reserva
+  name="Ada Lovelace" // nombre accesible y origen de las iniciales ("AL")
+  initials="ADA"    // iniciales explícitas, si la derivación no sirve
+  theme="accent"    // los 8 roles
+  shape="circle"    // circle | square
+  size="md"         // xs | sm | md | lg | xl
+/>
+
+<Avatar.Group max={3} total={50} size="lg">…</Avatar.Group>
+```
+
+La cascada de contenido es **imagen → hijos → iniciales → icono de reserva**. `Avatar.Group`
+solapa, resume lo que sobra en un contador `+N` y comparte `size`/`shape` por contexto, así que
+un avatar envuelto en otro componente los sigue heredando.
 
 ---
 
@@ -298,12 +376,12 @@ Todos verificados ejecutándolos en el lote 9 (ver [`specs/lote-9.md`](./specs/l
 
 | Script | Qué hace |
 | --- | --- |
-| `pnpm build` | Construye los 6 paquetes publicables en orden topológico (Turborepo) |
-| `pnpm test` | Jest, los 3 proyectos: 19 suites / 400 tests |
+| `pnpm build` | Construye los 13 paquetes publicables en orden topológico (Turborepo) |
+| `pnpm test` | Jest, los 3 proyectos: 22 suites / 507 tests |
 | `pnpm test:components` · `test:tw-theme` · `test:scripts` | Un proyecto de Jest cada uno |
 | `pnpm test:watch` · `test:components:watch` · `test:tw-theme:watch` | Modo watch |
 | `pnpm test:coverage` | Jest con informe de cobertura (la cobertura **no** va activada por defecto) |
-| `pnpm --filter @ownui/tw-theme e2e` | Playwright sobre CSS compilado: 11 fixtures / 193 tests |
+| `pnpm --filter @ownui/tw-theme e2e` | Playwright sobre CSS compilado: 14 fixtures / 271 tests |
 | `pnpm lint` · `pnpm lint:fix` | ESLint sobre todo el repo |
 | `pnpm format` | Prettier sobre todo el repo |
 | `pnpm check:contract` | Cruza React ⇄ `variants/` ⇄ CSS de cada componente. Puerta de CI |

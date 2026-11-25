@@ -5,3 +5,6 @@ export { default as input } from "./input.ts";
 export { default as checkbox } from "./checkbox.ts";
 export { default as radio } from "./radio.ts";
 export { default as switch } from "./switch.ts";
+export { default as card } from "./card.ts";
+export { default as badge } from "./badge.ts";
+export { default as avatar } from "./avatar.ts";

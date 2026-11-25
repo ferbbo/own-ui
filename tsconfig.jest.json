@@ -34,6 +34,9 @@
       "@ownui/checkbox": ["packages/ui/src/Checkbox/src/index.ts"],
       "@ownui/radio": ["packages/ui/src/Radio/src/index.ts"],
       "@ownui/switch": ["packages/ui/src/Switch/src/index.ts"],
+      "@ownui/card": ["packages/ui/src/Card/src/index.ts"],
+      "@ownui/badge": ["packages/ui/src/Badge/src/index.ts"],
+      "@ownui/avatar": ["packages/ui/src/Avatar/src/index.ts"],
       "@ownui/ui": ["packages/ui/src/index.ts"]
     }
   }

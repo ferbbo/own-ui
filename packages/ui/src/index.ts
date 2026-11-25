@@ -30,3 +30,14 @@ export * from "./Radio/src/Radio.types";
 export { default as Switch } from "./Switch/src/Switch";
 export type { SwitchProps } from "./Switch/src/Switch.types";
 export * from "./Switch/src/Switch.types";
+export { default as Card } from "./Card/src/Card";
+export type { CardProps } from "./Card/src/Card.types";
+export * from "./Card/src/Card.types";
+
+export { default as Badge } from "./Badge/src/Badge";
+export type { BadgeProps } from "./Badge/src/Badge.types";
+export * from "./Badge/src/Badge.types";
+
+export { default as Avatar } from "./Avatar/src/Avatar";
+export type { AvatarProps } from "./Avatar/src/Avatar.types";
+export * from "./Avatar/src/Avatar.types";

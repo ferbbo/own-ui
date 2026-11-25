@@ -16,6 +16,9 @@ const workspaceModuleMapper = {
   "^@ownui/checkbox$": "<rootDir>/packages/ui/src/Checkbox/src/index.ts",
   "^@ownui/radio$": "<rootDir>/packages/ui/src/Radio/src/index.ts",
   "^@ownui/switch$": "<rootDir>/packages/ui/src/Switch/src/index.ts",
+  "^@ownui/card$": "<rootDir>/packages/ui/src/Card/src/index.ts",
+  "^@ownui/badge$": "<rootDir>/packages/ui/src/Badge/src/index.ts",
+  "^@ownui/avatar$": "<rootDir>/packages/ui/src/Avatar/src/index.ts",
   "^@ownui/ui$": "<rootDir>/packages/ui/src/index.ts",
 };
 

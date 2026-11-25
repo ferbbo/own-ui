@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Plugin principal: inyecta los tokens de los dos temas built-in. */
+@plugin "@ownui/tw-theme";
+
+/* CSS de componentes publicado. Este fixture mide `avatar.css`: si el subpath
+   export o la copia a dist/css se rompen, la compilacion falla aqui y el spec
+   no llega a correr. */
+@import "@ownui/tw-theme/css";

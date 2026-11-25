@@ -1,0 +1,217 @@
+/* =========================================================
+   badge.css — sistema de tokens del Badge
+
+   Sigue la cascada de `AGENTS.md` §4.8 y de
+   `.github/instructions/components-css.instructions.md`:
+
+     1. la base define TODAS las custom properties del componente
+     2. la variante semántica SOLO redefine --badge-color / --badge-fg
+     3. los estados y los tratamientos recalculan por color-mix en oklab
+     4. los tamaños derivan de --size-field, no de valores sueltos
+
+   Ningún color literal: sólo var(--color-*). Los únicos literales permitidos
+   son #000 / #0000 como operandos de color-mix.
+
+   ── Anatomía ──────────────────────────────────────────────
+   Al contrario que el Card y el Input, el Badge **sí rellena con el rol**: es
+   una etiqueta corta cuyo único contenido es su propio texto, así que el par
+   rol / `-content` del tema es exactamente lo que necesita. Es el mismo
+   criterio del Button.
+
+     .badge                 la etiqueta: relleno, texto y radio de píldora
+     .badge-{rol}           los 8 roles semánticos
+     .badge-outline         sin relleno; borde y texto del rol
+     .badge-soft            relleno tenue del rol; texto oscurecido
+
+   **Los dos tratamientos pintan texto de color de rol sobre una superficie
+   del tema**, y ahí el token `-content` no sirve (está pensado para ir sobre
+   el relleno del rol). Por eso `--badge-fg` se calcula mezclando el rol hacia
+   `--color-base-content`: un `warning` puro sobre blanco da 2.15:1, muy por
+   debajo de AA. La mezcla es lo que hace legibles los ocho roles en los dos
+   temas, y el fixture e2e `badge/` mide el ratio WCAG real en Chromium para
+   que no se pueda aflojar sin que CI se entere.
+
+   Se publica como `@ownui/tw-theme/css/badge.css` y agregado en
+   `@ownui/tw-theme/css` (ver `src/css/index.css`).
+   ========================================================= */
+
+/* =========================================================
+   0) Base: .badge
+   ========================================================= */
+
+.badge {
+  /* ─── estructura ─── */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--badge-gap, 0.25rem);
+  white-space: nowrap;
+  vertical-align: middle;
+
+  /* ─── fuente (ROL): lo único que redefinen las variantes ─── */
+  --badge-color: var(--color-base-300);
+  --badge-fg: var(--color-base-content);
+
+  /* ─── finales (pintura) ─── */
+  --badge-bg: var(--badge-color);
+  --badge-border: var(--badge-color);
+  /* Texto del rol legible sobre una superficie del tema. Lo usan los
+     tratamientos `outline` y `soft`, nunca el relleno. */
+  --badge-role-fg: color-mix(in oklab, var(--badge-color), var(--color-base-content) 55%);
+  /* Relleno tenue del tratamiento `soft`. */
+  --badge-soft-bg: color-mix(in oklab, var(--badge-color) 16%, var(--color-base-100));
+
+  /* ─── decoración ─── */
+  /* Píldora: el radio no escala con el tamaño porque una píldora deja de
+     serlo en cuanto el radio es menor que la mitad de la altura. */
+  --badge-radius: 9999px;
+  --badge-border-width: var(--border, 1px);
+
+  /* ─── tamaños (los redefine cada .badge-{xs..xl}) ─── */
+  --badge-size: calc(var(--size-field, 0.25rem) * 6);
+  --badge-p: 0.5rem;
+  --badge-fontsize: 0.75rem;
+
+  /* ─── estados ─── */
+  --badge-transition-duration: var(--transition-duration, 0.2s);
+
+  /* ─── propiedades finales ─── */
+  height: var(--badge-size);
+  padding-inline: var(--badge-p);
+  font-size: var(--badge-fontsize);
+  font-weight: 600;
+  line-height: 1;
+
+  background-color: var(--badge-bg);
+  color: var(--badge-fg);
+
+  border: var(--badge-border-width) solid var(--badge-border);
+  border-radius: var(--badge-radius);
+
+  transition: color var(--badge-transition-duration),
+    background-color var(--badge-transition-duration), border-color var(--badge-transition-duration);
+}
+
+/* =========================================================
+   1) Variantes semánticas: sólo mueven la FUENTE del color
+   ========================================================= */
+
+.badge-primary {
+  --badge-color: var(--color-primary);
+  --badge-fg: var(--color-primary-content);
+}
+
+.badge-secondary {
+  --badge-color: var(--color-secondary);
+  --badge-fg: var(--color-secondary-content);
+}
+
+.badge-accent {
+  --badge-color: var(--color-accent);
+  --badge-fg: var(--color-accent-content);
+}
+
+.badge-neutral {
+  --badge-color: var(--color-neutral);
+  --badge-fg: var(--color-neutral-content);
+}
+
+.badge-info {
+  --badge-color: var(--color-info);
+  --badge-fg: var(--color-info-content);
+}
+
+.badge-success {
+  --badge-color: var(--color-success);
+  --badge-fg: var(--color-success-content);
+}
+
+.badge-warning {
+  --badge-color: var(--color-warning);
+  --badge-fg: var(--color-warning-content);
+}
+
+.badge-error {
+  --badge-color: var(--color-error);
+  --badge-fg: var(--color-error-content);
+}
+
+/* =========================================================
+   2) Tratamientos: sólo remapean los finales
+   ========================================================= */
+
+/* Perfilado: la superficie del tema de fondo, borde y texto del rol. */
+.badge-outline {
+  --badge-bg: transparent;
+  --badge-fg: var(--badge-role-fg);
+  --badge-border: color-mix(in oklab, var(--badge-color), var(--color-base-100) 25%);
+}
+
+/* Tenue: relleno lavado del rol y el mismo texto legible que `outline`. */
+.badge-soft {
+  --badge-bg: var(--badge-soft-bg);
+  --badge-fg: var(--badge-role-fg);
+  --badge-border: color-mix(in oklab, var(--badge-color) 28%, var(--color-base-100));
+}
+
+/* =========================================================
+   3) Tamaños: todo deriva de --size-field
+   ========================================================= */
+
+.badge-xs {
+  --badge-size: calc(var(--size-field, 0.25rem) * 4);
+  --badge-p: 0.25rem;
+  --badge-fontsize: 0.625rem;
+  --badge-gap: 0.125rem;
+}
+
+.badge-sm {
+  --badge-size: calc(var(--size-field, 0.25rem) * 5);
+  --badge-p: 0.375rem;
+  --badge-fontsize: 0.6875rem;
+  --badge-gap: 0.1875rem;
+}
+
+.badge-md {
+  --badge-size: calc(var(--size-field, 0.25rem) * 6);
+  --badge-p: 0.5rem;
+  --badge-fontsize: 0.75rem;
+  --badge-gap: 0.25rem;
+}
+
+.badge-lg {
+  --badge-size: calc(var(--size-field, 0.25rem) * 7);
+  --badge-p: 0.625rem;
+  --badge-fontsize: 0.875rem;
+  --badge-gap: 0.3125rem;
+}
+
+.badge-xl {
+  --badge-size: calc(var(--size-field, 0.25rem) * 8);
+  --badge-p: 0.75rem;
+  --badge-fontsize: 1rem;
+  --badge-gap: 0.375rem;
+}
+
+/* =========================================================
+   4) Punto: badge sin texto
+   ========================================================= */
+
+/* Un indicador de estado sin contenido. Es cuadrado y del tamaño de la
+   tipografía, no de la altura del badge: vive al lado de un texto, no en una
+   fila de etiquetas. */
+.badge-dot {
+  --badge-size: var(--badge-fontsize);
+
+  width: var(--badge-size);
+  min-width: var(--badge-size);
+  height: var(--badge-size);
+  padding-inline: 0;
+  border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    transition: none;
+  }
+}
