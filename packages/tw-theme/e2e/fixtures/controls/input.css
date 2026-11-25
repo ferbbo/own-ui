@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Plugin principal: inyecta los temas built-in y los tokens --control-*. */
+@plugin "@ownui/tw-theme";
+
+/* CSS de componentes publicado. Este fixture mide checkbox.css, radio.css y
+   switch.css, y sobre todo que los tres se alinean entre si porque comparten
+   la capa `--control-*` de themes/root.ts. */
+@import "@ownui/tw-theme/css";

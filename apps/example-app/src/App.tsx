@@ -4,6 +4,7 @@ import { BadgeSection } from "./sections/BadgeSection";
 import { ButtonSection } from "./sections/ButtonSection";
 import { CardSection } from "./sections/CardSection";
 import { DropdownSection } from "./sections/DropdownSection";
+import { ControlsSection } from "./sections/ControlsSection";
 import { InputSection } from "./sections/InputSection";
 import { LoaderSection } from "./sections/LoaderSection";
 import { Panel, Row, Section } from "./layout";
@@ -86,6 +87,7 @@ export default function App() {
         <SurfaceSection />
         <ButtonSection />
         <InputSection />
+        <ControlsSection />
         <DropdownSection />
         <LoaderSection />
         <CardSection />

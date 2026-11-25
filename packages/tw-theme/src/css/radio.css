@@ -1,0 +1,257 @@
+/* =========================================================
+   radio.css — sistema de tokens del Radio
+
+   Mismo patron que `checkbox.css` y mismos tokens globales `--control-*`
+   (`themes/root.ts`), para que un radio y una casilla del mismo tamano se
+   alineen cuando conviven en un formulario. Lo que cambia es la geometria:
+   el radio es redondo y su marca es un punto solido, no un trazo.
+
+   ── Anatomia ──────────────────────────────────────────────
+     .radio-field                   <label>: fila, control + texto
+       .radio-input                 el <input type="radio">, oculto visualmente
+       .radio                       el circulo que se ve
+         .radio-mark                el punto interior
+       .radio-label                 el texto
+
+     .radio-group                   <div role="radiogroup"> en columna
+       .radio-group-label
+       .radio-group-items
+       .radio-group-description
+       .radio-group-error-message
+
+   Cada estado se escribe como clase del contrato (lo que emite el hook) y
+   como `:has()` sobre el input nativo, para que el CSS publicado sirva
+   tambien a HTML escrito a mano.
+   ========================================================= */
+
+/* =========================================================
+   0) El input nativo: invisible, pero presente
+   ========================================================= */
+
+.radio-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   1) Base: .radio — el circulo
+   ========================================================= */
+
+.radio {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  /* ─── fuente (ROL) ─── */
+  --radio-color: var(--color-primary);
+
+  /* ─── finales (pintura) ─── */
+  --radio-bg: #0000;
+  --radio-border: color-mix(in oklab, var(--color-base-content) 35%, #0000);
+
+  /* ─── decoracion ─── */
+  --radio-size: var(--control-size, 1.25rem);
+  --radio-border-width: var(--control-border-width, 1px);
+  /* El punto ocupa poco menos de la mitad del circulo: mas y toca el marco,
+     menos y no se lee a tamano xs. */
+  --radio-mark-scale: 0.45;
+
+  /* ─── estados ─── */
+  --radio-disabled-opacity: var(--disabled-fg-opacity, 35%);
+  --radio-transition-duration: var(--transition-duration, 0.2s);
+  --radio-outline-width: 2px;
+  --radio-outline-offset: 2px;
+
+  width: var(--radio-size);
+  height: var(--radio-size);
+
+  background-color: var(--radio-bg);
+  border: var(--radio-border-width) solid var(--radio-border);
+  border-radius: 50%;
+
+  transition: background-color var(--radio-transition-duration),
+    border-color var(--radio-transition-duration);
+}
+
+/* =========================================================
+   2) El punto
+   ========================================================= */
+
+.radio-mark {
+  width: calc(var(--radio-size) * var(--radio-mark-scale));
+  height: calc(var(--radio-size) * var(--radio-mark-scale));
+  border-radius: 50%;
+  background-color: var(--radio-color);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity var(--radio-transition-duration), transform var(--radio-transition-duration);
+}
+
+.radio-checked .radio-mark,
+.radio-field:has(.radio-input:checked) .radio-mark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radio,
+  .radio-mark {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* =========================================================
+   3) El campo
+   ========================================================= */
+
+.radio-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--control-gap, 0.5rem);
+  cursor: pointer;
+}
+
+.radio-label {
+  font-size: var(--radio-fontsize, var(--fontsize, 0.875rem));
+  color: var(--color-base-content);
+  user-select: none;
+}
+
+/* =========================================================
+   4) El grupo
+   ========================================================= */
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--size-field, 0.25rem) * 1.5);
+  --radio-group-muted-opacity: 70%;
+}
+
+.radio-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--size-field, 0.25rem) * 2);
+}
+
+.radio-group-label {
+  font-size: var(--radio-fontsize, var(--fontsize, 0.875rem));
+  font-weight: 500;
+  color: var(--color-base-content);
+}
+
+.radio-group-description {
+  font-size: calc(var(--radio-fontsize, var(--fontsize, 0.875rem)) * 0.9);
+  color: color-mix(in oklab, var(--color-base-content) var(--radio-group-muted-opacity), #0000);
+}
+
+.radio-group-error-message {
+  font-size: calc(var(--radio-fontsize, var(--fontsize, 0.875rem)) * 0.9);
+  font-weight: 500;
+  color: var(--color-error);
+}
+
+/* =========================================================
+   5) Variantes semanticas
+   ========================================================= */
+
+.radio-primary {
+  --radio-color: var(--color-primary);
+}
+
+.radio-secondary {
+  --radio-color: var(--color-secondary);
+}
+
+.radio-accent {
+  --radio-color: var(--color-accent);
+}
+
+.radio-neutral {
+  --radio-color: var(--color-neutral);
+}
+
+.radio-info {
+  --radio-color: var(--color-info);
+}
+
+.radio-success {
+  --radio-color: var(--color-success);
+}
+
+.radio-warning {
+  --radio-color: var(--color-warning);
+}
+
+.radio-error {
+  --radio-color: var(--color-error);
+}
+
+/* =========================================================
+   6) Estados
+   ========================================================= */
+
+/* El radio marcado NO se rellena como el checkbox: el marco toma el color
+   del rol y el relleno se queda transparente, porque el punto interior ya es
+   solido y un circulo relleno con un punto del mismo color no se leeria. */
+.radio-checked,
+.radio-field:has(.radio-input:checked) .radio {
+  --radio-border: var(--radio-color);
+}
+
+.radio-invalid,
+.radio-field:has(.radio-input[aria-invalid="true"]) .radio {
+  --radio-border: var(--color-error);
+}
+
+.radio-field:has(.radio-input:focus-visible) .radio {
+  outline: var(--radio-outline-width) solid var(--radio-color);
+  outline-offset: var(--radio-outline-offset);
+}
+
+.radio-disabled,
+.radio-field:has(.radio-input:disabled) .radio {
+  opacity: var(--radio-disabled-opacity);
+}
+
+.radio-field:has(.radio-input:disabled),
+.radio-field:has(.radio-disabled) {
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   7) Tamanos
+   ========================================================= */
+
+.radio-xs {
+  --radio-size: calc(var(--size-field, 0.25rem) * 3.5);
+  --radio-fontsize: 0.75rem;
+}
+
+.radio-sm {
+  --radio-size: calc(var(--size-field, 0.25rem) * 4);
+  --radio-fontsize: 0.8125rem;
+}
+
+.radio-md {
+  --radio-size: calc(var(--size-field, 0.25rem) * 5);
+  --radio-fontsize: 0.875rem;
+}
+
+.radio-lg {
+  --radio-size: calc(var(--size-field, 0.25rem) * 6);
+  --radio-fontsize: 1rem;
+}
+
+.radio-xl {
+  --radio-size: calc(var(--size-field, 0.25rem) * 7);
+  --radio-fontsize: 1.125rem;
+}

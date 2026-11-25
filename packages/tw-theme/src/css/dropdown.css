@@ -262,8 +262,7 @@
   background-color: var(--dropdown-item-bg, var(--dropdown-color, var(--color-base-100)));
   color: var(--dropdown-item-fg, var(--dropdown-fg, var(--color-base-content)));
 
-  transition:
-    background-color var(--dropdown-transition-duration, 0.2s),
+  transition: background-color var(--dropdown-transition-duration, 0.2s),
     color var(--dropdown-transition-duration, 0.2s);
 }
 

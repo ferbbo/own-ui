@@ -1,0 +1,54 @@
+{
+  "name": "@ownui/radio",
+  "version": "1.0.0",
+  "description": "Accessible radio and radio group for Own UI.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "radio"
+  ],
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "pnpm build:fast --watch",
+    "typecheck": "tsc --noEmit",
+    "build:fast": "tsup src"
+  },
+  "author": "ferbbo <Diego Benitez>",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18 || <20.0.0",
+    "react-dom": ">=18 <20.0.0"
+  },
+  "dependencies": {
+    "@ownui/dom-utils": "workspace:*",
+    "@ownui/tw-theme": "workspace:*",
+    "@react-aria/radio": "^3.13.0",
+    "@react-aria/utils": "^3.29.0",
+    "@react-stately/radio": "^3.12.0"
+  },
+  "devDependencies": {
+    "@storybook/react": "^8.6.12",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "tsup": "^8.4.0"
+  }
+}

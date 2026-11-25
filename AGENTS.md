@@ -3,7 +3,7 @@
 > Contexto canónico para agentes (Claude Code, Copilot, etc.) y para cualquier
 > persona que entre al repo. Describe **lo que el código realmente hace hoy**,
 > no lo que la documentación histórica aspira a hacer.
-> Última verificación contra el código: **2026-11-23** (rama `claude/lote-9`, tras el lote 8).
+> Última verificación contra el código: **2026-11-23** (rama `claude/lote-11`, tras el lote 10).
 >
 > Plan de trabajo por lotes: **[`@docs/BUILD-BATCHES.md`](./@docs/BUILD-BATCHES.md)**
 
@@ -70,24 +70,25 @@ own-ui/
 │   │   │   ├── theme.ts           → entry "@ownui/tw-theme/theme": temas custom
 │   │   │   ├── types.ts           → SemanticColorName, PluginOptions, Flags…
 │   │   │   ├── themes/            → TOKENS: root (forma), light, dark (color)
-│   │   │   ├── variants/          → CONTRATO de clases: button, dropdown, loader, input,
-│   │   │   │                        card, badge, avatar
+│   │   │   ├── variants/          → CONTRATO de clases: avatar, badge, button, card, checkbox,
+│   │   │   │                        dropdown, input, loader, radio, switch
 │   │   │   ├── functions/         → generateThemeProperties, formatAndClean…, plugin.withOptions, splitStyles
 │   │   │   ├── utilities/         → colors.ts (generateColorUtilities, cssVarName/Ref), file.ts
-│   │   │   └── css/               → index + button/dropdown/loader/input/card/badge/avatar
-│   │   │                            .css  [PUBLICADO en ./css]
-│   │   └── e2e/                   → 12 fixtures + specs Playwright (254 tests)
+│   │   │   └── css/               → index + un .css por componente  [PUBLICADO en ./css]
+│   │   └── e2e/                   → 14 fixtures + specs Playwright (271 tests)
 │   │
 │   ├── ui/                        → @ownui/ui          paquete agregador (barrel)
 │   │   └── src/
-│   │       ├── index.ts           → re-exporta Avatar, Badge, Button, Card, Dropdown,
-│   │       │                        Input, Loader + tipos
-│   │       ├── Avatar/            → @ownui/avatar      [paquete propio]
+│   │       ├── index.ts           → re-exporta los 10 componentes + tipos
+│   │       ├── Avatar/            → @ownui/avatar      [paquete propio] + Avatar.Group
 │   │       ├── Badge/             → @ownui/badge       [paquete propio]
 │   │       ├── Button/            → @ownui/button      [paquete propio]
-│   │       ├── Card/              → @ownui/card        [paquete propio]
+│   │       ├── Card/              → @ownui/card        [paquete propio] + Header/Title/Body/Footer
+│   │       ├── Checkbox/          → @ownui/checkbox    [paquete propio] + CheckboxGroup
 │   │       ├── Dropdown/          → @ownui/dropdown    [paquete propio]
 │   │       ├── Input/             → @ownui/input       [paquete propio]
+│   │       ├── Radio/             → @ownui/radio       [paquete propio] + RadioGroup
+│   │       ├── Switch/            → @ownui/switch      [paquete propio]
 │   │       └── Loader/            → @ownui/loader      [paquete propio]
 │   │
 │   ├── utils/
@@ -160,6 +161,7 @@ Compartidos por todos los temas, inyectados en `:root`:
 | `--disabled-bg-opacity` | `60%` | opacidad del relleno deshabilitado |
 | `--disabled-fg-opacity` | `35%` | opacidad del texto deshabilitado |
 | `--transition-duration` | `0.2s` | duración de las transiciones de color |
+| `--control-size` · `-radius` · `-border-width` · `-gap` · `-mark-width` | `5 × --size-field`… | **capa de controles marcables** (L11): checkbox, radio y switch. Globales, no por componente, para que los tres se alineen entre sí cuando conviven en un formulario |
 | `--noise` | `0` | opacidad de la textura de ruido |
 | `--fx-noise` | `none` | imagen de ruido |
 | `--btn-noise` | `var(--fx-noise)` | alias por componente |
@@ -663,6 +665,9 @@ Avatar no son polimórficos a propósito. Queda el Loader por migrar.
 | `@ownui/button` | Composición | `as`, `theme`(10), `variant`(3), `size`(5), `shape`(2), `width`(2), `active`, `disabled`, `loading`, `icon`, `startIcon`, `endIcon`, `className` | ✅ 39 reales (L5) | 15 stories | **completo** (L5): contrato alineado, `loading` con `aria-busy`, iconos reales, sin fuga de props |
 | `@ownui/dropdown` | Provider | `variant`(8), `size`(5), `styleVariant`(3), `open`/`defaultOpen`/`onOpenChange` + `.Trigger`/`.Menu`/`.Item` | ✅ reales | 296 ln | **parcial**: sin CSS para menu/trigger, sin navegación por teclado, fuga de props al DOM |
 | `@ownui/input` | Composición | `label`, `description`, `errorMessage`, `invalid`, `theme`(8), `variant`(3), `size`(5), `type`(7), `startIcon`, `endIcon`, `readOnly`, `disabled`, `value`/`defaultValue`/`onChange` | ✅ reales (33) | 142 ln | **sano** (L10): `useTextField`, el rol colorea borde y foco en vez del relleno, cobertura 100% líneas |
+| `@ownui/checkbox` | Composición + Provider | `theme`(8), `size`(5), `checked`/`defaultChecked`/`onChange`, `indeterminate`, `value`, `invalid`, `readOnly`, `disabled` · `CheckboxGroup`: `label`, `description`, `errorMessage`, `value`/`defaultValue`/`onChange` | ✅ reales (32) | 119 ln | **sano** (L11): `useCheckbox` / `useCheckboxGroupItem`, tercer estado, 100% líneas |
+| `@ownui/radio` | Provider | `RadioGroup`: `label`, `description`, `errorMessage`, `orientation`, `value`/`defaultValue`/`onChange` · `Radio`: `value` (obligatorio), `theme`, `size`, `disabled` | ✅ reales (23) | 134 ln | **sano** (L11): flechas y tabindex rotatorio; un `<Radio>` suelto lanza |
+| `@ownui/switch` | Composición | `theme`(8), `size`(5), `checked`/`defaultChecked`/`onChange`, `invalid`, `readOnly`, `disabled` | ✅ reales (18) | 95 ln | **sano** (L11): `role="switch"`; sin tercer estado ni grupo, a propósito |
 | `@ownui/card` | Compound estático | `as`(7), `theme`(8), `variant`(3), `size`(5), `className` + `.Header`/`.Title`/`.Body`/`.Footer` | ✅ 35 reales (L12) | 6 stories | **sano** (L12): rol sobre el borde, accionable sólo con `as="a"`/`"button"`, cobertura 100% líneas |
 | `@ownui/badge` | Composición | `theme`(8), `variant`(2), `size`(5), `dot`, `className` | ✅ 26 reales (L12) | 5 stories | **sano** (L12): relleno por rol, texto de `outline`/`soft` derivado y medido contra AA, punto decorativo vs anunciable |
 | `@ownui/avatar` | Composición + contexto | `src`, `alt`, `name`, `initials`, `theme`(8), `shape`(2), `size`(5) + `.Group` (`max`, `total`, `size`, `shape`, `theme`) | ✅ 46 reales (L12) | 7 stories | **sano** (L12): cascada imagen→hijos→iniciales→reserva con recuperación de `onError`, cobertura 100% líneas |
@@ -679,18 +684,18 @@ Avatar no son polimórficos a propósito. Queda el Loader por migrar.
 ```bash
 pnpm install                       # requiere Node 20.16 / pnpm 10
 
-pnpm build                         # turbo build — los 6 paquetes en orden topológico
+pnpm build                         # turbo build — los 13 paquetes en orden topológico
 pnpm --filter "@ownui/ui..." build # el agregador + sus dependencias (ojo a los 3 puntos)
 turbo build --filter=@ownui/ui     # equivalente vía turbo (usa dependsOn: ["^build"])
 pnpm --filter @ownui/button build  # SÓLO ese paquete: falla en limpio si sus deps no están
 
-pnpm test                          # Jest, los 3 proyectos — 15 suites / 271 tests (sin coverage)
+pnpm test                          # Jest, los 3 proyectos — 22 suites / 507 tests (sin coverage)
 pnpm test:coverage                 # lo mismo + informe de cobertura
 pnpm test:tw-theme                 # sólo el plugin
 pnpm test:components               # componentes de packages/ui + utils de packages/utils
 pnpm test:scripts                  # los CLIs de scripts/ (lote 8)
 
-pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (12 fixtures / 254 tests)
+pnpm --filter @ownui/tw-theme e2e  # compila fixtures + Playwright (14 fixtures / 271 tests)
 
 pnpm create-component <Name>       # andamio completo del componente (lote 8)
 pnpm create-component <Name> --compound   # patrón Provider + Trigger/Panel/Item

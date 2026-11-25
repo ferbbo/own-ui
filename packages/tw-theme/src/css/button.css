@@ -106,11 +106,8 @@
   outline-offset: var(--btn-outline-offset);
   outline-color: var(--btn-focus-color, var(--btn-color, currentColor));
 
-  transition:
-    color var(--btn-transition-duration),
-    background-color var(--btn-transition-duration),
-    border-color var(--btn-transition-duration),
-    box-shadow var(--btn-transition-duration),
+  transition: color var(--btn-transition-duration), background-color var(--btn-transition-duration),
+    border-color var(--btn-transition-duration), box-shadow var(--btn-transition-duration),
     transform 0.05s;
 }
 
